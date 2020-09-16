@@ -1,0 +1,79 @@
+import java.util.ArrayList;
+class Solution {
+  ArrayList<String> list = new ArrayList<>();
+	
+	public String solution(int n, int t, int m, int p) {
+	      String answer = "";
+	      int number = calculate(n,t*m);
+	      make_num(n,number);
+	      int count =1, i =0;
+	      
+	      while(answer.length()<t)
+	      {
+	    	  if(count == p)
+	    		  answer += list.get(i);
+	    	  count++;
+	    	  i++;
+	    	  if(count>m)
+	    		  count =1;
+	      }
+	      return answer;
+	  }
+	public void make_num(int n, int t)
+	{
+		list.add("0");
+		for(int i=1; i<=t; i++)
+		{
+			String temp ="";
+			int num = i;
+			while(num!=0)
+			{
+				if((num%n)>=10)
+					temp += change(num%n);
+				else
+					temp +=Integer.toString(num%n);
+				num/=n;
+			}
+			String[] temp_arr = reverse(temp).split("");
+			for(int j=0; j<temp_arr.length;j++)
+				list.add(temp_arr[j]);
+		}
+	}
+	public String reverse(String num)
+	{
+		String temp ="";
+		for(int i = num.length()-1; i>=0; i--)
+			temp += num.substring(i,i+1);
+		return temp;
+	}
+	public String change(int num)
+	{
+		if(num==10) return "A";
+		if(num==11) return "B";
+		if(num==12) return "C";
+		if(num==13) return "D";
+		if(num==14) return "E";
+		if(num==15) return "F";
+		return "";
+	}
+	public int calculate(int n, int t)
+	{
+		int total = 0;
+		int num = 0;
+		int add =1;
+		int standard = n;
+		while(total < t)
+		{
+			if(num<standard)
+				total+= add;
+			else 
+			{
+				standard *= n;
+				add++;
+				total+=add;
+			}
+			num++;
+		}
+		return num;
+	}
+}

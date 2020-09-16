@@ -1,0 +1,61 @@
+class Solution {
+   public String solution(String m, String[] musicinfos) {
+		 String[] music_info = {"0","(None)"};
+		 
+		 for(int i=0; i<musicinfos.length; i++)
+		 {
+			 String[] temp_arr = musicinfos[i].split(",");
+			 String temp_music="";
+			 int time =0;
+			 if(temp_arr[0].substring(0,2).equals(temp_arr[1].substring(0,2)))
+				 time=Integer.parseInt(temp_arr[1].substring(3,5))-Integer.parseInt(temp_arr[0].substring(3,5));
+			 else
+			 {
+				 time=(Integer.parseInt(temp_arr[1].substring(0,2))-Integer.parseInt(temp_arr[0].substring(0,2)))*60;
+				 time+=Integer.parseInt(temp_arr[1].substring(3,5))-Integer.parseInt(temp_arr[0].substring(3,5));
+				
+				 
+			 }
+			 int index =0;
+			 for(int j=0; j<time; j++)
+			 {
+				 temp_music += temp_arr[3].substring(index,index+1);
+				 if(temp_arr[3].substring(index,index+1).equals("#"))
+					 j--;
+				 index++;
+				
+				 if(index==temp_arr[3].length())
+					 index = 0;
+				 if(j==(time-1) && index<temp_arr[3].length() && temp_arr[3].substring(index,index+1).equals("#"))
+					 temp_music+="#"; 
+			 } 
+			 System.out.println(temp_music+" "+time+" "+temp_music.length());
+			 if(temp_music.contains(m))
+			 {
+				 boolean check = true;
+				 if(temp_music.indexOf(m)+m.length()<temp_music.length() && temp_music.charAt(temp_music.indexOf(m)+m.length())=='#')
+				 {
+					 int start_index = temp_music.indexOf(m)+m.length();
+					 check = false;
+					 while(start_index>0)
+					 {
+						 if(temp_music.indexOf(m,start_index)+m.length()<temp_music.length() && temp_music.charAt(temp_music.indexOf(m,start_index)+m.length())=='#')
+						 {}
+						 else if(temp_music.indexOf(m,start_index)+m.length()<temp_music.length() && temp_music.charAt(temp_music.indexOf(m,start_index)+m.length())!='#' && temp_music.indexOf(m,start_index)!=-1)
+						 {
+							 check = true;
+							 break;
+						 }
+						 start_index = temp_music.indexOf(m,start_index)+1;
+					 }
+				 }
+				 if(Integer.parseInt(music_info[0])<time && check)
+				 {
+					 music_info[0] = Integer.toString(time);
+					 music_info[1] = temp_arr[2];
+				 }
+			 }
+		 }
+	      return music_info[1];
+	  }
+}

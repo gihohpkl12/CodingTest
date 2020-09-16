@@ -1,0 +1,46 @@
+import java.util.*;
+class Solution {
+public String[] solution(String[] record) {
+        String[] answer = {};
+        String[] temp = new String[3];
+        int count =0;
+        int counte = 0;
+        HashMap<String,String> user = new HashMap<String,String>();
+        for(int i=0; i<record.length; i++)
+        {
+        	temp = record[i].split(" ");
+            if(temp[0].equals("Leave"))
+            {count++;}
+            else if(temp[0].equals("Enter"))
+            {count++;}
+        	if(!temp[0].equals("Leave")) {
+        		if(!user.containsKey(temp[1]))
+        			{
+        				user.put(temp[1],temp[2]);
+        			}else if(user.containsKey(temp[1]) && user.get(temp[1]) != temp[2])
+        			{
+        				user.remove(temp[1]);
+        				user.put(temp[1],temp[2]);
+        			}
+        	}
+        }
+        answer = new String[count];
+        
+        for(int i=0; i<record.length;i++)
+        {
+        	temp = record[i].split(" ");
+        	if(temp[0].equals("Enter"))
+        	{
+        		answer[counte] = user.get(temp[1]) + "님이 들어왔습니다.";
+        		counte++;
+        	}
+        	else if(temp[0].equals("Leave"))
+        	{
+        		answer[counte] = user.get(temp[1]) + "님이 나갔습니다.";
+        		counte++;
+        	}
+        }
+        
+        return answer;
+    }
+}

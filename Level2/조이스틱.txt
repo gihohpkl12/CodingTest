@@ -1,0 +1,47 @@
+import java.util.ArrayList;
+class Solution {
+     public int solution(String name) 
+	 {
+		 int answer =0;
+		 String[] split = name.split("");
+		 int[] change = new int[split.length];
+		 ArrayList<Integer> list = new ArrayList<>();
+		 for(int i =0; i<split.length; i++)
+		 {
+			 if(split[i].charAt(0)>'N')
+	            {
+	                change[i] = 'Z'-split[i].charAt(0);
+	                change[i]+=1;
+	            }else
+	                change[i] = split[i].charAt(0)-'A';
+			 if(!split[i].equals("A")&&i!=0) list.add(i);
+			 answer+=change[i];
+		 }
+		 answer += distence(list, split.length-1);
+		 return answer;
+	 }
+	 public static int distence(ArrayList<Integer> list, int length)
+	 {
+		 int index = 0;
+		 int total = 0;
+		 while(list.size()!=0)
+		 {
+			 int min = 21;
+			 int dist = 21;
+			 for(int i=0; i<list.size(); i++)
+			 {
+				 int temp = list.get(i);
+				 int temp_dis = temp - index < (length-temp)+(index-0)+1 ? temp-index : (length-temp)+(index-0)+1;
+				 if(temp_dis < dist) 
+				 {
+					 min = i;
+					 dist = temp_dis;
+				 }
+			 }
+			 index = list.get(min);
+			 total += dist;
+			 list.remove(min);
+		 }
+		return total;
+	 }
+}

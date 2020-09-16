@@ -1,0 +1,16 @@
+class Solution {
+   	public int[] solution(int brown, int red) {
+        int[] answer = new int[2];
+        int half = brown /2;
+        for(int i=1; i<half-2; i++)
+        {
+        	if( red%(half-i-2)==0 && red/(half-i-2)==i )
+        	{
+        		answer[0] = half-i;
+        		answer[1] = i+2;
+        		break;
+        	}
+        }
+        return answer;
+    }
+}

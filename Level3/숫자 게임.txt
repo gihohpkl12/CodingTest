@@ -1,0 +1,31 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+class Solution {
+    public int solution(int[] A, int[] B) {
+        int answer = 0, index = 0, endcount = 0;
+        ArrayList<Integer> list = new ArrayList<>();
+        Arrays.sort(A);
+        Arrays.sort(B);
+        for(int i : B)
+        	list.add(i);
+        while(index<list.size())
+        {
+        	int num = list.get(index);
+        	if(num>A[index])
+        	{
+        		index++;
+        		answer++;
+        		endcount = 0;
+        	}
+        	else
+        	{
+        		list.remove(index);
+        		list.add(num);
+        		endcount++;
+        	}
+        	if(endcount== (list.size()-index) )
+        		break;
+        }
+        return answer;
+    }
+}

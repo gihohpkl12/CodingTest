@@ -1,0 +1,67 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+class Solution {
+  	  public int solution(String str1, String str2) {
+        ArrayList<String> list1 = new ArrayList<>();
+        ArrayList<String> list2 = new ArrayList<>();
+        ArrayList<String> same = new ArrayList<>();
+        ArrayList<String> total = new ArrayList<>();
+        
+        setlist(list1, str1); setlist(list2, str2);
+        if(list1.size()==0 && list2.size()==0)
+        	return 65536;
+        same(list1, list2, same);
+        total(list1, list2, same, total);
+        System.out.println(total.size()+" "+same.size());
+        float a = same.size(), b = total.size(); 
+        
+        return (int)((a/b)*65536);
+    }
+	public void setlist(ArrayList<String> list, String str)
+	{
+		str = str.toUpperCase();
+		for(int i = 0; i<=str.length()-2; i++)
+		{
+			String save = str.substring(i,i+2);
+			if(check(save))
+				list.add(save);
+		}
+	}
+	public void same(ArrayList<String> list1, ArrayList<String> list2, ArrayList<String> same)
+	{
+		for(int i = 0; i<list1.size(); i++)
+		{
+			String temp = list1.get(i);
+			for(int j = 0; j<list2.size(); j++)
+			{
+				if(list2.get(j).equals(temp))
+				{
+					same.add(temp);
+					list1.remove(i);
+					list2.remove(j);
+					i-=1;
+					break;
+				}
+			}
+		}
+	}
+	public void total(ArrayList<String> list1, ArrayList<String> list2, ArrayList<String> same, ArrayList<String> total)
+	{
+		for(String i : list1)
+			total.add(i);
+		for(String i : list2)
+			total.add(i);
+		for(String i : same)
+			total.add(i);
+	}
+	public boolean check(String str)
+	{
+		for(int i =0; i< str.length(); i++)
+		{
+			if(str.charAt(i)>='A' && str.charAt(i)<='Z') {}
+			else
+				return false;
+		}
+		return true;
+	}
+}

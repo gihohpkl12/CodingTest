@@ -1,0 +1,37 @@
+class Solution {
+  public int solution(String skill, String[] skill_trees) 
+  {
+      int answer = 0;
+      String[] skil = skill.split("");
+      for(int i =0; i < skill_trees.length; i++)
+      {
+          String tree = skill_trees[i];
+          boolean plus = true, minus = false;
+          for(int j = 1; j<skil.length; j++)
+          {
+              if(minus)
+              {
+                  if(tree.indexOf(skil[j-1])!=-1 || tree.indexOf(skil[j-1])!=-1)
+                  {
+                      plus = false;
+                      break;
+                  }
+              }
+              else if(tree.indexOf(skil[j-1])<tree.indexOf(skil[j]))
+                  continue;
+              else if(tree.indexOf(skil[j-1])==-1 && tree.indexOf(skil[j-1])!=-1)
+              {
+                  minus = true;
+                  
+              }else if( tree.indexOf(skil[j-1])>tree.indexOf(skil[j]) )
+              {
+                  plus = false;
+                  break;
+              }else if(tree.indexOf(skil[j-1])==-1 && tree.indexOf(skil[j-1])==-1)
+                minus = true;
+          }
+          if(plus) answer++;
+      }
+      return answer;
+  }
+}

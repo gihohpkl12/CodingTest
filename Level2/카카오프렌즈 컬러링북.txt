@@ -1,0 +1,60 @@
+import java.util.Queue;
+import java.util.LinkedList;
+class Solution {
+   public int[] solution(int m, int n, int[][] picture) 
+   {
+       Queue<pic> Q = new LinkedList<>();
+       int[] answer = {0,0};
+       int[][] move = {{-1,0},{1,0},{0,-1},{0,1}};
+       int[][] Picture = new int[picture.length][picture[0].length];
+       for(int i = 0; i<picture.length; i++)
+           Picture[i] = picture[i].clone();
+       for(int i = 0; i< Picture.length; i++)
+       {
+           for(int j = 0; j<Picture[0].length; j++)
+           {
+               if(Picture[i][j]==0 || Picture[i][j] == -1)
+                   continue;
+               else
+               {
+                   Q.add(new pic(Picture[i][j],i,j));
+                   Picture[i][j] = -1;
+                   answer[0]+=1;
+                   int count = 1;
+                   while(Q.size()!=0)
+                   {
+                       pic temp = Q.poll();
+                       int x = temp.i, y = temp.j;
+                       for(int mov = 0; mov<move.length; mov++)
+                       {
+                           if(x+move[mov][0]>=0 && y+move[mov][1]>=0 && x+move[mov][0]<=picture.length-1 && y+move[mov][1]<=picture[0].length-1)
+                           {
+                               if(Picture[x+move[mov][0]][y+move[mov][1]]==-1 || Picture[x+move[mov][0]][y+move[mov][1]] == 0 )
+                                   continue;
+                               if(Picture[x+move[mov][0]][y+move[mov][1]]==temp.col)
+                               {
+                                   Q.add(new pic(temp.col , x+move[mov][0], y+move[mov][1]));
+                                   Picture[x+move[mov][0]][y+move[mov][1]] = -1;
+                                   count++;
+                               }
+                           }
+                       }
+                       if(Q.size()==0)
+                           answer[1] = count > answer[1] ? count : answer[1];
+                   }
+               }
+           }
+       }
+       return answer;
+   }
+    class pic
+    {
+        int col, i, j;
+        public pic(int col, int i, int j)
+        {
+            this.col = col;
+            this.i = i;
+            this.j = j;
+        }
+    }
+}

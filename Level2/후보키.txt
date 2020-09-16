@@ -1,0 +1,231 @@
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Iterator;
+
+
+public class Solution {
+	static int arr_indexx=0;
+	public int solution(String[][] relation) {
+        int answer = 0;
+        int col = relation[0].length;
+        int row = relation.length;
+
+        int total_length = cal(col);
+        int count=0;
+        String[] answer_arr = new String[total_length];
+        String[] final_answer_arr = {};
+        String[] com_arr = new String[col]; 
+        boolean[] check_arr_bool = new boolean[col];
+        
+
+        for(int i=0; i<col;i++)
+        {
+        	com_arr[i] = Integer.toString(i);
+        }
+
+        for(int pull=1;pull<=col;pull++)
+        {
+        	String start="";
+        	combination(com_arr,col,pull,answer_arr,start,0);	
+        }
+   
+       for(String i : answer_arr)
+       {
+    	   System.out.println("combation check "+i);
+       }
+        for(int i=0; i<col;i++)
+        {
+        	HashMap<String, Integer> map = new HashMap<String, Integer>();
+        	for(int j=0; j<row; j++)
+        	{
+        		if(!map.containsKey(relation[j][i]))
+        		{
+
+        			map.put(relation[j][i],i);
+        			check_arr_bool[i] = true;
+        		}else {
+        			
+        			check_arr_bool[i] = false;
+        			break;
+        		}
+        	}
+        	if(check_arr_bool[i] == true)
+        	{
+
+        		answer++;
+        	}
+        		
+        }
+
+        final_answer_arr = new String[total_length];
+        for(int i=0; i<total_length; i++)
+        {
+        	for(int j=0; j<col;j++)
+        	{
+        		if( check_arr_bool[j]==true && answer_arr[i].contains(Integer.toString(j))==true )
+        		{
+        			answer_arr[i]="null";
+        		}
+        	}
+        	if(!answer_arr[i].equals("null")&&answer_arr[i].length()>1)
+        	{
+        		final_answer_arr[count]=answer_arr[i];
+        		count++;
+        	}
+        }
+        
+        HashMap<String, Integer> map_one = new HashMap<String, Integer>();
+        for(int i=0; i<count; i++)
+        {
+        	HashMap<String, Integer> map_two = new HashMap<String, Integer>();
+        	String[] temp_arr= {};
+        	if(!final_answer_arr[i].equals("null"))
+        	{
+
+        		temp_arr = final_answer_arr[i].split("");
+        		String[] adding_arr= new String[row];
+            	boolean check=true;
+            	adding_arr=adding_string(temp_arr,row,relation);
+        
+            	
+            	for(int j=0; j<row; j++)
+            	{
+            		if(!map_two.containsKey(adding_arr[j]))
+            		{
+            			map_two.put(adding_arr[j],j);
+            			check=true;
+            		}else
+            		{
+            			check=false;
+            			break;
+            		}
+            	}
+            	if(check==true)
+            	{
+
+            		Set key = map_one.keySet();
+            		boolean last_check=true;
+            		boolean[] final_key_check= {};
+            		for(Iterator iterator = key.iterator();iterator.hasNext();)
+            		{
+            			String keyname = (String)iterator.next();
+
+            			String[] keyname_arr = keyname.split("");
+
+            			final_key_check = new boolean[keyname_arr.length];
+            			for(int qq=0; qq<keyname_arr.length;qq++)
+            			{
+            				if(final_answer_arr[i].contains(keyname_arr[qq])&&keyname.length()<final_answer_arr[i].length())
+            				{
+            					System.out.println("see what`s going on : -final_arr :"+final_answer_arr[i]+" key : "+keyname_arr[qq]);
+            					final_key_check[qq]=false;
+            				}else
+            				{
+            					System.out.println("see what`s going on true : -final_arr :"+final_answer_arr[i]+" key : "+keyname_arr[qq]);
+            					final_key_check[qq]=true;
+            				}
+            			}
+            			for(boolean a : final_key_check)
+            			{
+            				if(a==true)
+            				{
+            					last_check=true;
+            				}else
+            				{
+            					last_check=false;
+            					System.out.println("bye~");
+            					
+            				}
+            			}
+            			if(last_check==false)
+            			{
+            				break;
+            			}
+            		}
+            		
+            		if(last_check==true)
+            		{
+            			System.out.println(final_answer_arr[i]);
+            			map_one.put(final_answer_arr[i],i);
+            			answer++;
+            		}
+            		
+            	}
+        	}
+        }
+        return answer;
+    }
+	public static void combination(String[] com_arr,int length,int pull,String[] answer,String start,int end)
+    {
+	
+		if(pull==0)
+		{
+
+			answer[arr_indexx]=start;
+			arr_indexx++;
+			return;
+		}
+		else if(end==length)
+		{
+
+			return;
+			}
+		else
+		{
+			start+=com_arr[end];
+
+			combination(com_arr,length,pull-1,answer,start,end+1);
+			start=start.substring(0,start.length()-1);
+			combination(com_arr,length,pull,answer,start,end+1);
+		}
+			
+	}
+	public static int cal(int length)
+	{
+		int total = 0;
+		int n = 0;
+		int m = 0;
+		int t=0;
+		for(int i=1;i<=length;i++)
+		{
+			n = fac(length);
+			m = fac(i);
+			t = fac(length-i);
+			
+			total+=n/(t*m);
+		}
+
+		return total;
+	}
+	public static int fac(int n)
+	{
+		int val =1;
+		for(int i=1; i<=n;i++)
+		{
+			val *= i;
+		}
+		return val;
+	}
+
+	public static String[] adding_string(String[] arr, int row, String[][] relation)
+	{
+		String[] add_arr = new String[row];
+		for(int q=0; q<row; q++)
+		{
+			add_arr[q]="";
+		}
+		
+		for(int i=0; i<arr.length;i++)
+		{
+
+			for(int j=0; j<row;j++)
+			{
+				add_arr[j] += relation[j][Integer.parseInt(arr[i])];
+			}
+		}
+		
+		return add_arr;
+	}
+}

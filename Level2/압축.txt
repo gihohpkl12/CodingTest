@@ -1,0 +1,44 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+class Solution {
+   public int[] solution(String msg) {
+      int end = 27;
+      ArrayList<Integer> list = new ArrayList<>();
+      HashMap<String, Integer> map = new HashMap<>();
+      String[] a = {"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
+      for(int i=1; i<=26; i++)
+          map.put(a[i-1],i);
+      while(msg.length()!=0)
+      {
+          int start =1;
+          int pre = 0;
+          String temp = msg.substring(0,start);
+          while(map.containsKey(temp))
+          {
+              pre = map.get(temp);
+              start++;
+              if(start <= msg.length())
+            	  temp = msg.substring(0,start);
+              else
+              {
+            	  temp = msg;
+            	  start =1;
+            	  if(map.containsKey(temp))
+            		  pre = map.get(temp);
+            	  else
+            		  pre = end;
+            	  msg="";
+            	  break;
+              }
+          }
+          list.add(pre);
+          map.put(temp,end);
+          end++;
+          msg = msg.substring(start-1,msg.length());
+      }
+      int[] answer = new int[list.size()];
+      for(int i =0; i<list.size(); i++)
+          answer[i] = list.get(i);
+      return answer;
+  }
+}

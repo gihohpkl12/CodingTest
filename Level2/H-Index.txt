@@ -1,0 +1,17 @@
+import java.util.Arrays;
+class Solution {
+   public int solution(int[] citations) {
+        int answer = 0;
+        int index_max =citations.length;
+        Arrays.sort(citations);
+        for(int i=0; i<citations.length; i++)
+        {
+            if(citations[i] <= citations.length-i)
+                answer = citations[i];
+            if(index_max>citations[i])
+            	index_max--;
+        }
+        answer = answer>index_max ? answer : index_max;
+        return answer;
+    }
+}

@@ -1,0 +1,38 @@
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Arrays;
+class Solution {
+  public int solution(int[] priorities, int location)
+	{
+        int index = priorities.length-1, answer = 0; 
+	    Queue<print> Q = new LinkedList<>();
+        for(int i = 0; i < priorities.length; i++)
+            Q.add(new print(i, priorities[i]));
+        Arrays.sort(priorities);
+      while(Q.size()!=0)
+      {
+          print temp = Q.poll();
+          if(temp.pri<priorities[index])
+              Q.add(temp);
+          else
+          {
+              answer++;
+              index--;
+              if(temp.index==location)
+                  break;
+          }
+      }
+      return answer;
+	}
+    class print
+    {
+        int index;
+        int pri;
+        public print(int index, int pri)
+        {
+            this.index = index;
+            this.pri = pri;
+        }
+    }
+}

@@ -1,0 +1,59 @@
+import java.util.Arrays; 
+import java.util.Comparator;
+class Solution {
+  public String[] solution(String[] files) {
+		Arrays.sort(files, new Comparator<String>() 
+		{
+			@Override
+			public int compare(String O1, String O2)
+			{
+				int index1=0, index2=0, index1_end=0, index2_end=0;
+				String o1 = O1.toLowerCase(), o2 = O2.toLowerCase();
+				for(int i=0; i<o1.length(); i++)
+				{
+					if(o1.charAt(i)>='0' && o1.charAt(i)<='9')
+					{
+						index1 = i;
+						for(int j =i; j<o1.length(); j++)
+						{
+							if(o1.charAt(j)<'0' || o1.charAt(j)>'9')
+							{
+								index1_end = j;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				for(int i=0; i<o2.length(); i++)
+				{
+					if(o2.charAt(i)>='0' && o2.charAt(i)<='9')
+					{
+						index2 = i;
+						for(int j =i; j<o2.length(); j++)
+						{
+							if(o2.charAt(j)<'0' || o2.charAt(j)>'9')
+							{
+								index2_end = j;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if(index1_end ==0) index1_end = o1.length();
+				if(index2_end ==0) index2_end = o2.length();
+				
+				String head1 = o1.substring(0,index1);
+				String head2 = o2.substring(0,index2);
+				String num1 = (o1.substring(index1,index1_end).length())<=5 ? o1.substring(index1,index1_end) : o1.substring(index1,index1+5);
+				String num2 = (o2.substring(index2,index2_end).length())<=5 ? o2.substring(index2,index2_end) : o2.substring(index2,index2+5);
+				
+				return head1.compareTo(head2) !=0 ? head1.compareTo(head2) : Integer.parseInt(num1)- Integer.parseInt(num2); 
+			}
+		});
+		
+		
+	    return files; 
+	  }
+}

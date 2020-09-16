@@ -1,0 +1,33 @@
+import java.util.ArrayList;
+class Solution {
+    public int[] solution(int[] progresses, int[] speeds) {
+        int[] answer;
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Integer> answerList = new ArrayList<>();
+        for(int i = 0; i < progresses.length; i++)
+        {
+            int complete = 100 - progresses[i];
+            complete = complete%speeds[i] !=0 ? complete/speeds[i]+1 : complete/speeds[i];
+            list.add(complete);
+        }
+        while(list.size()!=0)
+        {
+            int cur = list.get(0), count = 1;
+            list.remove(0);
+            while(list.size()!=0)
+            {
+                if(list.get(0)<=cur)
+                {
+                    count++;
+                    list.remove(0);
+                }else
+                    break;
+            }
+            answerList.add(count);
+        }
+        answer = new int[answerList.size()];
+        for(int i =0; i< answer.length; i++)
+            answer[i] = answerList.get(i);
+        return answer;
+    }
+}

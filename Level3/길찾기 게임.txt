@@ -1,0 +1,155 @@
+class Solution {
+    	static int a=0,b=0;
+	public int[][] solution(int[][] nodeinfo) {
+        int[][] answer = {};
+        int length = nodeinfo.length;
+        int[] arr_order = new int[length];
+        node[] order = new node[length];
+        int levels = 0;
+ 	   int pre_levels = 0;
+ 	   int root;
+        for(int i=0; i<length;i++)
+        {
+        	node temp = new node( nodeinfo[i][0],nodeinfo[i][1],i+1);
+        	order[i] = temp;
+        	//System.out.println(order[i].y);
+        }
+
+        for(int i=0; i<length;i++)
+        {
+        	for(int j=i+1; j<length;j++)
+        	{
+        		if(order[i].y<order[j].y)
+        		{
+        			node temp = order[j];
+        			order[j] = order[i];
+        			order[i] = temp;
+
+        		}
+        		if(order[i].y==order[j].y)
+        		{
+        			if(order[i].x>order[j].x)
+        			{
+        				node temp = order[j];
+            			order[j] = order[i];
+            			order[i] = temp;
+            			
+        			}
+        		}
+        		
+        	}
+        	
+        	if(i>0 && order[i].y !=order[i-1].y)
+        	{
+        		levels++;
+        	}
+        	
+        	order[i].set_levels(levels);
+        }
+
+        for(int i=1; i<length; i++)
+        {
+     	   child_research(order[0],order[i]);
+        }
+       
+       answer = new int[2][length];
+      
+       preorder(order[0],answer);
+       postorder(order[0],answer);
+        return answer;
+    }
+
+	public static void child_research(node root, node child)
+	{
+		if(root.x > child.x)
+		{
+			if(root.left_child ==null)
+			{
+				root.left_child = child;
+			}else
+			{
+				child_research(root.left_child,child);
+			}
+		}
+		else
+		{
+			if(root.right_child == null)
+			{
+				root.right_child = child;
+			}else
+			{
+				child_research(root.right_child, child);
+			}
+		}
+	}
+	
+	public static void preorder(node node, int[][] answer)
+	{
+		//System.out.println("one "+node.order+" a? "+a);
+		answer[0][a]=node.order;
+		a++;
+		if(node.left_child!=null)
+		{
+			
+			preorder(node.left_child,answer);
+		}
+		if(node.right_child!=null)
+		{
+			
+			preorder(node.right_child,answer);
+		}
+		
+		if(node.left_child==null && node.right_child==null)
+		{
+			
+			return;
+		}
+	}
+	public static void postorder(node node,int[][] answer)
+	{
+		if(node.left_child!=null)
+		{
+			postorder(node.left_child,answer);
+		}
+		if(node.right_child!=null)
+		{
+			postorder(node.right_child,answer);
+		}
+		if(node.right_child==null && node.left_child==null)
+		{
+			//System.out.println(node.order+"a? "+b);
+			answer[1][b]=node.order;
+			b++;
+			return;
+		}
+		answer[1][b]=node.order;
+		b++;
+
+		//System.out.println(node.order);
+	}
+	class node
+	{
+		int levels;
+		int x;
+		int y;
+		int order;
+		node left_child;
+		node right_child;
+		public node(int x, int y,int order)
+		{
+			this.x = x; 
+			this.y = y;
+			this.order = order;
+		}
+		public void set_levels(int levels)
+		{
+			this.levels = levels;
+		}
+		public int get_order()
+		{
+			return this.order;
+		}
+	
+	}
+
+}

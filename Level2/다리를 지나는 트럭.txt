@@ -1,0 +1,71 @@
+import java.util.ArrayList;
+//import java.util.Stack;
+class Solution {
+    public int solution(int bridge_length, int weight, int[] truck_weights) 
+	    {
+		    int answer = 0, index=0;
+	        road road = new road(bridge_length, weight);
+	        while(index<=truck_weights.length-1 || road.trucks.size()!=0)
+	        {
+	        	road.move();
+	        	if(index<truck_weights.length)
+	        	{
+	        		truck truck = new truck(truck_weights[index]);
+	        		if(road.add(truck))
+		                index+=1;
+	        	}
+	            answer++;
+	        }
+	        return answer;
+	    }
+	    class truck
+	    {
+	        int move;
+	        int weight;
+	        public truck(int weight)
+	        {
+	            this.weight = weight;
+	            this.move = 0;
+	        }
+	    }
+	    class road
+	    {
+	        ArrayList<truck> trucks;
+	        int totalWeight;
+	        int length;
+	        int limitWeight;
+	        public road(int length, int limitWeight)
+	        {
+	            this.totalWeight = 0;
+	            this.trucks = new ArrayList<>();
+	            this.length = length;
+	            this.limitWeight = limitWeight;
+	        }
+	        public void move()
+	        {
+	            for(int i =0; i< this.trucks.size(); i++)
+	            {
+	                truck temp = this.trucks.get(i);
+	                temp.move = temp.move+1;
+	                if(temp.move==this.length)
+	                {
+	                    this.trucks.remove(i);
+	                    this.totalWeight -= temp.weight;
+	                    i-=1;
+	                    
+	                }else
+	                    this.trucks.set(i, temp);
+	            }
+	        }
+	        public boolean add(truck truck)
+	        {
+	            if(this.totalWeight+truck.weight<=limitWeight)
+	            {
+	                this.totalWeight += truck.weight;
+	                this.trucks.add(truck);
+	            }else
+	                return false;
+	            return true;
+	        }
+	    }
+}

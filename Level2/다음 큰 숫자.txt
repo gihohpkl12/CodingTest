@@ -1,0 +1,26 @@
+class Solution {
+  	public int solution(int n) 
+	{
+		int answer =n;
+		int standard = one_count(n);
+		while(true)
+		{
+			answer++;
+			if(answer>n && standard==one_count(answer))
+				break;
+		}
+		return answer;		
+	}
+	
+	public static int one_count(int n) 
+	{
+		int count =0;
+		String binary = Integer.toBinaryString(n);
+		for(int i=0; i<binary.length(); i++)
+		{
+			if(binary.charAt(i)=='1')
+				count ++;
+		}
+		return count;
+	}
+}

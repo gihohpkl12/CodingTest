@@ -1,0 +1,22 @@
+import java.util.Arrays;
+import java.util.Comparator;
+class Solution {
+    public boolean solution(String[] phone_book) {
+        boolean answer = true;
+     
+        for(int i=0; i<phone_book.length; i++)
+        {
+            String temp1 = phone_book[i].replace(" ","");
+            for(int j =0; j<phone_book.length; j++)
+            {
+                if(j==i) continue;
+                String temp2 = phone_book[j].replace(" ","");
+                if(temp2.indexOf(temp1)==0)
+                {
+                    return false;
+                }
+            }
+        }
+        return answer;
+    }
+}

@@ -1,0 +1,55 @@
+import java.util.Arrays;
+class Solution {
+    public String solution(int n, int t, int m, String[] timetable) {
+		int[] time = new int[timetable.length];
+        stringtoTime(timetable,time);
+        return busCheck(n,t,m,time);
+    }
+	public void stringtoTime(String[] timetable, int[] time)
+	{
+		for(int i =0; i< timetable.length; i++)
+			time[i] += Integer.parseInt(timetable[i].substring(0,timetable[i].indexOf(":")))*60+Integer.parseInt(timetable[i].substring(timetable[i].indexOf(":")+1,timetable[i].length()));
+		Arrays.sort(time);
+	}
+	
+	public String timetoString(int time)
+	{
+		String answer = "";
+		answer += Integer.toString(time/60);
+		if(answer.length()!=2)
+			answer = "0"+answer;
+		answer += ":"+Integer.toString(time%60);
+		if(answer.length()!=5)
+			answer = answer.substring(0,3)+"0"+answer.substring(3,answer.length());
+		return answer;
+	}
+	
+	public String busCheck(int n, int t, int m, int[] time)
+	{
+		String answer = "";
+		int busTime = 540-t, index = -1, count=0 ;
+		for(int i = 1; i<=n; i++)
+		{
+			busTime+=t; count=0;
+			for(int j = index+1; j<time.length; j++)
+			{
+				if(time[j]<=busTime)
+				{
+					//System.out.println("take in "+j);
+					count++;
+					index = j;
+					if(count==m)
+						break;
+				}
+				
+			}
+		}
+		//System.out.println("last in "+index+" last bus time "+busTime+" count "+count);
+		if((index<=time.length-1 && count<m) || index == -1)
+			answer = timetoString(busTime);
+		else 
+			answer = timetoString(time[index]-1);
+		
+		return answer;
+	}
+}

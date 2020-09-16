@@ -1,0 +1,27 @@
+import java.util.Arrays;
+class Solution {
+     public int solution(int[] people, int limit) {
+	        int answer = 0;
+	       Arrays.sort(people);
+	       int index = 0;
+	       for(int i=people.length-1; i>=0; i--)
+	       {
+	    	   if(people[i]==-1) continue;
+
+	    	   if(people[i]+people[index]<=limit)
+	    	   {
+	    		   people[i] = -1;
+	    		   people[index] = -1;
+	    		   index++;
+
+	    	   }
+	    	   else
+	    	   {
+	    		   people[i]=-1;
+	    	   }
+			   answer++;
+	       }
+
+	        return answer;
+	    }
+}

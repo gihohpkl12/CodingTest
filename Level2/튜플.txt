@@ -1,0 +1,42 @@
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Comparator;
+
+public class Solution {
+	public int[] solution(String s) {
+		 int[] answer = {};
+		 s= s.substring(2,s.length()-2);
+		 String[] temp = s.split("\\{");
+		 String[][] s_arr = new String[temp.length][];
+		 HashMap<String, Integer> map = new HashMap<>();
+		 
+		 for(int i =0; i< temp.length; i++)
+			s_arr[i] = temp[i].replace("}", "").split(",");
+		 
+		 Arrays.sort(s_arr, new Comparator<String[]>() 
+		 {
+			 public int compare(String[] o1, String[] o2)
+			 {
+				 return o1.length-o2.length;
+			 }
+		 });
+		 
+		for(int i =0; i< s_arr.length; i++)
+		{
+			for(int j =0; j<s_arr[i].length; j++)
+			{
+				if(!map.containsKey(s_arr[i][j]))
+				{
+					map.put(s_arr[i][j], i);
+				}
+			}
+		}
+		answer = new int[map.size()];
+		for(String i : map.keySet())
+		{
+			int a = Integer.parseInt(i);
+			answer[map.get(i)] = a;
+		}
+		 return answer;
+	 }
+}

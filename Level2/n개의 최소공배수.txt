@@ -1,0 +1,30 @@
+import java.util.Arrays;
+
+class Solution {
+  public int solution(int[] arr) 
+  {
+      int answer =0;
+      int x =1;
+      Arrays.sort(arr);
+      while(true)
+      {
+          int standard = arr[arr.length-1]*x;
+          boolean check = true;
+          for(int i=0; i<arr.length; i++)
+          {
+              if(standard%arr[i]!=0)
+              {
+                  check = false;
+                  break;
+              }
+          }
+          if(check)
+          {
+              answer = standard;
+              break;
+          }else
+            x++;
+      }
+      return answer;
+  }
+}

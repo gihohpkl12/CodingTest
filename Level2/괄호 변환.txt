@@ -1,0 +1,72 @@
+class Solution {
+   public String solution(String p) {
+        String answer = "";
+        answer = correcting(p);
+        return answer;
+    }
+	public static String correcting(String sentence)
+	{
+		String answer ="";
+		int right =0;
+		int left =0;
+		int index =0;
+		boolean start = false;
+		int length = sentence.length();
+		if(length == 0)
+		{
+			return answer;
+		}
+		while(true)
+		{	
+			
+			if(sentence.substring(index,index+1).equals("("))
+			{
+				if(index ==0 )
+				{
+					start = true;
+				}
+				left++;
+				index++;
+				
+			}else
+			{
+				right++;
+				index++;
+			}
+			if(left == right && right!=0 && left!=0)
+			{
+				break;
+			}
+			if(index>=length)
+			{
+				break;
+			}	
+		}
+			if(start==true && sentence.substring(index-1,index).equals(")"))
+			{
+				answer += sentence.substring(0,index);
+				answer += correcting(sentence.substring(index,sentence.length()));
+				
+			}else
+			{
+				answer +="(";
+				answer +=correcting(sentence.substring(index,sentence.length()));
+				answer +=")";
+				for(int i=0; i<index; i++)
+				{
+					if(i==0 || i == index-1)
+					{
+						continue;
+					}
+					if(sentence.substring(i,i+1).equals("("))
+					{
+						answer+=")";
+					}else
+					{
+						answer+="(";
+					}
+				}
+			}
+		return answer;
+	}
+}

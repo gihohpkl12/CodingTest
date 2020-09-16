@@ -1,0 +1,107 @@
+import java.util.ArrayList;
+class Solution {
+  static ArrayList<String> total;
+	public int solution(int n, String[] data) 
+	{
+		int answer =0;
+        total = new ArrayList<>();
+		String[] name = {"A", "C", "F", "J", "M", "N", "R", "T"};
+		ArrayList<String> list = new ArrayList<>();
+		String temp ="";
+		for(String i : name)
+			list.add(i);
+		make_com(list,temp, list.size());
+		for(String a : total)
+		{
+			if(check_All_condition(data,a))
+				answer++;
+		}
+		
+		return answer;
+	}
+	public static void make_com(ArrayList<String> list,String temp ,int length)
+	{
+		if(temp.length()==length)
+		{
+			total.add(temp);
+			return;
+		}
+		ArrayList<String> list_temp = (ArrayList<String>)list.clone();
+		for(int i=0; i<list_temp.size(); i++)
+		{
+			String temp2 = temp;
+			String a = list_temp.get(i);
+			temp2 += a;
+			list_temp.remove(i);
+			make_com(list_temp, temp2, length);
+			list_temp.add(i,a);
+		}
+	}
+	
+	
+	public static boolean check_All_condition(String[] data, String friend)
+	{
+		boolean result = false;
+		for(int i =0; i<data.length; i++)
+		{
+			if(check(data[i],friend))
+			{
+				result = true;
+			}else
+			{
+				result = false;
+				break;
+			}
+		}
+		
+		return result;
+	}
+	public static boolean check(String data, String friend)
+	{
+		int num = Integer.parseInt(data.substring(4,5))+1;
+		boolean result = false;
+		if(data.charAt(3)=='=')
+		{
+			String first = data.substring(0,1);
+			String second = data.substring(2,3);
+			int gap = friend.indexOf(first)-friend.indexOf(second);
+			gap = gap>0 ? gap : gap*-1;
+			if(gap== num)
+			{
+				result = true;
+			}else
+			{
+				result = false;
+			}
+		}
+		if(data.charAt(3)=='>')
+		{
+			String first = data.substring(0,1);
+			String second = data.substring(2,3);
+			int gap = friend.indexOf(first)-friend.indexOf(second);
+			gap = gap>0 ? gap : gap*-1;
+			if(gap> num)
+			{
+				result = true;
+			}else
+			{
+				result = false;
+			}
+		}
+		if(data.charAt(3)=='<')
+		{
+			String first = data.substring(0,1);
+			String second = data.substring(2,3);
+			int gap = friend.indexOf(first)-friend.indexOf(second);
+			gap = gap>0 ? gap : gap*-1;
+			if(gap< num)
+			{
+				result = true;
+			}else
+			{
+				result = false;
+			}
+		}
+		return result;
+	}
+}
