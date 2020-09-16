@@ -1,0 +1,53 @@
+import java.util.*;
+class Solution {
+  public int solution(String dartResult) {
+     int answer = 0;
+	      int one =-1;
+	      int[] score = new int[3];
+	      int skip = -1;
+	      for(int i=0; i<dartResult.length(); i++)
+	      {
+	          if(i==skip)
+	          {
+	        	  skip = -1;
+	        	  continue;
+	          }
+	          String a ="";
+	          char aa = dartResult.charAt(i);
+	          System.out.println("start "+aa);
+	          if((int)aa>=48 && (int)aa<=57)
+	          {
+	        	  a = Character.toString(aa);
+	        	  if((int)aa==49)
+	        	  {
+	        		  if(dartResult.charAt(i+1)=='0')
+	        		  {
+	        			  a+=Character.toString(dartResult.charAt(i+1));;
+	        			  skip = i+1;
+	        		  }
+	        	  }
+	        	  one++;
+	        	  score[one] = Integer.parseInt(a);
+	          }else
+	          { a = Character.toString(aa);}
+	          if(a.equals("S")) { score[one] = (int)Math.pow(score[one],1);}
+	          if(a.equals("D")) {score[one] = (int)Math.pow(score[one],2); }
+	          if(a.equals("T")){score[one] = (int)Math.pow(score[one],3);}
+	          if(a.equals("*") ) {
+                  if(one>0)
+                  for(int j=one-1; j<=one; j++) {score[j]*=2;}
+                  else if(one==0)
+                  {
+                      score[one]*=2;
+                  }
+              }
+	          if(a.equals("#")) {score[one] *=-1;}
+	      }
+	      for(int i=0; i<3;i++)
+	      {
+	    	  answer +=score[i];
+	    	  System.out.println(score[i]);
+	      }
+	      return answer;
+  }
+}

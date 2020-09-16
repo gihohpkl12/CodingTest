@@ -1,0 +1,10 @@
+class Solution {
+  public boolean solution(int x) {
+      boolean answer = true;
+      String a = Integer.toString(x);
+      int xx = 0;
+      String[] temp = a.split("");
+      for(String b : temp) xx += Integer.parseInt(b);
+      return x%xx ==0;
+  }
+}

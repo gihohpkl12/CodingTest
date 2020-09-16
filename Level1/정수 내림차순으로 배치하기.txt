@@ -1,0 +1,23 @@
+import java.util.*;
+class Solution {
+  public long solution(long n) {
+      long answer = 0;
+      String[] s = String.valueOf(n).split("");
+      String temp="";
+      Arrays.sort(s, new Comparator<String>(){
+          public int compare(String o1, String o2)
+          {
+              if(o1.charAt(0)==o2.charAt(0)) return 0;
+              if(o1.charAt(0)>o2.charAt(0)) return -1;
+              if(o1.charAt(0)<o2.charAt(0)) return 1;
+              return 0;
+          }
+      });
+      for(int i=0; i<s.length; i++)
+      {
+          temp +=s[i];
+      }
+      answer = Long.parseLong(temp); 
+      return answer;
+  }
+}

@@ -1,0 +1,43 @@
+
+import java.util.LinkedHashMap;
+class Solution {
+  public int[] solution(int n, int m) {
+	      int[] answer = new int[2];
+	      LinkedHashMap<Integer,Integer> N = new LinkedHashMap<>();
+	      LinkedHashMap<Integer,Integer> M = new LinkedHashMap<>();
+	      for(int i=n; i>=1;i--)
+	          if(n%i == 0) N.put(i,i);
+	      for(int i=m; i>=1;i--)
+	          if(m%i == 0) M.put(i,i);
+	      System.out.println(N.keySet());
+	      System.out.println(M.keySet());
+
+	      if(n<m) 
+	      {
+	          for(int i : N.keySet())
+	          {
+	              if(M.containsKey(N.get(i)))
+	              {
+	                   answer[0] = N.get(i);
+	                  break;
+	              }
+	          }
+	      }else
+	      {
+	           for(int i : M.keySet())
+	          {
+	              if(N.containsKey(M.get(i)))
+	              {
+	                   answer[0] = M.get(i);
+	                  break;
+	              }
+	          }
+	      }
+	      if(answer[0] == 1) answer[1] = n*m;
+	      else
+	      {
+	          answer[1] = (n/answer[0])*(m/answer[0])*answer[0];
+	      }
+	      return answer;
+	  }
+}

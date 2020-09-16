@@ -1,0 +1,11 @@
+class Solution {
+  public int[] solution(long n) {
+      int[] answer = new int[String.valueOf(n).length()];
+      String temp = String.valueOf(n);
+      String[] temp2 = temp.split("");
+      for(int i=0; i<answer.length; i++)
+          answer[i] = Integer.parseInt(temp2[temp2.length-1-i]);
+      
+      return answer;
+  }
+}

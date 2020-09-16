@@ -1,0 +1,49 @@
+class Solution {
+    public int[] solution(int N, int[] stages) {
+	        int [] answer = new int[N];
+	    	float[][] fail = new float[N+2][1];
+	        int total =0;
+	        int courrent =0;
+	        float max=-1;
+	        float temp=0;
+	        int answer_temp=0;
+
+	        for(int i=1; i<=N;i++)
+	        {
+	        	for(int a : stages)
+		        {
+		        	if(a>=i)
+		        	{
+		        		total++;
+		        		if(a==i)
+		        		{
+		        			courrent++;
+		        		}
+		        	}
+		        }
+	        	fail[i][0]=(float)courrent/total;
+	        	courrent =0;
+	        	total =0;
+	        }
+	        for(int i=0;i<N;i++)
+	        {
+	        	answer[i]=i+1;
+	        }
+	        for(int i=1; i<N+1;i++)
+	        {
+	        	for(int j=1;j<N;j++)
+	        	{
+	        		if(fail[j][0]<fail[j+1][0])
+	        		{
+	        			temp = fail[j+1][0];
+	        			fail[j+1][0]=fail[j][0];
+	        			fail[j][0]=temp;
+	        			answer_temp=answer[j];
+	        			answer[j]=answer[j-1];
+	        			answer[j-1]=answer_temp;
+	        		}
+	        	}
+	        }
+	        return answer;
+	    }
+}

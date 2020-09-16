@@ -1,0 +1,13 @@
+class Solution {
+  public String solution(String s) {
+      String answer = "";
+      int length = s.length(), odd =0, even =0;
+      
+      if(length %2 ==0) even = length/2;
+      else odd = length/2 +1;
+      if(odd !=0) answer = s.substring(odd-1,odd);
+      else answer = s.substring(even-1,even+1);
+      
+      return answer;
+  }
+}

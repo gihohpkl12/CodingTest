@@ -1,0 +1,20 @@
+import java.util.ArrayList;
+
+public class Solution {
+	public int[] solution(int []arr) {
+        int[] answer;
+        int previous = -1;
+        ArrayList<Integer> List = new ArrayList<>();
+        for(int i=0; i<arr.length;i++)
+        {
+            if(arr[i]!=previous) 
+            {
+                List.add(arr[i]);
+                previous = arr[i];
+            }
+        }
+        answer = new int[List.size()];
+        for(int i=0; i<answer.length; i++) answer[i] = List.get(i); 
+        return answer;
+	}
+}
