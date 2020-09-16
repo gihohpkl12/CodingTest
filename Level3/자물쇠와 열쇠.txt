@@ -1,0 +1,184 @@
+class Solution {
+   	
+		static int zero_count =0;
+		public boolean solution(int[][] key, int[][] lock) {
+	        boolean answer = false;
+	        int[][] new_lock = expend_lock(lock,key.length-1);
+	        if(zero_count==0)
+            {
+                return true;
+            }
+	        for(int t =0; t<4; t++ )
+	        {
+	        	 boolean answer2 = new_search(key,new_lock,lock.length);
+	        	 if(answer2==false)
+	        	 {
+	        		 key = turning(key);
+
+	        	 }else if(answer2==true)
+	        	 {
+	        		 answer = answer2;
+	        		 break;
+	        	 }
+	        }
+
+	        return answer;
+	    }
+		public static boolean new_search(int[][] key, int[][] lock, int origin_length)
+		{
+			boolean result = true;
+			int W_start =0;
+			int H_start =0;
+			
+			while(true)
+			{
+				if(H_start == lock.length-(key.length-1))
+				{
+                    result = false;
+					break;
+				}else
+				{
+					int[] temp_range = {W_start, H_start};
+					result = put_key(key,lock,temp_range);
+					if(result == true)
+					{
+						break;
+					}
+					else
+					{
+						int[] temp_index = next_index(W_start, H_start, lock.length, key.length);
+						W_start = temp_index[0];
+						H_start = temp_index[1];
+					}
+							
+				}
+			}
+			
+			return result;
+		}
+		public static int[] next_index(int start_w, int start_h, int lock_length, int key_length)
+		{
+
+			int W_start =start_w;
+			int H_start =start_h;
+			int[] index_arr = new int[2];
+			if(start_w<=lock_length-key_length && start_h<=lock_length-key_length )
+			{
+				
+				if(start_w<lock_length-(key_length))
+				{
+					W_start++;
+				}else if(start_w==lock_length-(key_length))
+				{
+					
+					W_start =0;
+					H_start ++;
+				}
+			}	
+			
+			index_arr[0] = W_start;
+			index_arr[1] = H_start;
+			return index_arr;
+		}
+		// put key is complete!
+		public static boolean put_key(int[][] key, int[][] lock, int[] range)
+		{
+			int start_w =range[0];
+			int start_h =range[1];
+			int end_w = start_w+key.length;
+			int end_h = start_h+key.length;
+			int key_index_w =0;
+			int key_index_h =0;
+			boolean state = true;
+			boolean final_answer = false;
+			int zero =0;
+			boolean zero_state = false;
+			
+			for(int i=start_h; i<end_h; i++)
+			{
+				for(int j= start_w; j<end_w; j++)
+				{
+					if(lock[i][j]+key[key_index_h][key_index_w]==2)
+					{
+						
+						state = false;
+						break;
+					}
+					if(lock[i][j]==0 && lock[i][j]+key[key_index_h][key_index_w]==1)
+					{
+						zero++;
+						if(zero==zero_count)
+						{
+							zero_state = true;
+						}
+					}
+					key_index_w++;
+				}
+				key_index_h++;
+				key_index_w = 0;
+				if(state == false)
+				{
+					break;
+				}
+				if(state == true && zero_state==true && zero == zero_count)
+				{
+					final_answer = true;
+				}
+			}
+			return final_answer;
+		}
+		// turning is complete
+		public static int[][] turning(int[][] key)
+		{
+			int[][] new_key = new int[key.length][key[0].length];
+			int h_index =0;
+			int w_index =0;
+			for(int i=0;i<key[0].length; i++)
+			{
+				for(int j=key.length-1;j>=0;j--)
+				{
+					new_key[h_index][w_index] = key[j][i]; 
+					w_index++;
+				}
+				w_index =0;
+				h_index++;
+			}
+			
+			return new_key;
+			
+		}
+		// expend_lock is complete
+		public static int[][] expend_lock(int[][] lock, int add)
+		{
+			int[][] new_lock = new int[lock.length+(add*2)][lock[0].length+(add*2)];
+			int h_index =0;
+			int w_index =0;
+			for(int i=0; i<new_lock.length; i++)
+			{
+				for(int j=0; j<new_lock[0].length; j++)
+				{
+					
+					if(i>=add && i<lock.length+add && j>=add && j<lock.length+add)
+					{
+						// this is origin place
+						new_lock[i][j] = lock[h_index][w_index];
+						if(lock[h_index][w_index]==0)
+						{
+							zero_count++;
+						}
+						w_index++;
+					}else
+					{
+						// 3 is adding place 
+						new_lock[i][j] = 3;
+					}
+				}
+				if(i>=add && i<lock.length+add )
+				{
+					h_index++;
+				}
+				w_index=0;
+			}
+			return new_lock;
+		}
+}

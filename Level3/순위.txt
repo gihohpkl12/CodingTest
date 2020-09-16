@@ -1,0 +1,110 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+class Solution {
+    public int solution(int n, int[][] results) {
+        int answer = 0;
+        HashMap<Integer, ArrayList<Integer>> winIndex = new HashMap<>();
+        HashMap<Integer, ArrayList<Integer>> loseIndex = new HashMap<>();
+        HashMap<Integer, ArrayList<Integer>> win = new HashMap<>();
+        HashMap<Integer, ArrayList<Integer>> lose = new HashMap<>();
+        
+        for(int i = 0; i < results.length; i++)
+        {
+        	int winner = results[i][0], loser = results[i][1];
+        	Index(winIndex, winner, i);
+        	Index(loseIndex, loser, i);
+        }
+        for(int i =0; i< results.length; i++)
+        {
+        	int winner = results[i][0], loser = results[i][1];
+        	add(win, winner, loser);
+        	add(lose, loser, winner);
+        	findWin(results, win, winIndex,winner, winIndex.get(loser));
+        	findLose(results, lose , loseIndex, loser, loseIndex.get(winner));
+        }
+        for(int i=1; i<=n; i++)
+        {
+        	int winCount = win.containsKey(i)==true ? win.get(i).size() : 0, loseCount = lose.containsKey(i)==true ? lose.get(i).size() : 0;
+        	if(winCount+loseCount == n-1)
+        		answer++;
+        }
+        
+        return answer;
+    }
+	public void findWin(int[][] results, HashMap<Integer, ArrayList<Integer>> win, HashMap<Integer, ArrayList<Integer>> winIndex, int key, ArrayList<Integer> movelist )
+	{
+		if(movelist==null)
+			return;
+		ArrayList<Integer> newMoveList = new ArrayList<>();
+		ArrayList<Integer> temp = win.get(key);
+		
+		for(int i : movelist)
+		{
+			if(!temp.contains(results[i][1]))
+			{
+				temp.add(results[i][1]);
+				if(winIndex.get(results[i][1])!=null)
+					newMoveList.addAll(winIndex.get(results[i][1]));
+			}
+		}
+		win.replace(key, temp);
+		if(newMoveList.size()!=0)
+			findWin(results, win, winIndex,key, newMoveList);
+	}
+	
+	public void findLose(int[][] results, HashMap<Integer, ArrayList<Integer>> lose, HashMap<Integer, ArrayList<Integer>> loseIndex, int key, ArrayList<Integer> movelist )
+	{
+		if(movelist==null)
+			return;
+		ArrayList<Integer> newMoveList = new ArrayList<>();
+		ArrayList<Integer> temp = lose.get(key);
+		
+		for(int i : movelist)
+		{
+			if(!temp.contains(results[i][0]))
+			{
+				temp.add(results[i][0]);
+				if(loseIndex.get(results[i][0])!=null)
+					newMoveList.addAll(loseIndex.get(results[i][0]));
+			}
+		}
+		lose.replace(key, temp);
+		if(newMoveList.size()!=0)
+			findLose(results, lose, loseIndex,key, newMoveList);
+	}
+	
+	public void Index(HashMap<Integer, ArrayList<Integer>> map, int key, int index)
+	{
+		if(map.containsKey(key))
+		{
+			ArrayList<Integer> temp = map.get(key);
+			temp.add(index);
+			map.replace(key, temp);
+		}
+		else
+		{
+			ArrayList<Integer> temp = new ArrayList<Integer>();
+			temp.add(index);
+			map.put(key,temp);
+		}
+	}
+	public void add(HashMap<Integer, ArrayList<Integer>> map, int key, int value)
+	{
+		if(map.containsKey(key))
+    	{
+    		ArrayList<Integer> temp = map.get(key);
+    		if(!temp.contains(value))
+    			temp.add(value);
+    		map.replace(key, temp);
+    	}
+    	else
+    	{
+    		ArrayList<Integer> temp = new ArrayList<>();
+    		if(!temp.contains(value))
+    			temp.add(value);
+    		map.put(key, temp);
+    	}
+	}
+}

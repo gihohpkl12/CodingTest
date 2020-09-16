@@ -1,0 +1,54 @@
+import java.util.List;
+import java.util.ArrayList;
+class Solution {
+    public int[] solution(int[] answers) {
+        int[] answer = new int[3];
+        int[] one = {1,2,3,4,5};
+        int[] two = {2,1,3,4,5};
+        int[] tre = {3,1,2,4,5};
+        int one_index =0, two_index =1, tre_index =0;
+        // 1번 : 1,2,3,4,5
+        // 2번 : 21, 23, 24, 25 
+        // 3번 : 33,11,22,44,55
+        for(int i=0; i<answers.length; i++)
+        {
+            int anw = answers[i];
+            if(anw == one[one_index])  answer[0]++;
+           if(i%2 ==0)
+           {
+                if(anw == two[0]) answer[1]++;
+                if(anw == tre[tre_index]) answer[2]++;
+           }else
+           {
+               if(anw == two[two_index])    answer[1]++;
+               if(anw == tre[tre_index]) answer[2]++;
+               tre_index++;
+               if(tre_index == tre.length) tre_index=0;
+               two_index++;
+               if(two_index==two.length) two_index =1;
+           }
+            one_index++;
+            if(one_index == one.length) one_index =0;
+        }
+        int max = answer[0];
+        ArrayList<Integer> final_anw = new ArrayList<>();
+        final_anw.add(1);
+        for(int i=1; i<3; i++)
+        {
+        	System.out.println(answer[i]);
+            if(answer[i]>max) 
+            {
+                final_anw.removeAll(final_anw);
+                final_anw.add(i+1);
+                max = answer[i];
+            }else if(answer[i]==max) final_anw.add(i+1);
+        }
+       int[] aaaa = new int[final_anw.size()];
+        for(int i=0; i<aaaa.length;i++)
+        {
+            aaaa[i] = final_anw.get(i);
+        }
+        return aaaa;
+
+    }
+}

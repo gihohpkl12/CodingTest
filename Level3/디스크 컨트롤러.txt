@@ -1,0 +1,55 @@
+import java.util.PriorityQueue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+class Solution {
+   public int solution(int[][] jobs) {
+	        int answer = 0, end = jobs.length;
+	        PriorityQueue<Integer> q = new PriorityQueue<>();
+	        ArrayList<Integer> time = new ArrayList<>();
+	        Arrays.sort(jobs, new Comparator<int[]>() 
+	        {
+	        	public int compare(int[] o1, int[] o2)
+	        	{
+	        		return o1[0]-o2[0];
+	        	}
+	        });
+	        int index =0;
+	        int current = 0; 
+	        while(end != 0)
+	        {
+	        	while(index < jobs.length)
+	        	{
+	        		if(jobs[index][0]<=answer)
+	        		{
+	        			q.offer(jobs[index][1]);
+	        			index++;
+	        		}else
+	        			break;
+	        	}
+	            if(current ==0)
+	            {
+	                if(q.size()!=0)
+	                	current = q.poll();
+	                else
+	                {
+	                    answer++;
+	                    continue;
+	                }
+	            }
+	        	answer++;
+	        	current--;
+	        	if(current==0)
+	        	{
+	        		end--;
+	        		time.add(answer);
+	        	}
+	        }
+	        answer =0;
+	        for(int i : time)
+	        	answer +=i;
+	        for(int[] i : jobs)
+	        	answer -= i[0];
+	        return answer/jobs.length;
+	    }
+}

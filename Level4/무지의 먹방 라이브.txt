@@ -1,0 +1,78 @@
+import java.util.*;
+class Solution {
+		public int solution(int[] food_times, long k) {
+		int answer = 0;
+		long arr_length = food_times.length;
+		int[] copy_arr = new int[food_times.length];
+		long count =0;
+		long minus=0;
+		
+		for(int i=0; i<arr_length; i++)
+		{
+			copy_arr[i] = food_times[i];
+			count+=food_times[i];
+		}
+		
+		Arrays.sort(copy_arr);
+		if(count<=k)
+		{
+			return -1;
+		}else
+		{
+			count=0;
+			for(int i=0;i<food_times.length; i++)
+			{
+				if(i==0)
+				{
+					minus = (arr_length)*copy_arr[i];	
+					if(minus>k)
+					{
+						break;
+					}
+					else
+					{
+						arr_length--;
+						k -= minus;
+					}
+				}
+				else
+				{
+					minus = (arr_length)*(copy_arr[i]-copy_arr[i-1]);				
+					if(minus>k)
+					{
+						break;
+					}
+					else
+					{
+						arr_length--;
+						k -= minus;
+					}
+				}
+			}
+		
+			long kk = k % arr_length;
+			int index = copy_arr.length-(int)arr_length;
+			if(index==0)
+			{
+				for(int i=0; i<copy_arr.length; i++)
+				{
+					 if (food_times[i] <= 0)
+		                    continue;
+		             if (kk == 0)
+		                    return i + 1;
+		                kk--;
+				}
+			}
+			for(int i=0; i<copy_arr.length; i++)
+			{
+				 if (food_times[i] <= copy_arr[index-1])
+	                    continue;
+	             if (kk == 0)
+	                    return i + 1;
+	                kk--;
+			}
+			
+		}
+		return -1;
+	}
+   }

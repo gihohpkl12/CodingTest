@@ -1,0 +1,112 @@
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Arrays;
+
+class Solution {
+	 public int solution(String begin, String target, String[] words) {
+	        int answer = -1;
+	        for(int i =0; i<words.length; i++)
+	        {
+	        	if(words[i].equals(target))
+	        	{
+	        		answer = 0;
+	        		break;
+	        	}
+	        }
+	        if(answer !=0)
+	        	return 0;
+	        Arrays.sort(words, new Comparator<String>() 
+	        {
+	        	public int compare(String o1, String o2)
+	        	{
+	        		if(o1.equals(target))
+	        			return 1;
+	        		if(o2.equals(target))
+	        			return -1;
+	        		else
+	        			return 0;
+	        	}
+	        });
+	        answer = bfs(begin, target, words); 
+	        return answer;
+	    }
+	 
+	 public boolean wordcheck(String begin, String target)
+	 {
+		 boolean result = true;
+		 int count = 0;
+		 HashMap<Integer, Integer> map = new HashMap<>();
+		 
+		 for(int i =0; i<begin.length(); i++)
+		 {
+			 String temp = begin.substring(i,i+1);
+			 int index =0;
+			 while(index!=-1)
+			 {
+				 index = target.indexOf(temp,index);
+				 if(index==-1)
+				 {
+					 count++;
+					 break;
+				 }
+				 if(!map.containsKey(index))
+				 {
+					 map.put(index, index);
+					 break;
+				 }else
+				 {
+					 index+=1;
+				 }
+			 }
+			 if(count>=2)
+			 {
+				 result = false;
+				 break;
+			 }
+		 }
+		 return result;
+	 }
+    public int bfs(String begin, String target, String[] words)
+	 {
+		 Queue<word> Q = new LinkedList<>();
+		 Q.add(new word(0,begin));
+		 int answer = Integer.MAX_VALUE;
+		 for(int i =0; i<words.length; i++)
+		 {
+			 int Qcount = Q.size();
+			 while(Qcount>0)
+			 {
+				 word temp = Q.poll();
+				 if(words[i].equals(target))
+				 {
+					 if(wordcheck(temp.word,words[i]))
+						answer = temp.count+1<answer ? temp.count+1 : answer; 
+					 Qcount--;
+					 continue;
+				 }
+				 if(wordcheck(temp.word, words[i]))
+				 {
+					 Q.add(temp);
+					 word temp2 = new word(temp.count+1, words[i]);
+					 Q.add(temp2);
+					 
+				 }else
+					 Q.add(temp);
+				 Qcount--;
+			 }
+		 }
+		 return answer;
+	 }
+	 class word
+	 {
+		 int count;
+		 String word;
+		 public word(int count, String word)
+		 {
+			 this.count  = count;
+			 this.word = word;
+		 }
+	 }
+}

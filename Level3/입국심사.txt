@@ -1,0 +1,33 @@
+import java.util.Arrays;
+class Solution {
+   public long solution(int n, int[] times) 
+	 {
+			Arrays.sort(times);
+			long start = 1;
+            long end = (long)(times[times.length-1]*n);
+            long answer =end;
+            long  time =0;
+	        long people = 0;
+	        while(start<=end)
+	        {
+	        	time = (start+end)/2;
+	            people = cal(times,n, time);
+	        	if(people>0)
+	        		start = time+1;
+	        	else if(people<=0)
+	        	{
+                    if(time<answer) answer = time;
+	        		end =time-1;
+	        		
+	        	}
+	        }
+	        return answer;
+	    }
+	public long cal(int[] times, int people, long time)
+	{
+        long n = people;
+		for(int i =0; i<times.length; i++)
+        	n -= time/times[i];
+		return n;
+	}
+}

@@ -1,0 +1,131 @@
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Stack;
+class Solution {
+static boolean answer = true;
+	public boolean solution(int n, int[][] path, int[][] order) 
+	{
+		int[] ban = new int[n], parents = new int[n];
+        boolean[] succ = new boolean[n], saveCheck = new boolean[n], Check = new boolean[n], BanNum = new boolean[n];
+        ArrayList<Integer>[] cave = new ArrayList[n];
+        Stack<cave> S = new Stack<>(); Stack<Integer> B = new Stack<>();
+        Queue<Integer> Q = new LinkedList<>();
+
+        for(int i =0; i<order.length; i++)
+        {
+        	if(order[i][0] == 0) continue; 
+        	ban[order[i][1]] = order[i][0];
+        	BanNum[order[i][1]]= true;
+        	B.add(order[i][1]);
+        	if(order[i][1]==0) return false;
+        }
+        for(int i =0; i<path.length; i++)
+        {
+        	int start  = path[i][0], end = path[i][1]; 
+        	if(cave[start] == null) cave[start] = new ArrayList<>();
+        	if(cave[end] == null) cave[end] = new ArrayList<>();
+        	cave[start].add(end);
+        	cave[end].add(start);
+        }
+        Q.add(0);
+        while(Q.size()!=0)
+        {
+        	int num = Q.poll();
+        	saveCheck[num] = true;
+        	for(int i = 0; i< cave[num].size(); i++)
+        	{
+        		if(!saveCheck[cave[num].get(i)])
+        		{
+        			parents[cave[num].get(i)] = num;
+                	Q.add(cave[num].get(i));
+        		}
+        	}
+        }
+        int startNum = next(B,BanNum);
+        S.add(new cave( startNum, ban[startNum] ));
+        Check[startNum] = true;
+        while(S.size()!=0)
+        {
+        	cave start = S.pop(); 
+			if(BanNum[start.target])
+			{
+				S.add(start);
+    			S.add(new cave(start.target , ban[start.target]) );
+    			Check[start.target] = true;
+    			continue;
+			}
+        	else
+        	{
+        		int temp = 0;
+        		while(start.target!=0)
+        		{
+        			temp = parents[start.target];
+        			if(temp==0)
+        			{
+        				BanNum[start.remove] = false;
+        				Check[start.remove] =false;
+        				for(int i : start.save)
+        					succ[i] = true;
+        				break;				
+        			}
+        			if(succ[temp])
+            		{
+                		BanNum[start.remove] = false;
+                		Check[start.remove] =false;               		
+        				break;
+            		}
+        			if( Check[temp])
+        				return false;
+        			else if(BanNum[temp])
+        			{
+        				S.add(start);
+        				S.add(new cave(temp , ban[temp]) );
+        				Check[temp] =true;
+        				break;
+        			}
+        			else
+        			{
+        				start.target = temp;
+        				start.save.add(temp);
+        			}
+        			
+        		}
+        	}
+        	if(S.size()==0) 
+        	{
+        		int next = next(B , BanNum);
+        		if(next==-1)
+        			return true;
+        		else
+        		{
+        			S.add(new cave( next, ban[next]) );
+            		Check[next] =true;
+        		}
+        	}
+        }
+        return answer;
+	}
+	class cave
+	{
+		int remove, target;
+		ArrayList<Integer> save;
+		public cave(int r, int t)
+		{
+			this.remove = r;
+			this.target = t;
+			save = new ArrayList<>();
+			save.add(this.target);
+		}
+	}
+	public int next(Stack<Integer> B, boolean[] BanNum)
+	{
+		while(B.size()!=0)
+		{
+			int next = B.pop();
+			if(BanNum[next])
+				return next;
+		}
+		return -1;
+	}	
+}

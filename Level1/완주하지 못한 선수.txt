@@ -1,0 +1,24 @@
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+class Solution {
+    public String solution(String[] participant, String[] completion) {
+        String answer = "";
+        List<String> part = new ArrayList<String>();
+        List<String> com = new  ArrayList<String>();
+        Collections.addAll(part,participant);
+        Collections.addAll(com,completion);
+        Collections.sort(part);
+        Collections.sort(com);
+        for(int i=0; i<part.size(); i++)
+        {
+            if(i==com.size()) return part.get(part.size()-1);
+            String p = part.get(i);
+            String c = com.get(i);
+            if(!p.equals(c)) return p;
+        }
+
+        return answer;
+    }
+}

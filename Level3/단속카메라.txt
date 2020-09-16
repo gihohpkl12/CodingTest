@@ -1,0 +1,70 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+class Solution {
+      public int solution(int[][] routes) {
+	        ArrayList<int[]> camera = new ArrayList<>();
+	        Arrays.sort(routes, new Comparator<int[]>() 
+	        {
+	        	public int compare(int[] o1, int[] o2)
+	        	{
+	        		if(o1[1]>o2[1])
+	        			return 1;
+	        		if(o1[1]<o2[1])
+	        			return -1;
+	        		return 0;
+	        					
+	        	}
+	        });
+	        for(int i =0; i< routes.length; i++)
+	        {
+	        	if(camera.size()==0)
+	        		camera.add(routes[i]);
+	        	else
+	        	{
+	        		boolean saveCheck = true;
+	        		for(int j =0; j< camera.size(); j++)
+	        		{
+	        			int[] temp = camera.get(j);
+	        			if(!overlapcheck(routes[i][0],routes[i][1],temp))
+	        				continue;
+	        			else
+	        			{
+	        				saveCheck = false;
+	        				temp = setRange(routes[i][0], routes[i][1], temp);
+	        				camera.set(j, temp);
+	        				break;
+	        			}
+	        		}
+	        		if(saveCheck)
+	        			camera.add(routes[i]);
+	        	}
+	        }
+        
+	        return camera.size();
+	    }
+	 public boolean overlapcheck(int start, int end, int[] arr)
+	 {
+		 boolean result = false;
+		 if(arr[1]>=start && arr[1]<=end)
+			 result = true;
+		 else if(arr[0]>=start && arr[0]<=end)
+			 result = true;
+		 else if(start>=arr[0] && end<=arr[1])
+			 result = true;
+		 return result;
+	 }
+	 public int[] setRange(int start, int end, int[] arr)
+	 {
+		 int[] result = new int[2];
+		 if(start==arr[0])
+		 	 result[0] = start;
+		 else
+		 	 result[0] =  start>arr[0] ? start : arr[0];
+		 if(end == arr[1])
+			 result[1] = end;
+		 else
+			 result[1] = end<arr[1] ? end : arr[1]; 
+		 return result;
+	 }
+}

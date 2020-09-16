@@ -1,0 +1,49 @@
+import java.util.LinkedHashMap;
+class Solution {
+    public int solution(String dirs) {
+        String[] dir = dirs.split("");
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        int[] cur = {0,0};
+        for(int i = 0; i<dir.length; i++)
+        {
+        	int[] move = move(dir[i]);
+        	if(rangeCheck(cur,move))
+        	{
+        		if(!map.containsKey(makeKey(cur,move)))
+        		{
+        			map.put(makeKey(cur,move), "");
+        			map.put(makeKeyReverse(cur,move), "");
+        		}
+        		cur[0]+=move[0]; cur[1] +=move[1];
+        	}
+        }
+        return map.size()/2;
+    }
+	public boolean rangeCheck(int[] cur, int[] move)
+	{
+		if(cur[0]+move[0]<-5 || cur[0]+move[0]>5 || cur[1]+move[1]<-5 || cur[1]+move[1]>5)
+			return false;
+		return true;
+	}
+	public String makeKey(int[] cur, int[] move)
+	{
+		return Integer.toString(cur[0])+","+Integer.toString(cur[1])+"->"+Integer.toString(cur[0]+move[0])+","+Integer.toString(cur[1]+move[1]);
+	}
+	public String makeKeyReverse(int[] cur, int[] move)
+	{
+		return Integer.toString(cur[0]+move[0])+","+Integer.toString(cur[1]+move[1])+"->"+Integer.toString(cur[0])+","+Integer.toString(cur[1]);
+	}
+	public int[] move(String move)
+	{
+		int[] Move = new int[2];
+		if(move.equals("U"))
+		{Move[0] =1;Move[1] =0;}
+		else if(move.equals("D"))
+		{Move[0] =-1;Move[1] =0;}
+		else if(move.equals("R"))
+		{Move[0] =0;Move[1] =1;}
+		else
+		{Move[0] =0;Move[1] =-1;}
+		return Move;
+	}
+}

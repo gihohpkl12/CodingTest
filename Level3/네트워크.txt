@@ -1,0 +1,71 @@
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+class Solution {
+   public int solution(int n, int[][] computers) {
+	        int answer = n;
+	        boolean[] check = new boolean[n];
+	        LinkedHashMap<Integer,ArrayList<Integer>> map = new LinkedHashMap<>();
+	        for(int i=0; i<computers.length; i++)
+	        {
+	        	ArrayList<Integer> temp = new ArrayList<>();
+	        	for(int j =0; j<computers[0].length; j++)
+	        	{
+	        		if(i==j || check[j]) continue;
+	        		if(computers[i][j] == 1)
+	        			temp.add(j);
+	        	}
+	        	if(temp.size()!=0)
+	        	{
+	        		for(int j =0; j<temp.size(); j++)
+	        		{
+	        			if(check[temp.get(j)]) continue;
+	        			if(map.containsKey(i))
+	        			{
+	        				ArrayList<Integer> map_temp = map.get(i);
+	        				map_temp.add(temp.get(j));
+	        				map.replace(i, map_temp);
+	        			}
+	        			else
+	        			{
+	        				ArrayList<Integer> map_temp = new ArrayList<>();
+	        				map_temp.add(temp.get(j));
+	        				map.put(i,map_temp);
+	        			}
+	        			check[temp.get(j)] = true;
+	        			research(computers, map,i,check, temp.get(j));
+	        		}
+	        	}
+	        	check[i] = true;
+	        	
+	        }
+	        for(int i : map.keySet())
+	        	answer -= map.get(i).size();
+	        return answer;
+	    }
+	 public void research(int[][] computers, LinkedHashMap<Integer,ArrayList<Integer>> map, int key, boolean[] check,int j)
+	 {
+		 
+		 ArrayList<Integer> next = new ArrayList<>();
+		 for(int i =0; i<computers.length; i++)
+		 {
+			 if(i == key || check[i] || i==j) continue;
+			 if(computers[j][i]==1) 
+			 {
+				 next.add(i);
+				 check[i] = true;
+			 }
+		 }
+		 if(next.size()!=0)
+		 {
+			 for(int i =0; i<next.size(); i++ )
+			 {
+				 ArrayList<Integer> map_temp = map.get(key);
+				 map_temp.add(next.get(i));
+				 map.replace(key, map_temp);
+				 check[next.get(i)] = true;
+				 research(computers, map,key,check,next.get(i));
+			 }
+		 }
+		 return;
+	 }
+}

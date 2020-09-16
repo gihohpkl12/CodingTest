@@ -1,0 +1,14 @@
+class Solution {
+  	public int solution(int n) {
+	    int answer = 1;
+        int pre =0;
+        for(int i=0; i<n; i++)
+        {
+            int temp = answer;
+            answer = answer + pre;
+            pre = temp;
+            answer = answer%1000000007;
+        }
+	      return answer;
+	  }
+}

@@ -1,0 +1,305 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+class Solution {
+  	public int[] solution(String[] words, String[] queries) {
+        int[] answer = new int[queries.length];
+        HashMap<String,Integer> memory = new HashMap<String,Integer>();
+        Node fro_node = new Node(words, true);
+        Node bac_node = new Node(words, false);
+        
+        for(int i=0; i<queries.length;i++)
+        {
+        	String temp = queries[i];
+        	int index =0;
+        	int count =0;
+        	if(memory.containsKey(queries[i]))
+        	{
+        		answer[i] = memory.get(queries[i]); 
+        		continue;
+        	}
+
+        	if(!temp.substring(0,1).equals("?"))
+        	{
+        		index = temp.indexOf("?");
+        		if(index ==-1)
+        		{
+        			
+        			count = fro_node.research(temp, 0,queries[i].length());
+        			answer[i] = count;
+        		}
+        		else
+        		{
+        			temp = temp.substring(0,index);
+        			
+        			count = fro_node.research(temp, 0,queries[i].length());
+        			answer[i] = count;
+        		}
+        	}else
+        	{
+        		index = temp.lastIndexOf("?");
+        		if(index ==-1)
+        		{
+        			count = bac_node.research_back(temp, 0, queries[i].length());
+        			answer[i] = count;
+        		}else
+        		{
+        			if(index != queries[i].length()-1)
+        			{
+        				temp = temp.substring(index+1,queries[i].length());
+            			count = bac_node.research_back(temp, temp.length()-1,queries[i].length());
+            			answer[i] = count;
+        			}else
+        			{
+        				temp = temp.substring(index,queries[i].length());
+        				count = bac_node.research_back(temp, 0,queries[i].length());
+            			answer[i] = count;
+        			}
+        			 
+        		}
+        	}
+        	if(!memory.containsKey(queries[i]))
+        	{
+        		memory.put(queries[i], count);
+        	}
+        }
+        
+        return answer;
+	}
+	class Node
+	{
+		Node[] arr = new Node[26];
+		char c;
+		int index =0;
+		int back_index =0;
+		int count =0;
+		HashMap<Integer, Integer> length_count = new HashMap<>();
+		public Node(String[] words,boolean a)
+		{
+			if(a)
+			{
+				for(int i=0; i<words.length;i++)
+				{
+					String word = words[i];
+					this.c = word.charAt(index);
+					this.count++;
+					
+					if(this.length_count.containsKey(word.length()))
+					{
+						int c = this.length_count.get(word.length());
+						this.length_count.replace(word.length(), c+1);
+					}else
+					{
+						length_count.put(word.length(), 1);
+					}
+					
+					if(this.arr[(int)word.charAt(index)-97]==null)
+					{
+						this.arr[(int)word.charAt(index)-97] = new Node(word, index+1,a);
+					}else
+					{
+						
+						this.arr[(int)word.charAt(index)-97].move(word, index+1,a);
+					}
+					
+				}
+			}else
+			{
+				for(int i=0; i<words.length;i++)
+				{
+					String word = words[i];
+					this.back_index = word.length()-1;
+					this.c = word.charAt(this.back_index);
+					this.count++;
+					
+					if(this.length_count.containsKey(word.length()))
+					{
+						int c = this.length_count.get(word.length());
+						this.length_count.replace(word.length(), c+1);
+					}else
+					{
+						length_count.put(word.length(), 1);
+					}
+					
+					if(this.arr[(int)word.charAt(this.back_index)-97]==null)
+					{
+						this.arr[(int)word.charAt(this.back_index)-97] = new Node(word, this.back_index-1,a);
+					}else
+					{
+						
+						this.arr[(int)word.charAt(this.back_index)-97].move(word, this.back_index-1,a);
+					}
+					
+				}
+
+			}
+			
+		}public Node(String word, int index, boolean a)
+		{
+			if(a)
+			{
+				this.count++;
+				if(this.length_count.containsKey(word.length()))
+				{
+					int c = this.length_count.get(word.length());
+					this.length_count.replace(word.length(), c+1);
+				}else
+				{
+					length_count.put(word.length(), 1);
+				}
+				if(word.length()!=index)
+				{	
+					this.index = index;
+					this.c = word.charAt(index);
+					if(this.arr[(int)word.charAt(index)-97]==null)
+					{
+						this.arr[(int)word.charAt(index)-97] = new Node(word,index+1,a);
+					}else
+					{
+						this.arr[(int)word.charAt(index)-97].move(word,index+1,a);
+					}
+				}
+			}
+			else
+			{
+				this.count++;
+				if(this.length_count.containsKey(word.length()))
+				{
+					int c = this.length_count.get(word.length());
+					this.length_count.replace(word.length(), c+1);
+				}else
+				{
+					length_count.put(word.length(), 1);
+				}
+				if(index!=-1)
+				{	
+					this.back_index = index;
+					
+					this.c = word.charAt(index);
+					if(this.arr[(int)word.charAt(index)-97]==null)
+					{
+						this.arr[(int)word.charAt(index)-97] = new Node(word,index-1,a);
+					}else
+					{
+						this.arr[(int)word.charAt(index)-97].move(word,index-1,a);
+					}
+				}
+			}
+		}
+		public void move(String word, int index, boolean a)
+		{
+			if(a)
+			{
+				this.count++;
+				if(this.length_count.containsKey(word.length()))
+				{
+					int c = this.length_count.get(word.length());
+					this.length_count.replace(word.length(), c+1);
+				}else
+				{
+					length_count.put(word.length(), 1);
+				}
+				if(word.length()!=index)
+				{
+					
+					if(this.arr[(int)word.charAt(index)-97]==null)
+					{
+						this.c = word.charAt(index);
+						this.arr[(int)word.charAt(index)-97] = new Node(word,index+1,a);
+					}
+					else
+					{
+						this.arr[(int)word.charAt(index)-97].move(word,index+1,a);
+					}
+				}
+			}
+			else
+			{
+				this.count++;
+				if(this.length_count.containsKey(word.length()))
+				{
+					int c = this.length_count.get(word.length());
+					this.length_count.replace(word.length(), c+1);
+				}else
+				{
+					length_count.put(word.length(), 1);
+				}
+				if(index!=-1)
+				{
+					if(this.arr[(int)word.charAt(index)-97]==null)
+					{
+						this.c = word.charAt(index);
+						this.arr[(int)word.charAt(index)-97] = new Node(word,index-1,a);
+					}
+					else
+					{
+						this.arr[(int)word.charAt(index)-97].move(word,index-1,a);
+					}
+				}
+			}
+
+		}
+		public int research(String word, int index, int origin)
+		{
+			int a = 0;
+			if(index < word.length())
+			{
+				if(this.arr[(int)word.charAt(index)-97]!=null)
+				{
+					a= this.arr[(int)word.charAt(index)-97].research(word, index+1,origin);
+				}else
+				{
+					a = 0;
+				}
+			
+			}else
+			{
+				if(this.length_count.containsKey(origin))
+				{
+					return this.length_count.get(origin);
+				}
+				else
+				{
+					a =0;
+				}
+			}
+			return a;
+		}
+		public int research_back(String word, int index,int origin)
+		{
+			int a = 0;
+			if(index >= 0)
+			{
+				if(word.charAt(index)=='?')
+				{
+					if(this.length_count.containsKey(origin))
+					{
+						return this.length_count.get(origin);
+					}else
+					{
+						a = 0;
+					}
+				}
+				else if(this.arr[(int)word.charAt(index)-97]!=null)
+				{
+					a= this.arr[(int)word.charAt(index)-97].research_back(word, index-1, origin);
+				}
+				else
+				{
+					a = 0;
+				}
+			}else
+			{
+				if(this.length_count.containsKey(origin))
+				{
+					return this.length_count.get(origin);
+				}else
+				{
+					a = 0;
+				}
+			
+			}
+			return a;
+		}
+	}
+}

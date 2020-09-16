@@ -1,0 +1,283 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+class Solution {
+  	 public int solution(int[][] board) {
+	        int answer = 0;
+	        int horizontal = board.length;
+	        int vertical = board[0].length;
+	        Map<Integer,figure_data> figure_map = new HashMap<Integer,figure_data>();
+	        for(int i=0; i<vertical; i++)
+	        {
+	        	for(int j=0; j<horizontal;j++)
+	        	{
+	        		if(board[i][j]!=0)
+	        		{
+	        			if(figure_map.containsKey(board[i][j]))
+	        			{
+	        				figure_data data = figure_map.get(board[i][j]);
+	        				data.last_index_checking(i);
+	        				data.position_insert(i,j);
+	        				data.case_insert();
+	        				data.case_check();
+	        				figure_map.replace(board[i][j],data);
+	        			}
+	        			else
+	        			{
+	        				figure_data data = new figure_data();
+	        				data.position_insert(i,j);
+	        				data.case_insert();
+	        				data.ranking[0] = i;
+	        				data.ranking[1] = j;
+	        				figure_map.put(board[i][j], data);
+	        			}
+	        		}
+	        	}
+	        }
+	       
+	        List<Map.Entry<Integer,figure_data>> list = new ArrayList(figure_map.entrySet());
+	       
+	        Collections.sort(list, new Comparator<Map.Entry<Integer, figure_data>>()
+	        {
+	        	public int compare(Map.Entry<Integer,figure_data> o1, Map.Entry<Integer,figure_data>o2)
+	        	{
+
+	        		if(o1.getValue().ranking[0] < o2.getValue().ranking[0])
+	        		{
+	        			return -1;
+	        		}else if(o1.getValue().ranking[0] == o2.getValue().ranking[0]) 
+	        		{
+	        			if(o1.getValue().figure_case[1] > o2.getValue().figure_case[1])
+	        			{
+	        				return -1;
+	        			}
+	        		}
+	        		else if(o1.getValue().ranking[0] > o2.getValue().ranking[0])
+	        		{
+	        			return 1;
+	        		}
+	        		return 0;
+	        	}
+	        });
+
+    	 for(int i=0; i<list.size();i++)
+    	 {
+    		
+    		 if(list.get(i).getValue().possibility)
+    		 {
+
+    			 int temp_arr[] = list.get(i).getValue().figure_case;
+    			 if((temp_arr[0]==1 && temp_arr[1]==3 && temp_arr[2]==0))
+    			 {
+    				 int[][] temp_arr_two = list.get(i).getValue().position;
+    				 if(temp_arr_two[0][1]==temp_arr_two[1][1])
+    				 {
+    					 int[] check_arr = new int[2];
+    					 check_arr[0] = temp_arr_two[0][1]+1;
+    					 check_arr[1] = temp_arr_two[0][1]+2;
+    					 int check_num = temp_arr_two[0][0];
+    					 boolean possi = true;
+    					 for(int h = 0; h<=temp_arr_two[0][0]; h++)
+    					 {
+    						 if(board[h][check_arr[0]]!=0 || board[h][check_arr[1]]!=0)
+    						 {
+
+    							 possi = false;
+    							 break;
+    						 }
+    					 }
+    					 if(possi)
+    					 {
+    						 answer++;
+    						 for(int q =0; q<4; q++)
+        					 {
+        						 board[temp_arr_two[q][0]][temp_arr_two[q][1]] = 0;
+        					 }
+    					 }
+    					 
+    					 
+    				 }
+    				 else if(temp_arr_two[0][1]==temp_arr_two[2][1])
+    				 {
+    					
+    					 int[] check_arr = new int[2];
+    					 check_arr[0] = temp_arr_two[0][1]-1;
+    					 check_arr[1] = temp_arr_two[0][1]+1;
+    					 int check_num = temp_arr_two[0][0];
+    					 boolean possi = true;
+    					 for(int h = 0; h<=temp_arr_two[0][0]; h++)
+    					 {
+    						 if(board[h][check_arr[0]]!=0 || board[h][check_arr[1]]!=0)
+    						 {
+
+    							 possi = false;
+    							 break;
+    						 }
+    					 }
+    					 if(possi)
+    					 {
+
+    						 answer++;
+    						 for(int q =0; q<4; q++)
+        					 {
+    							 
+        						 board[temp_arr_two[q][0]][temp_arr_two[q][1]] = 0;
+        					 }
+    					 }
+
+    				 }
+    				 else if(temp_arr_two[0][1]==temp_arr_two[3][1])
+    				 {
+    					
+    					 int[] check_arr = new int[2];
+    					 check_arr[0] = temp_arr_two[0][1]-2;
+    					 check_arr[1] = temp_arr_two[0][1]-1;
+    					
+    					 int check_num = temp_arr_two[0][0];
+    					 boolean possi = true;
+    					 for(int h = 0; h<=temp_arr_two[0][0]; h++)
+    					 {
+    						 if(board[h][check_arr[0]]!=0 || board[h][check_arr[1]]!=0)
+    						 {
+    							 possi = false;
+    							 break;
+    						 }
+    					 }
+    					 if(possi)
+    					 {
+	 answer++;
+    						 for(int q =0; q<4; q++)
+        					 {
+        						 board[temp_arr_two[q][0]][temp_arr_two[q][1]] = 0;
+        					 }
+    					 }
+    					
+    					 
+    				 }
+    			 }	
+    			 else if ((temp_arr[0]==1 && temp_arr[1]==1 && temp_arr[2]==2) )
+    			 {
+    				 int[][] temp_arr_two = list.get(i).getValue().position;
+    				 if(temp_arr_two[0][1]==temp_arr_two[2][1])
+    				 {
+    					 
+    					 int check_num = temp_arr_two[0][1]+1;
+    					 boolean possi = true;
+    					 
+    					 for(int h = 0; h<temp_arr_two[3][0]; h++)
+    					 {
+    						 
+    						 if(board[h][check_num]!=0)
+    						 {
+    							 possi = false;
+    							
+    							 break;
+    						 }
+    					 }
+    					 if(possi)
+    					 {
+    						 answer++;
+    						 for(int q =0; q<4; q++)
+        					 {
+        						 board[temp_arr_two[q][0]][temp_arr_two[q][1]] = 0;
+        					 }
+    						 
+    					 }
+
+    				 }else
+    				 {
+    					 int check_num = temp_arr_two[0][1]-1;
+    					 boolean possi = true;
+    					 for(int h = 0; h<temp_arr_two[2][0]; h++)
+    					 {
+    						 if(board[h][check_num]!=0)
+    						 {
+    							 possi = false;
+    							 break;
+    						 }
+    					 }
+    					 if(possi)
+    					 {
+    						 answer++;
+    						 for(int q =0; q<4; q++)
+        					 {
+        						 board[temp_arr_two[q][0]][temp_arr_two[q][1]] = 0;
+        					 }
+    					 }
+    				 }
+    			 }
+    		}	 
+    		 
+    	 }
+	        return answer;
+	    }
+	 public static void print_block(int[][] board)
+	 {
+		 for(int i=0; i<board.length;i++)
+		 {
+			 for(int j=0; j<board[i].length;j++)
+			 {
+				 if(board[i][j]!=0)
+					 System.out.print(board[i][j]);
+				 else
+					 System.out.print(" ");
+			 }
+			 System.out.println();
+		 }
+	 }
+	 class figure_data 
+	 {
+		 int[] figure_case = {0,0,0};
+		 int last_index = 0;
+		 int position[][] = new int[4][2];
+		 int position_index =0;
+		 boolean possibility = false;
+		 int[] ranking = new int[2];
+		 
+		
+		 
+		 public void last_index_checking(int y)
+		 {
+			 if(this.position[position_index-1][0]!=y&&position_index!=0)
+			 {
+
+				 this.last_index++;
+			 }
+		 }
+		 public void case_insert()
+		 {
+			 this.figure_case[last_index]++;
+		 }
+		 public void position_insert(int i, int j)
+		 {
+			 this.position[position_index][0] = i;
+			 this.position[position_index][1] = j;
+
+			 if(this.position_index!=3)
+			 {
+				 this.position_index++; 
+			 }
+			
+		 }
+		 public void case_check()
+		 {
+			 if(position_index==3)
+			 {
+				 if((figure_case[0]==1 && figure_case[1]==3 && figure_case[2]==0) || (figure_case[0]==1 && figure_case[1]==1 && figure_case[2]==2) )
+				 {
+					 this.possibility = true;
+				 }else
+				 {
+					 this.possibility = false;
+				 } 
+			 }
+			 
+		 }
+
+	 }
+	  
+}

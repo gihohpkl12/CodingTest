@@ -1,0 +1,201 @@
+import java.util.ArrayList;  
+import java.util.Comparator;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Arrays;
+class Solution {
+public int solution(int n, int[] weak, int[] dist) {
+        int answer = -1;
+        ArrayList<ArrayList<Integer>> distence = new ArrayList<ArrayList<Integer>>();
+        ArrayList<ArrayList<Integer>> friend = new ArrayList<>();
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<Integer> temp_list = new ArrayList<>();
+        boolean[] point_check = new boolean[weak.length];
+        for(int i=0; i<dist.length;i++)
+        {
+        	list.add(dist[i]);
+        }
+        distence_make(weak,distence,n,point_check);       
+        make_permutation(list,temp_list,friend,0,dist.length);
+        int[] friend_count_arr = new int[distence.size()];
+
+       for(int i=0; i<distence.size(); i++)
+       {
+    	   ArrayList<Integer> temp = (ArrayList<Integer>)distence.get(i).clone();
+    	   for(int j=0; j<friend.size();j++)
+    	   {
+    		   ArrayList<Integer> weak_temp = (ArrayList<Integer>)temp.clone();
+    		   ArrayList<Integer> dist_temp = (ArrayList<Integer>)friend.get(j).clone();
+    		   boolean[] temp_check = point_check.clone();
+    		   
+    		   int friend_count =1;
+    		   int friend_count2 = dist_temp.size();
+    		   int friend_dist = dist_temp.get(0);
+    		   dist_temp.remove(0);
+   
+    		   int pre_weak = one_pull(weak_temp);
+    		   int cur_weak =one_pull(weak_temp);
+
+    		   int weak_dist = cur_weak - pre_weak;
+    		   if(weak_dist<0) weak_dist*=-1;
+    		   while(weak_dist!=0)
+    		   {
+    			   if(friend_dist > weak_dist)
+    			   {
+    				   friend_dist -= weak_dist;
+    				   if(dist_temp.size()==0)
+    				   {
+    					   break;
+    				   }
+    				   pre_weak = cur_weak;
+    				   cur_weak = one_pull(weak_temp);
+    				
+    				   if(cur_weak == -100)
+    				   {
+    					   break;
+    				   }
+    				   weak_dist = cur_weak - pre_weak;
+    	    		   if(weak_dist<0) weak_dist*=-1;
+    	    		   
+    			   }
+    			   else if(friend_dist == weak_dist)
+    			   {
+    				   
+    				   if(dist_temp.size()==0)
+    				   {
+                            int a = one_pull(weak_temp);
+    					   if(a==-100) pre_weak = a;
+    					   break;
+    				   }
+    				  
+    				   pre_weak = one_pull(weak_temp);
+    				   cur_weak = one_pull(weak_temp);
+    				   
+    				   if(pre_weak == -100)
+    				   {
+    					   break;
+    				   }else if(cur_weak ==-100)
+    				   {
+    					   if(dist_temp.size()!=0)
+    					   dist_temp.remove(0);
+    					   break;
+    				   }
+    				   friend_dist = dist_temp.get(0);
+    	    		   dist_temp.remove(0);
+    				   weak_dist = cur_weak - pre_weak;
+    	    		   if(weak_dist<0) weak_dist*=-1;
+    	    		   
+    				   
+    			   }
+    			   else if(friend_dist < weak_dist)
+    			   {
+    				   
+    				   if(dist_temp.size()==0)
+    				   {
+    					   break;
+    				   }
+    	    		   
+    	    		   pre_weak = cur_weak;
+    				   cur_weak = one_pull(weak_temp);
+   
+    				   if(cur_weak == -100)
+    				   {
+    					   if(dist_temp.size()!=0)
+    					   dist_temp.remove(0);
+    					   break;
+    				   }
+    				   friend_dist = dist_temp.get(0);
+    	    		   dist_temp.remove(0);
+    				   weak_dist = cur_weak - pre_weak;
+    	    		   if(weak_dist<0) weak_dist*=-1;
+    			   }
+    		   }
+    		   if(pre_weak == -100 || cur_weak == -100)
+    		   {
+                   friend_count = friend_count2 - dist_temp.size();
+    			   if(friend_count_arr[i]==-1 || friend_count_arr[i] == 0 || friend_count_arr[i]>friend_count)
+    			   friend_count_arr[i] = friend_count2 - dist_temp.size();
+    		   }else
+    		   {
+    			   if(friend_count_arr[i]==0) friend_count_arr[i] = -1;
+    			   
+    		   }
+    	   }
+       }
+        answer = 1000000;
+        int min = friend_count_arr[0];
+        for(int i=0; i<friend_count_arr.length; i++)
+        {
+        	if(friend_count_arr[i]!=-1 && min>=friend_count_arr[i] || min==-1)
+        		{
+        			
+        			min = friend_count_arr[i];
+        			answer = min;
+        		}
+        }
+       
+     return answer;
+    }
+	public static int one_pull(ArrayList<Integer>weak)
+	{
+		if(weak.size()==0) return -100;
+		int point = weak.get(0);
+		weak.remove(0);
+
+		return point;
+	}
+	
+	public static void distence_make(int[] weak, ArrayList<ArrayList<Integer>> distence, int n,boolean[] point_check)
+	{
+		for(int i=0; i<weak.length; i++)
+		{
+			point_check[i] = false;
+			int start_index =i;
+			//int[] temp = new int[weak.length];
+			ArrayList<Integer> temp = new ArrayList<>();
+			for(int j=0; j<weak.length; j++)
+			{
+				//temp[j] = weak[start_index];
+				temp.add(j,weak[start_index]);
+				if(weak[i]>weak[start_index])
+				{
+					//temp[j] +=n; 
+					temp.set(j, temp.get(j)+n);
+				}
+				if(start_index < weak.length)
+				{
+					start_index++;
+				}
+				if(start_index == weak.length)
+				{
+					start_index = 0;
+				}
+			}
+			distence.add(i,temp);
+		}
+	}
+	public static void make_permutation( ArrayList<Integer> list,  ArrayList<Integer> temp_list,ArrayList<ArrayList<Integer>> friend, int index, int length)
+	{
+		if(index == length)
+		{
+			friend.add(temp_list);
+			return;
+		}
+		ArrayList<Integer> temp  = (ArrayList<Integer>)list.clone();
+		ArrayList<Integer> temp_list1 = (ArrayList<Integer>)temp_list.clone();
+		for(int i=0; i<temp.size(); i++)
+		{
+			if(index==temp_list1.size())
+			{
+				temp_list1.add(index,temp.get(i));
+			}else
+			{
+				temp_list1.set(index,temp.get(i));
+			}
+			temp.remove(i);
+			make_permutation(temp,temp_list1,friend,index+1,length);
+			temp.add(i,temp_list1.get(index));
+		}
+
+	}
+}

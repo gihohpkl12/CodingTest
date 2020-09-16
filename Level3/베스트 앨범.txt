@@ -1,0 +1,82 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+
+class Solution {
+    public int[] solution(String[] genres, int[] plays) {
+        int[] answer;
+        HashMap<String,ArrayList<song>> play = new HashMap<>();
+        ArrayList<Integer> answerlist = new ArrayList<>();
+        for(int i =0; i<genres.length; i++)
+        {
+            if(play.containsKey(genres[i]))
+            {
+            	ArrayList<song> templist = play.get(genres[i]);
+            	song temp = templist.get(0);
+            	song temp2 = new song(plays[i],i);
+            	templist.add(temp2);
+            	temp.max += plays[i];
+            	templist.set(0, temp);
+            	play.replace(genres[i], templist);
+            }
+            else
+            {
+            	ArrayList<song> templist = new ArrayList<>();
+            	song temp = new song(plays[i]);
+            	song temp2 = new song(plays[i],i);
+            	templist.add(temp);
+            	templist.add(temp2);
+            	play.put(genres[i], templist);
+            }
+        }
+        
+        ArrayList<Map.Entry<String, ArrayList<song>>> entry = new ArrayList<>(play.entrySet());
+        Collections.sort(entry, new Comparator<Map.Entry<String, ArrayList<song>> >() 
+        {
+        	public int compare(Map.Entry<String, ArrayList<song>> o1, Map.Entry<String, ArrayList<song>> o2)
+        	{
+        		return o2.getValue().get(0).max-o1.getValue().get(0).max;
+        	}
+        });
+        
+        for(int i =0; i<entry.size(); i++)
+        {
+        	ArrayList<song> temp = entry.get(i).getValue();
+        	temp.remove(0);
+        	Collections.sort(temp, new Comparator<song>()
+        	{
+        		public int compare(song o1, song o2)
+        		{
+        			return o2.count-o1.count;
+        		}
+        	});
+        	if(temp.size()>=2)
+        	{
+        		answerlist.add(temp.get(0).index);
+        		answerlist.add(temp.get(1).index);
+        	}else
+        		answerlist.add(temp.get(0).index);
+        }
+        answer = new int[answerlist.size()];
+        for(int i =0; i<answerlist.size(); i++)
+        	answer[i] = answerlist.get(i);
+        return answer;
+    }
+    class song 
+    {
+        int count;
+        int index;
+        int max;
+        public song(int count, int index)
+        {
+            this.count = count;
+            this.index = index;
+        }
+        public song(int max)
+        {
+        	this.max = max;
+        }
+    }
+}

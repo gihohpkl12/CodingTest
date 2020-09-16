@@ -1,0 +1,21 @@
+class Solution {
+  public int solution(int[] money) 
+	{
+		int[] steal1 = new int[money.length], steal2 = new int[money.length];
+		steal1[0] = money[0]; steal1[1] = money[0]; steal2[0] = 0; steal2[1] = money[1];
+		for(int i = 2; i<money.length; i++)
+		{
+			if(i!=money.length-1)
+			{
+				steal1[i] = steal1[i-2]+money[i] > steal1[i-1] ? steal1[i-2]+money[i] : steal1[i-1];
+				steal2[i] = steal2[i-2]+money[i] > steal2[i-1] ? steal2[i-2]+money[i] : steal2[i-1];
+			}
+			else
+			{
+				steal2[i] = steal2[i-2]+money[i] > steal2[i-1] ? steal2[i-2]+money[i] : steal2[i-1];
+				steal1[i] = steal1[i-1];
+			}
+		}
+		return steal1[steal1.length-1] > steal2[steal1.length-1] ? steal1[steal1.length-1] : steal2[steal1.length-1];
+	}
+}

@@ -1,0 +1,106 @@
+import java.util.HashMap;
+class Solution {
+    HashMap<Integer, Integer> list;
+    public int solution(int N, int number) {
+        int answer = -1;
+        list = new HashMap<>();
+        String N_temp = Integer.toString(N)+Integer.toString(N);
+        init(N,N_temp);
+        N_temp += Integer.toString(N);
+        for(int i =3; i<=8; i++)
+        {
+            int[][] temp_list = new int[list.size()][2];
+            int index = 0;
+            for(int key : list.keySet())
+            {
+                temp_list[index][0] =key;
+                temp_list[index][1] =list.get(key);
+                index++;
+            }
+            for(int j = 0; j<temp_list.length; j++)
+            {
+                int temp_N = temp_list[j][0];
+                int temp_count = temp_list[j][1];
+                for(int k=0; k<temp_list.length; k++)
+                {
+                    if(temp_count+temp_list[k][1]>8) continue;
+                    int key = temp_N*temp_list[k][0];
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+
+                    key = temp_N+temp_list[k][0];
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+
+                    key = temp_N-temp_list[k][0];
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+
+                    key = temp_list[k][0]-temp_N;
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+
+                    if(temp_N==0) continue;
+                    key = temp_list[k][0]/temp_N;
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+
+                    if(temp_list[k][0]==0) continue;
+                    key = temp_N/temp_list[k][0];
+                    if(list.containsKey(key))
+                    {
+                        int count = list.get(key);
+                        count = count < temp_list[k][1]+temp_count ? count : temp_list[k][1]+temp_count;
+                        list.replace(key, count);
+                    }
+                    else
+                        list.put(key, temp_count+temp_list[k][1]);
+                }
+            }
+            list.put(Integer.parseInt(N_temp),i);
+            N_temp += Integer.toString(N);
+        }
+        if(list.containsKey(number)) answer = list.get(number);
+        return answer;
+    }
+    public void init(int N, String N_temp)
+    {
+        list.put(N*N,2);
+        list.put(N+N,2);
+        list.put(N-N,2);
+        list.put(N/N,2);
+        list.put(N,1);
+        list.put(Integer.parseInt(N_temp),2);
+    }
+
+}

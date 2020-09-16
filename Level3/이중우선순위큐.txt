@@ -1,0 +1,50 @@
+import java.util.PriorityQueue;
+import java.util.ArrayList;
+class Solution {
+    public int[] solution(String[] operations) {
+        int[] answer = {0,0};
+        PriorityQueue<Integer> Q = new PriorityQueue<>();
+        for(String i : operations)
+        {
+            if(i.substring(0,1).equals("I"))
+                Q.offer(Integer.parseInt(i.replace("I","").replace(" ", "")));
+            else if(i.equals("D -1"))
+            {
+                if(Q.size()!=0)
+                	Q.poll();
+            }else if(i.equals("D 1"))
+            {
+                if(Q.size()!=0)
+                	max(Q);
+            }
+        }
+        if(Q.size()>1)
+        {
+            answer[0] = max(Q)+1;
+            answer[1] = Q.poll();
+        }else if(Q.size()==1)
+        {
+            int num = Q.poll();
+            if(num>0)
+                answer[0] = num;
+            else
+                answer[1] = num;
+        }
+        return answer;
+    }
+    public int max(PriorityQueue<Integer> Q)
+    {
+    	int max = Q.size();
+    	ArrayList<Integer> list = new ArrayList<>();
+    	while(Q.size()!=0)
+    	{
+    		if(max==1)
+    			max = Q.poll();
+    		else
+    			list.add(Q.poll());
+    		max--;
+    	}
+    	Q.addAll(list);
+    	return max;
+    }
+}

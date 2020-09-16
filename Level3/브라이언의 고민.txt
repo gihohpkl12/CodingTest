@@ -1,0 +1,91 @@
+import java.util.LinkedHashMap; 
+class Solution {
+public String solution(String sentence)
+	{
+		String answer ="";
+		LinkedHashMap<String,int[]> map_index = new LinkedHashMap<>(); 
+		LinkedHashMap<String,Integer> map_count = new LinkedHashMap<>();
+		LinkedHashMap<String,int[]> map_index_inner = new LinkedHashMap<>();
+		int[] arr = new int[sentence.length()];
+		for(int i =0; i<sentence.length(); i++)
+		{
+			if(sentence.substring(i,i+1).charAt(0)<'A' || sentence.substring(i,i+1).charAt(0)>'Z')
+			{
+				int[] index = new int[2];
+				index[0] = i;
+				index[1] = sentence.lastIndexOf(sentence.substring(i,i+1));
+				
+				map_index.put(sentence.substring(i,i+1), index);
+				if(index[0]!=index[1])
+					map_count.put(sentence.substring(i,i+1), 2);
+				else
+					map_count.put(sentence.substring(i,i+1), 1);
+				int count =0;
+				for(int j =index[0]+1; j<index[1]; j++)
+				{
+					if(sentence.substring(j,j+1).charAt(0)<'A' || sentence.substring(j,j+1).charAt(0)>'Z')
+					{
+						if(map_count.containsKey(sentence.substring(j,j+1)))
+							map_count.replace(sentence.substring(j,j+1), map_count.get(sentence.substring(j,j+1))+1);
+						else
+						{
+							map_count.put(sentence.substring(j,j+1), 1);
+							count++;
+							if(count>=2)
+							{
+								answer = "invalid";
+								return answer;
+							}
+						}
+						if(!map_index_inner.containsKey(sentence.substring(j,j+1)))
+						{
+							int[] index2 = new int[2];
+							index2[0] = j;
+							index2[1] = sentence.lastIndexOf(sentence.substring(j,j+1));
+							map_index_inner.put(sentence.substring(j,j+1), index2);
+						}		
+					}
+				}
+				i = index[1];
+			}
+		}
+		for(String i : map_index.keySet())
+		{
+			int start = map_index.get(i)[0];
+			int end = map_index.get(i)[1];
+			if(map_count.get(i)==2)
+				sentence = sentence.replace(i," ");
+
+			else if(map_count.get(i)==1)
+			{
+				if(end-start!=0)
+					return "invalid";
+				else if(end-start ==0)
+				{
+					start = sentence.indexOf(i)-1;
+					sentence = sentence.substring(0,start)+" "+sentence.substring(start,sentence.length());
+					end = sentence.lastIndexOf(i)+1;
+					sentence = sentence.substring(0,end+1)+" "+sentence.substring(end+1,sentence.length());
+					sentence = sentence.replace(i, "*");
+				}
+			}
+			else if(map_count.get(i)>2)
+			{
+				start = sentence.indexOf(i)-1;
+				sentence = sentence.substring(0,start)+" "+sentence.substring(start,sentence.length());
+				end = sentence.lastIndexOf(i)+1;
+				sentence = sentence.substring(0,end+1)+" "+sentence.substring(end+1,sentence.length());
+				sentence = sentence.replace(i, "*");	
+			}
+		}
+		for(String i : map_index_inner.keySet())
+			sentence = sentence.replace(i, "*");
+		sentence = sentence.replace("*",""); 
+		sentence = sentence.replace("  ", " ");
+		sentence = sentence.replace("  ", " ");
+        answer = sentence;
+        answer = answer.trim();
+    
+		return answer;
+	}
+}

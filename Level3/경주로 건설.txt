@@ -1,0 +1,97 @@
+import java.util.Queue;
+import java.util.LinkedList;
+class Solution {
+    public int solution(int[][] board) {
+        int answer = Integer.MAX_VALUE;
+        Queue<car> Q = new LinkedList<>();
+        Q.add(new car(0,board.length));
+        int[] move = {1,2,3,4};
+        int[][] moneyBoard = new int[board.length][board.length];
+        while(Q.size()!=0)
+        {
+        	car car = Q.poll();
+        	if(moneyBoard[car.i][car.j]!=0 && moneyBoard[car.i][car.j] < car.money()) continue;
+        	if(car.i == board.length-1 && car.j == board.length-1)
+        	{
+        		answer = car.money() < answer ? car.money() : answer;
+        		continue;
+        	}
+        	for(int I : move)
+        	{
+        		int i = car.i, j = car.j;
+        		if(I ==1 )
+        			i-=1;
+        		else if(I == 2)
+        			i+=1;
+        		else if(I==3)
+        			j +=1;
+        		else if(I==4)
+        			j-=1;
+        		if(car.rangecheck(i, j) && car.mapcheck(i, j))
+        		{
+        			if(board[i][j]==1) continue;
+        			car save = new car(car, car.map);
+        			save.move(i, j);
+        			save.map[i][j] = true;
+        			if(car.dir==0)
+        			{
+        				save.straight+=1;
+        				save.dir = I;
+        			}
+        			else if(car.dir == I)
+        				save.straight+=1;
+        			else if(car.dir!=I)
+        				save.curve+=1;
+        			save.dir = I;
+        			Q.add(save);
+        			if(moneyBoard[save.i][save.j]==0)
+        				moneyBoard[save.i][save.j] = save.money();
+        			else
+        				moneyBoard[save.i][save.j] = moneyBoard[save.i][save.j]>save.money() ? save.money() : moneyBoard[save.i][save.j];
+        		}
+        	}
+        }
+        return answer;
+    }
+	class car
+	{
+		int dir, curve, straight, i, j;
+		boolean[][] map;
+		public car(int dir, int len)
+		{
+			this.dir = 0;
+			this.map = new boolean[len][len];
+			this.i = 0; this.j = 0;
+			map[0][0] = true;
+		}
+		public car(car cp, boolean[][] map)
+		{
+			this.dir = cp.dir;
+			this.curve = cp.curve;
+			this.straight = cp.straight;
+			this.map = new boolean[map.length][map.length];
+			for(int i = 0; i< this.map.length; i++)
+				this.map[i] = map[i].clone();
+			
+		}
+		public boolean mapcheck(int i, int j)
+		{
+			if(this.map[i][j])
+				return false;
+			return true;
+		}
+		public int money()
+		{
+			return (this.straight+this.curve)*100 + this.curve*500;
+		}
+		public boolean rangecheck(int i, int j)
+		{
+			if(i<0 || i>=this.map.length || j<0 || j>=this.map.length) return false;
+			return true;
+		}
+		public void move(int i, int j)
+		{
+			this.i = i; this.j = j;
+		}
+	}
+}

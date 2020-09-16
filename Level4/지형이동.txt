@@ -1,0 +1,90 @@
+import java.util.Queue;
+import java.util.Comparator;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Arrays;
+class Solution {
+ int[] parents;
+	public int solution(int[][] land, int height)
+	{
+		int[][] region = new int[land.length][land.length], move = {{1,0},{0,-1},{0,1},{-1,0}};
+		int regionNum = 0, answer = 0;
+		Queue<int[]> Q = new LinkedList<>();
+		ArrayList<save> ladderList = new ArrayList<>();
+
+		for(int i = 0; i<land.length; i++)
+		{
+			for(int j = 0; j<land.length; j++)
+			{
+				if(region[i][j]>=1) continue;
+				Q.add(new int[] {i,j});
+				regionNum++;
+				region[i][j] = regionNum;
+				while(Q.size()!=0)
+				{
+					int[] temp = Q.poll();
+					int x = temp[0], y = temp[1];
+					for(int[] m : move)
+					{
+						int nx = x+m[0], ny = y+m[1];
+						if(nx >= 0 && nx <= land.length-1 && ny >= 0 && ny <= land.length-1)
+						{
+							int value = Math.abs(land[x][y]-land[nx][ny]);
+							if(value<=height && region[nx][ny]<1)
+							{
+								region[nx][ny] = regionNum;
+								Q.add(new int[] {nx,ny});
+							}else if(value>height && region[nx][ny]!=region[x][y] && region[nx][ny]>=1)
+								ladderList.add(new save(region[x][y],region[nx][ny], value));
+						}
+					}
+				}
+			}
+		}
+		parents = new int[regionNum+1];
+		for(int i =0; i<parents.length; i++)
+			parents[i] = i;
+		Collections.sort(ladderList, new Comparator<save>() 
+		{
+			public int compare(save o1, save o2)
+			{
+				return o1.value - o2.value;
+			}
+		});
+		while(ladderList.size()!=0) {
+            save temp = ladderList.get(0);
+            ladderList.remove(0);
+            if(regionNum==1) break;
+            if(union(temp.start, temp.end)) {
+                answer += temp.value;
+                regionNum--;
+            }
+        }
+		return answer;
+	}
+	class save
+	{
+		int start, end;
+		int value;
+		public save(int x, int y, int value)
+		{
+			this.start = x; this.end = y; this.value = value; 
+		}
+	}
+	 int find(int u) {
+	        if(u == parents[u]) {
+	            return u;
+	        }
+	        return parents[u] = find(parents[u]);
+	    }
+	    boolean union(int u, int v) {
+	        u = find(u);
+	        v = find(v);
+	        if(u == v) {
+	            return false;
+	        }
+	        parents[u] = v;
+	        return true;
+	    }
+}

@@ -1,0 +1,25 @@
+class Solution {
+    public int solution(int n, int[] stations, int w) {
+        int answer = 0, start = 0, end = 0, index = 0;
+        for(int i =0; i<stations.length; i++)
+        {
+        	start = stations[i] - w >= 1 ? stations[i] - w : 1;
+        	end = stations[i] + w <= n ? stations[i] + w : n;
+        	int count = start - index-1 >=0 ? start - index-1 : 0;
+        	answer += count/(w*2+1);
+    		answer += count%(w*2+1)!=0 ? 1 : 0;
+    		index = end;
+    		//System.out.println("index "+index+" start "+start+" end "+end+" answer "+answer+" count "+count);
+    		if(i == stations.length-1)
+    		{
+    			if(index<n)
+    			{
+    				count = n - index;
+    				answer += count/(w*2+1);
+    	    		answer += count%(w*2+1)!=0 ? 1 : 0;
+    			}
+    		}
+        }
+        return answer;
+    }
+}

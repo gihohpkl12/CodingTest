@@ -1,0 +1,198 @@
+import java.util.Queue;  
+import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
+class Solution {
+ public int solution(int[][] board) {
+        int answer = 0;
+        int N = board.length;
+        Queue<int[]> Q = new LinkedList<int[]>(); 
+        answer = bfs(Q,board,N);
+        //ArrayList<Integer> a = bfs(Q,board,N);
+        //Collections.sort(a);
+
+        return answer;
+    }
+	public static int bfs(Queue<int[]> Q, int[][] board, int N)
+	{
+		
+		boolean[][][] polled = new boolean[N][N][2];
+		ArrayList<Integer> a = new ArrayList<>();
+		polled[0][0][0] = true; polled[0][1][0] = true;
+		int[] start = {0,0,0,1,0,0};
+		int[] move_x = {-1,1,0,0};
+		int[] move_y = {0,0,1,-1};
+	    Q.add(start);
+	    while(!Q.isEmpty())
+	    {
+	    	//System.out.println("Q`s size "+Q.size());
+	    	int[] temp = Q.poll();
+			int x1 = temp[0], y1= temp[1], x2 = temp[2], y2 = temp[3], count = temp[4], type = temp[5]; 
+	    	// move 0: up, 1: down, 2: right, 3: left
+			
+			if( (x1 == N-1 && y1 == N-1) || (x2 == N-1 && y2 == N-1) )
+			{
+				
+				return count;
+			}
+			//System.out.println("check "+x1+""+y1+" "+x2+""+y2+" type "+type);
+	    	for(int i=0; i<4; i++)
+	    	{
+	    		
+	    		int x_o = x1 + move_x[i], y_o = y1 + move_y[i], x_t = x2 + move_x[i], y_t = y2 + +move_y[i];
+	    		
+	    		if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board))
+	    		{
+	    			
+	    			if(polled[x_o][y_o][type]==false || polled[x_t][y_t][type]==false) 
+	    			{
+	    				//System.out.println("   in move 2) "+x_o+""+y_o+" "+x_t+""+y_t);
+	    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,type};
+	    				polled[x_o][y_o][type] = true;
+	    				polled[x_t][y_t][type] = true;
+	    				Q.add(temp2);
+	    				
+	    			}else continue;
+	    		}else continue;		
+	    	}
+	    	// turn by 1
+	    		// horizontal
+	    	if(x1 == x2)
+	    	{
+	    		// turn by up
+	    		int x_o = x1, x_t = x1-1,y_o = y1, y_t = y1;
+	    		if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board)  && check_turn(x2-1,y2,board) )
+	    		{
+	    			if(polled[x_o][y_o][1]==false || polled[x_t][y_t][1]==false)
+	    			{
+	    				//System.out.println("   in turn 2) "+x_o+""+y_o+" "+x_t+""+y_t);
+		    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,1};
+		    				polled[x_o][y_o][1] = true;
+		    				polled[x_t][y_t][1] = true;
+		    				Q.add(temp2);
+		    				
+		    			
+	    			}
+	    		}
+	    		 x_o = x1; x_t = x1+1; y_o = y1; y_t = y1;
+	    		 if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board)  && check_turn(x2+1,y2,board) )
+		    		{
+	    			 if(polled[x_o][y_o][1]==false || polled[x_t][y_t][1]==false)
+		    			{
+		    				//System.out.println("   in turn 2) "+x_o+""+y_o+" "+x_t+""+y_t);
+			    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,1};
+			    				polled[x_o][y_o][1] = true;
+			    				polled[x_t][y_t][1] = true;
+			    				Q.add(temp2);
+		    			}
+		    		}
+	    		
+	    	}
+	    		//vertical
+	    	else
+	    	{
+	    		//left
+	    		int x_o = x1, x_t = x1,y_o = y1, y_t = y1-1;
+	    		if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board) && check_turn(x2,y2-1,board))
+	    		{
+	    			if(polled[x_o][y_o][0]==false || polled[x_t][y_t][0]==false)
+	    			{
+	    				//System.out.println("   in turn 2) "+x_o+""+y_o+" "+x_t+""+y_t);
+		    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,0};
+		    				polled[x_o][y_o][0] = true;
+		    				polled[x_t][y_t][0] = true;
+		    				Q.add(temp2);
+		    				
+		    			
+	    			}
+	    		}
+	    		 x_o = x1; x_t = x1; y_o = y1; y_t = y1+1;
+	    		 if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board) && check_turn(x2,y2+1,board))
+		    		{
+		    			 if(polled[x_o][y_o][0]==false || polled[x_t][y_t][0]==false)
+		    			{
+			    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,0};
+			    				polled[x_o][y_o][0] = true;
+			    				polled[x_t][y_t][0] = true;
+			    				Q.add(temp2);
+		    			}
+		    		}
+	    	}
+	    	
+	    	if(x1 == x2)
+	    	{
+	    		int x_o = x2-1, x_t = x2,y_o = y2, y_t = y2;
+	    		if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board) && check_turn(x1-1,y1,board))
+	    		{
+	    			if(polled[x_o][y_o][1]==false || polled[x_t][y_t][1]==false)
+	    			{
+	    				
+		    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,1};
+		    				polled[x_o][y_o][1] = true;
+		    				polled[x_t][y_t][1] = true;
+		    				Q.add(temp2);	
+	    			}
+	    		}
+	    		 x_o = x2+1; x_t = x2; y_o = y2; y_t = y2;
+	    		 if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board) && check_turn(x1+1,y1,board))
+		    		{
+	    			 if(polled[x_o][y_o][1]==false || polled[x_t][y_t][1]==false)
+		    			{
+		    				
+			    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,1};
+			    				polled[x_o][y_o][1] = true;
+			    				polled[x_t][y_t][1] = true;
+			    				Q.add(temp2);
+		    			}
+		    		}
+	    		
+	    	}
+	    		//vertical
+	    	else
+	    	{
+	    		//left
+	    		int x_o = x2, x_t = x2,y_o = y2-1, y_t = y2;
+	    		if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board)&& check_turn(x1,y1-1,board))
+	    		{
+	    			if(polled[x_o][y_o][0]==false || polled[x_t][y_t][0]==false)
+	    			{
+	    				//System.out.println("   in turn 2) "+x_o+""+y_o+" "+x_t+""+y_t);
+		    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,0};
+		    				polled[x_o][y_o][0] = true;
+		    				polled[x_t][y_t][0] = true;
+		    				Q.add(temp2);
+		    				
+		    			
+	    			}
+	    		}
+	    		 x_o = x2; x_t = x2; y_o = y2+1; y_t = y2;
+	    		 if(check_range(x_o,y_o,x_t,y_t,board) && check_obstacle(x_o,y_o,x_t,y_t,board) && check_turn(x1,y1+1,board))
+		    		{
+	    			 if(polled[x_o][y_o][0]==false || polled[x_t][y_t][0]==false)
+		    			{
+			    				int temp2[] = {x_o,y_o,x_t,y_t,count+1,0};
+			    				polled[x_o][y_o][0] = true;
+			    				polled[x_t][y_t][0] = true;
+			    				Q.add(temp2);
+		    			}
+		    		}
+	    	}
+	    }
+		return 0;
+	}
+	public static boolean check_obstacle(int x1, int y1, int x2, int y2, int[][] board)
+	{
+		return board[x1][y1] == 0 && board[x2][y2] == 0;
+	}
+	public static boolean check_turn(int x1, int y1, int[][] board)
+	{
+		return board[x1][y1] == 0;
+	}
+	public static boolean check_range(int x1, int y1, int x2, int y2, int[][] board)
+	{
+		int N = board.length;
+		return x1>=0 && y1>=0 && x2>=0 && y2>=0 && x1<N && y1<N && x2<N && y2<N;
+	}
+
+}

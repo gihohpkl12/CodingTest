@@ -1,0 +1,38 @@
+import java.util.Stack; 
+class Solution {
+      public int solution(int n) {
+	        int answer = 0;
+	        Stack<sound> s = new Stack<>();
+	        s.add(new sound(0,n));
+	        while(s.size()>0)
+	        {
+	        	sound temp = s.pop();
+	        	if(temp.plus>0 && temp.height<Math.pow(3, temp.plus/2))
+	        		continue;
+	        	if(temp.height==1 && temp.plus==0)
+	        	{
+	        		answer++;
+	        		continue;
+	        	}
+	        	if(temp.height%3==0 && temp.plus>=2)
+	        	{
+	        		sound save = new sound(temp.plus-2, temp.height/3);
+	        		s.add(save);
+	        	}
+	        	temp.plus+=1;
+	        	temp.height-=1;
+	        	s.add(temp);
+	        }
+	        return answer;
+	    }
+	    class sound
+	    {
+	        int plus;
+	        long height;
+	        public sound(int plus, long height)
+	        {
+	            this.plus = plus;
+	            this.height = height;
+	        }
+	    }
+}

@@ -1,0 +1,108 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
+class Solution {
+    ArrayList<ArrayList<String>> total_list;
+	 public int solution(String[] user_id, String[] banned_id) {
+	        int answer = 1;
+	        ArrayList<ArrayList<String>> list = new ArrayList<>();
+	        HashMap<String, String> map = new HashMap<>();
+	        total_list = new ArrayList<>();
+	        
+	        for(int i =0; i<banned_id.length; i++)
+	        {
+	        	String id = banned_id[i];
+	        	ArrayList<String> temp = new ArrayList<>();
+	        	for(int j = 0; j< user_id.length; j++)
+	        	{
+	        		if(user_id[j].length()!= id.length())
+	        			continue;
+	        		else
+	        		{
+	        			if(check(id, user_id[j]))
+	        				temp.add(user_id[j]);
+	        		}
+	        	}
+	        	list.add(temp);
+	        }
+	        ArrayList<String> temp = new ArrayList<>();
+	        
+	        count(list,temp,0,map);
+	        remove(total_list);
+	        
+	        answer = total_list.size();
+	        return answer;
+	    }
+	 public boolean check(String o1, String o2)
+	 {
+		 boolean result = true;
+		 for(int i =0; i< o1.length(); i++)
+		 {
+			 if(o1.charAt(i)=='*')
+				 continue;
+			 else if(o1.charAt(i)!=o2.charAt(i))
+			 {
+				 result = false;
+				 break;
+			 }
+		 }
+		 return result;
+	 }
+	 public void count(ArrayList<ArrayList<String>> list,ArrayList<String> save, int index, HashMap<String,String> map2)
+	 {
+		 if(index==list.size())
+		 {
+			 total_list.add(save);
+			 return;
+		 }
+		 
+		 for(int i =0; i< list.get(index).size(); i++)
+		 {
+			 HashMap<String, String> temp_map = (HashMap)map2.clone();
+			 ArrayList<String> temp_save = (ArrayList<String>)save.clone();
+			 String temp_str = list.get(index).get(i);
+			 if(temp_map.containsKey(temp_str))
+				 continue;
+			 else
+			 {
+				 temp_map.put(temp_str, "");
+				 temp_save.add(temp_str);
+				 count(list, temp_save, index+1, temp_map);
+			 }
+		 }
+		 
+	 }
+	 
+	 public void remove(ArrayList<ArrayList<String>> list)
+	 {
+		 int index =0;
+		 while(index<list.size())
+		 {
+			 ArrayList<Integer> remove_list = new ArrayList<>();
+			 for(int i = index+1; i<list.size(); i++)
+			 {
+				 int count =0;
+				 for(String a : list.get(index))
+				 {
+					 
+					 if(list.get(i).contains(a))
+						 count++;
+					 else
+						 break;
+				 }
+				 if(count==list.get(index).size())
+					 remove_list.add(i);
+			 }
+			 if(remove_list.size()!=0)
+			 {
+				 for(int j =0; j<remove_list.size();j++)
+				 {
+					 int key = remove_list.get(j)-j;
+					 list.remove(key);
+				 }
+			 }
+			 index++;
+		 }
+
+	 }
+}

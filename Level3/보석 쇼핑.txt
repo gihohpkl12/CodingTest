@@ -1,0 +1,87 @@
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int[] solution(String[] gems) {
+        LinkedHashMap<String, ArrayList<Integer>> map = new LinkedHashMap<>();
+        ArrayList<ArrayList<Integer>> list = new ArrayList<>();
+        PriorityQueue<gem> Q = new PriorityQueue<>();
+        int[] type;
+        for(int i = 0; i< gems.length; i++)
+        {
+            if(!map.containsKey(gems[i]))
+            {
+                ArrayList<Integer> temp = new ArrayList<Integer>();
+                temp.add(i);
+                map.put(gems[i], temp);
+            }
+            else
+            {
+                ArrayList<Integer> temp = map.get(gems[i]);
+                temp.add(i);
+                map.replace(gems[i],temp);
+            }
+       }
+       type = new int[map.size()];
+       for(String i : map.keySet())
+           list.add(map.get(i));
+
+       for(int i = 0; i< list.size(); i++)
+       {
+           gem temp = new gem(i,list.get(i).get(0));
+           type[i] = temp.value;
+           list.get(i).remove(0);
+           Q.add(temp);
+       }
+       return range(Q,list,type);
+    }
+    public int[] range(PriorityQueue<gem> Q, ArrayList<ArrayList<Integer>> list, int[] type)
+    {
+        int[] answer = check(type);
+        int len = answer[1]-answer[0];
+        while(Q.size()!=0)
+        {
+            gem temp = Q.poll();
+            if(list.get(temp.index).size()!=0)
+            {
+                gem save = new gem(temp.index, list.get(temp.index).get(0));
+                list.get(temp.index).remove(0);
+                Q.add(save);
+                type[save.index] = save.value;
+                int[] arr = check(type);
+                if( (arr[1]-arr[0])<len )
+                {
+                    answer = arr;
+                    len = arr[1] - arr[0];
+                }
+            }
+
+        }
+        answer[0]+=1; answer[1]+=1;
+        return answer;
+    }
+    public int[] check(int[] type)
+    {
+        int max=Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+        for(int i : type)
+        {
+            max = i>max ? i : max;
+            min = i<min ? i : min;
+        }
+        return new int[] {min, max};
+    }
+    class gem implements Comparable<gem>
+    {
+        int index, value;
+        public gem(int index, int value)
+        {
+            this.index = index; this.value = value;
+        }
+        @Override
+        public int compareTo(gem temp)
+        {
+            return this.value - temp.value;
+        }
+    }
+}

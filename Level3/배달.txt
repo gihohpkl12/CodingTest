@@ -1,0 +1,80 @@
+import java.util.Queue;
+import java.util.LinkedList;
+class Solution {
+    public int solution(int N, int[][] road, int K) {
+        int answer = 0;
+        int[][] Road = new int[N+1][N+1];
+        boolean[] check = new boolean[N+1];
+        int[] timecheck = new int[N+1];
+        Queue<city> Q = new LinkedList<>();
+        
+        for(int i =0; i<road.length; i++)
+        {
+        	int start = road[i][0], end = road[i][1], time = road[i][2];
+        	if(Road[start][end]==0)
+        	{
+        		Road[start][end] = time;
+        		Road[end][start] = time;
+        	}else
+        	{
+        		if(Road[start][end]>time)
+        		{
+        			Road[start][end] = time;
+            		Road[end][start] = time;
+        		}
+        	}
+        }
+        Q.add(new city(1,0,N+1) );
+        while(Q.size()!=0)
+        {
+        	city get = Q.poll();
+            if(get.time>K)
+        		continue;
+        	if(!check[get.num] && get.time<=K)
+            {
+                check[get.num] = true;
+                answer++;
+            }
+        	if(timecheck[get.num]!=0 && get.time>timecheck[get.num])
+            	continue;
+        	
+        	for(int i = 1; i<Road[0].length; i++)
+        	{
+        		if(Road[get.num][i]!=0 && !get.check[i])
+        		{
+                    if(get.time+Road[get.num][i]<=K)
+                    {
+                        city temp = new city(i, get.time+Road[get.num][i], get.check);
+            			temp.check[i] = true;
+        				Q.add(temp);
+        				if(timecheck[i]==0)
+        					timecheck[i] = temp.time;
+        				else
+        					timecheck[i] = timecheck[i]>temp.time ? temp.time : timecheck[i];
+        				
+                    }
+        		}
+        	}
+        }
+        return answer;
+    }
+	class city
+	{
+		int num;
+		int time;
+		boolean[] check;
+		public city(int num, int time, boolean[] check)
+		{
+			this.num = num;
+			this.time = time;
+			this.check = check.clone();
+		}
+		public city(int num, int time, int len)
+		{
+			this.num = num;
+			this.time = time;
+			this.check = new boolean[len];
+            this.check[1] = true;
+		}
+	}
+}
