@@ -1,0 +1,81 @@
+import java.util.ArrayList;
+class Solution {
+    public int[] solution(int n) {
+        int num = 1, end = 0, change = 1, index = 0, N=n;
+        line[] triangle = new line[n];
+        for(int i =0; i<n; i++)
+        {
+            triangle[i] = new line(i+1);
+            end += i+1;
+        }
+        int[] answer = new int[end];
+        while(end>=num)
+        {
+            if(change == 1)
+            {
+                for(int i =1; i<=N; i++)
+                {
+                    num = triangle[index].down(num);
+                    index++;
+                }
+                N--; index--; change = 2;
+            }
+            else if(change == 2)
+            {
+                for(int i =1; i<=N;i++)
+                    num = triangle[index].right(num);
+                N--; index--; change = 3;
+            }
+            else if(change == 3)
+            {
+                for(int i = 1; i<=N; i++)
+                {
+                    num = triangle[index].up(num);
+                    index--;
+                }
+                index+=2; N--; change = 1;
+            }
+        }
+        index = 0;
+        for(int i =0; i< n; i++)
+        {
+            for(int j = 0; j<triangle[i].arr.length; j++)
+            {
+                answer[index] = triangle[i].arr[j];
+                index++;
+            }
+        }
+        return answer;
+    }
+    class line
+    {
+        int[] arr;
+        int index, endIndex;
+        public line(int size)
+        {
+            this.arr = new int[size];
+            index = 0; endIndex = size-1;
+        }
+        public int down(int num)
+        {
+            this.arr[this.index] = num;
+            this.index++;
+            return num+1;
+        }
+        
+        public int right(int num)
+        {
+            this.arr[this.index] = num;
+            this.index++;
+            return num+1;
+           
+        }
+        
+        public int up(int num)
+        {
+            this.arr[this.endIndex] = num;
+            this.endIndex--;
+            return num+1;
+        }
+    }
+}
