@@ -1,3 +1,57 @@
+// 효율성 갱신 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Solution {
+public int solution(int n, int[][] edge) {
+		 ArrayList<Integer>[] nodeMap = new ArrayList[n+1];
+		 Queue<Integer> nodeQueue = new LinkedList<>();
+		 int[] nodeCountArr = new int[n+1]; 
+		 int max = Integer.MIN_VALUE, answer = 0;
+		 
+		 // 트리 설정
+		 for(int i = 0; i < edge.length; i++) {
+			 if(nodeMap[edge[i][0]] == null) {
+				 nodeMap[edge[i][0]] = new ArrayList();
+			 }
+			 
+			 if(nodeMap[edge[i][1]] == null) {
+				 nodeMap[edge[i][1]] = new ArrayList();
+			 }
+			 
+			 nodeMap[edge[i][0]].add(edge[i][1]);
+			 nodeMap[edge[i][1]].add(edge[i][0]);
+		 }
+		 
+		 nodeQueue.add(1);
+		 while(!nodeQueue.isEmpty()) {
+			 int currentNode = nodeQueue.poll(), end = nodeMap[currentNode].size();
+			 
+			 for(int i = 0; i < end; i++) {
+				 int childNode = nodeMap[currentNode].get(0);
+				 nodeMap[currentNode].remove(0);
+				 nodeQueue.add(childNode);
+				 
+                if(nodeCountArr[childNode] != 0) {
+                    nodeCountArr[childNode] = nodeCountArr[childNode] > nodeCountArr[currentNode]+1 ? 
+                        nodeCountArr[currentNode]+1 : 
+                        nodeCountArr[childNode];
+                } else {
+                   nodeCountArr[childNode] = nodeCountArr[currentNode]+1;
+                }
+				 max = nodeCountArr[childNode] > max ? nodeCountArr[childNode] : max; 
+			 }
+		 }
+		 
+		 for(int i = 2; i < nodeCountArr.length; i++) {
+			 answer = nodeCountArr[i] == max ? answer+1 : answer;
+		 }
+		 
+		 return answer;
+	 }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.LinkedList;
