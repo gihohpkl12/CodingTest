@@ -1,3 +1,39 @@
+/*
+기본적으로 재귀식 풀이.
+범위를 4부분으로 나누는 풀이를 생각.
+*/
+// 풀이 갱신
+class Solution {
+    public int[] solution(int[][] arr) {
+		int[] answer = new int[2];
+		compression(arr, 0, 0, arr.length, answer);
+		return answer;
+	}
+	
+	public void compression(int[][] arr, int x, int y, int area, int[] answer) {
+		boolean check = true;
+		int init = arr[x][y];
+		
+		for(int i = x; i < x+area; i++) {
+			for(int j = y; j < y+area; j++) {
+				if(init != arr[i][j]) {
+					check = false;
+					break;
+				}
+			}
+		}
+		
+		if(check) {
+			answer[init] += 1;
+		} else {
+			compression(arr, x, y, area/2, answer);
+			compression(arr, x+(area/2), y, area/2, answer);
+			compression(arr, x, y+(area/2), area/2, answer);
+			compression(arr, x+(area/2), y+(area/2), area/2, answer);
+		} 
+	}
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Solution {
    public int[] solution(int[][] arr) {
 		int[] answer = new int[2];
