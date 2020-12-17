@@ -1,0 +1,55 @@
+class Solution {
+   public int[] solution(int[][] arr) {
+		int[] answer = new int[2];
+		int area = arr.length, x = 0, y = 0;
+		
+		for(int i = 0; i < area; i++) {
+			for(int j = 0; j < area; j++) {
+				if(arr[i][j] == 0) {
+					answer[0]++;
+				} else {
+					answer[1]++;
+				}
+			}
+		}
+		
+		if(answer[0] == area*area) {
+			answer[0] = 1;
+			return answer;
+		} else if(answer[1] == area*area) {
+			answer[1] = 1;
+			return answer;
+		}
+		
+		area /= 2;
+		compression(arr, area, x, y, answer);
+		compression(arr, area, x+area, y, answer);
+		compression(arr, area, x, y+area, answer);
+		compression(arr, area, x+area, y+area, answer);
+		return answer;
+	}
+	
+	 public void compression(int[][] arr, int area, int x, int y, int[] oneZeroCount) {
+		 int standard = arr[x][y];
+		 
+		 if(area < 2) {
+			 return;
+		 }
+		 
+		 for(int i = x; i < x+area; i++) {
+			 for(int j = y; j < y+area; j++) {
+				 if(arr[i][j] != standard) {
+					 if(x+(area/2) < arr.length && y+(area/2) < arr.length) {
+						 compression(arr, area/2, x, y, oneZeroCount);
+						 compression(arr, area/2, x+(area/2), y, oneZeroCount);
+						 compression(arr, area/2, x, y+(area/2), oneZeroCount);
+						 compression(arr, area/2, x+(area/2), y+(area/2), oneZeroCount);
+					 }
+					 return;
+				 }
+			 }
+		 }
+		 oneZeroCount[standard] -= (area*area)-1;
+		 return;
+	 }
+}
