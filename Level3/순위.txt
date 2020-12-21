@@ -1,3 +1,91 @@
+// 새로운 코드
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
+
+class Solution {
+   public int solution(int n, int[][] results) {
+        int answer = 0;
+        ArrayList<PlayRecord> playRecord = new ArrayList<>(); 
+        
+        for(int i = 0; i <= n; i++) {
+        	playRecord.add(new PlayRecord());
+        }
+        
+	// 승패 초기화
+        for(int i = 0; i < results.length; i++) {
+        	PlayRecord winner = playRecord.get(results[i][0]);
+        	PlayRecord loser = playRecord.get(results[i][1]);
+        	winner.win.put(results[i][1], 0);
+        	loser.lose.put(results[i][0], 0);
+        }
+        
+	// 승패 비교 및 answer 체크
+        for(int i = 1; i <= n; i++) {
+        	PlayRecord player = playRecord.get(i);
+        	recordCheck(player, playRecord, n);
+        	
+        	if(player.lose.size() + player.win.size() == n-1) {
+        		answer++;
+        	}
+        }
+        return answer;
+    }
+	
+	public void recordCheck(PlayRecord player, ArrayList<PlayRecord> playRecord, int n) {
+		boolean[] checkForWin = new boolean[n+1];
+		boolean[] checkForLose = new boolean[n+1];
+		Queue<Integer> recordCheckQueue = new LinkedList<>();
+		
+		for(int key : player.win.keySet()) {
+			recordCheckQueue.add(key);
+			checkForWin[key] = true;
+		}
+		
+		// 본인(= player)이 이긴 선수가 이긴 선수는 본인(= player)도 이김.
+		while(recordCheckQueue.size() > 0) {
+			PlayRecord checkPlayer = playRecord.get(recordCheckQueue.poll());
+			
+			for(int playerNum : checkPlayer.win.keySet()) {
+				if(!checkForWin[playerNum]) {
+					checkForWin[playerNum] = true;
+					player.win.put(playerNum, 0);
+					recordCheckQueue.add(playerNum);
+				}
+			}
+		}
+		
+		for(int key : player.lose.keySet()) {
+			recordCheckQueue.add(key);
+			checkForLose[key] = true;
+		}
+		
+		// 본인(= player)이 진 선수가 진 선수는 본인(= player)도 짐.
+		while(recordCheckQueue.size() > 0) {
+			PlayRecord checkPlayer = playRecord.get(recordCheckQueue.poll());
+			
+			for(int playerNum : checkPlayer.lose.keySet()) {
+				if(!checkForLose[playerNum]) {
+					checkForLose[playerNum] = true;
+					player.lose.put(playerNum, 0);
+					recordCheckQueue.add(playerNum);
+				}
+			}
+		}
+	}
+	
+	 class PlayRecord {
+		 HashMap<Integer, Integer> win, lose;
+		 
+		 public PlayRecord() {
+			 this.win = new HashMap<>();
+			 this.lose = new HashMap<>();
+		 }
+	 }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
