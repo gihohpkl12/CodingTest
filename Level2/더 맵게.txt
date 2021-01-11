@@ -1,29 +1,39 @@
 import java.util.PriorityQueue;
 
 class Solution {
-  public int solution(int[] scoville, int K) 
-	{
-		PriorityQueue<Integer> Q = new PriorityQueue<>();
-		int answer = 0;
-		for(int i: scoville)
-			Q.offer(i);
-		
-		while(Q.size()>0)
-		{
-			if(Q.peek()>=K)
-			{
-				break;
-			}
-			if(Q.size()==1)
-			{
-				answer =-1;
-				break;
-			}
-			int one = Q.poll();
-			one += Q.poll()*2;
-			Q.offer(one);
-			answer++;
-		}
-		return answer;
-}
+    public int solution(int[] scoville, int K) 
+    {
+        PriorityQueue<Integer> Q = new PriorityQueue<>();
+        int answer = 0;
+        
+        for(int num : scoville) 
+        {
+            Q.add(num);
+        }
+        
+        while(Q.size() > 1) 
+        {
+            int foodScoville = Q.poll();
+            
+            if(foodScoville >= K) 
+            {
+                break;
+            } else 
+            {
+                foodScoville = foodScoville + (Q.poll()*2);
+                Q.add(foodScoville);
+                answer++;
+            }
+        }
+        
+        if(Q.size() == 0) 
+        {
+            answer = -1;
+        } else if (Q.size() == 1 && Q.peek() < K) 
+        {
+            answer = -1;
+        }
+        
+        return answer;
+    }
 }
