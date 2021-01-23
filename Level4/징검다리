@@ -1,0 +1,42 @@
+import java.util.Arrays;
+
+class Solution {
+    public int solution(int distance, int[] rocks, int n) {
+        int answer = 0;
+        int minDist = 1, maxDist = distance;
+        int avr = 0;
+        Arrays.sort(rocks);
+        
+        while(minDist <= maxDist) {
+            int preRock = 0;
+            int removeRockCount = 0;
+            avr = (minDist + maxDist)/2;
+            
+            for(int i = 0; i < rocks.length; i++) {
+                int curRock = rocks[i];
+                if(curRock - preRock < avr) {
+                    removeRockCount++;
+                    
+                    if(removeRockCount > n) {
+                        break;
+                    }
+                } else if(curRock - preRock >= avr) {
+                    preRock = curRock;
+                }
+                
+                if(i == rocks.length-1) {
+                    removeRockCount = distance - preRock < avr ? removeRockCount+1 : removeRockCount;
+                }
+            }
+            
+            if(removeRockCount > n) {
+                maxDist = avr -1;
+            } else if(removeRockCount <= n) {
+                answer = avr > answer ? avr : answer;
+                minDist = avr +1;
+            } 
+        }
+        
+        return answer;
+    }
+}
