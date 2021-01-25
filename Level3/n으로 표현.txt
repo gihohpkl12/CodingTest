@@ -12,7 +12,7 @@ class Solution {
         }
         
         for(int i = 1; i <= 8; i++) {
-            for(int j = 1; j < i; j++) {
+            for(int j = 1; j <= i/2; j++) {
                 for(int firstKey : numMap[j].keySet()){
                     for(int secondKey : numMap[i-j].keySet()) {
                         numMap[i].put(firstKey+secondKey, 0);
@@ -23,6 +23,9 @@ class Solution {
                         }
                         if(firstKey/secondKey > 0) {
                             numMap[i].put(firstKey/secondKey, 0);
+                        }
+                        if(secondKey/firstKey > 0) {
+                            numMap[i].put(secondKey/firstKey, 0);
                         }
                         
                     }
