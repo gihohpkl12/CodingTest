@@ -1,5 +1,46 @@
 import java.util.HashMap;
 class Solution {
+    public int solution(int N, int number) {
+        int answer = -1;
+        int nn = N;
+        HashMap<Integer, Integer>[] numMap = new HashMap[9];
+        
+        for(int i = 1; i <= 8; i++) {
+            numMap[i] = new HashMap<>();
+            numMap[i].put(nn, 0);
+            nn = nn*10 + N;
+        }
+        
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j < i; j++) {
+                for(int firstKey : numMap[j].keySet()){
+                    for(int secondKey : numMap[i-j].keySet()) {
+                        numMap[i].put(firstKey+secondKey, 0);
+                        numMap[i].put(firstKey*secondKey, 0);
+                        
+                        if(firstKey - secondKey > 0) {
+                            numMap[i].put(firstKey-secondKey, 0);    
+                        }
+                        if(firstKey/secondKey > 0) {
+                            numMap[i].put(firstKey/secondKey, 0);
+                        }
+                        
+                    }
+                }
+            }
+            //System.out.println(numMap[i].keySet());
+            if(numMap[i].keySet().contains(number)) {
+                answer = i;
+                break;
+            }
+        }
+        
+        return answer;
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------
+import java.util.HashMap;
+class Solution {
     HashMap<Integer, Integer> list;
     public int solution(int N, int number) {
         int answer = -1;
