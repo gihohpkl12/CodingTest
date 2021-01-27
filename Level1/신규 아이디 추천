@@ -1,0 +1,58 @@
+class Solution {
+    public String solution(String new_id) {
+        String answer = "";
+        new_id = new_id.toLowerCase();
+        
+        for(int i = 0; i < new_id.length(); i++) {
+            if(new_id.charAt(i) >= 'a' && new_id.charAt(i) <= 'z') {
+                continue;
+            } else if(new_id.charAt(i) >= '0' &&  new_id.charAt(i) <= '9') {
+                continue;
+            } else if(new_id.charAt(i) == '-') {
+                continue;
+            } else if(new_id.charAt(i) =='_') {
+                continue;
+            } else if(new_id.charAt(i) == '.') {
+                continue;
+            } else {
+                new_id = new_id.substring(0, i) + "#" +new_id.substring(i+1, new_id.length());
+            }
+        }
+            
+        answer = new_id.replaceAll("#", "");
+
+        while(answer.indexOf("..") != -1) {
+            answer = answer.replace("..", ".");
+        }
+
+        answer = pointRemove(answer);
+
+        if(answer.equals("")) {
+            answer = "a";
+        }
+
+        if(answer.length() >= 16) {
+            answer = answer.substring(0, 15);
+        }
+
+        answer = pointRemove(answer);
+
+        while(answer.length() <= 2) {
+            answer = answer+answer.substring(answer.length()-1, answer.length());
+        }
+        
+        return answer;
+    }
+    
+    public String pointRemove(String str) {
+        String answer = str;
+        
+        if(answer.charAt(0) == '.') {
+                answer = answer.substring(1, answer.length());
+            } else if(answer.charAt(answer.length()-1) == '.') {
+                answer = answer.substring(0, answer.length()-1);
+            }
+        
+        return answer;
+    }
+}
