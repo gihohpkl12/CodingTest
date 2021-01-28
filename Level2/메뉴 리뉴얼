@@ -1,0 +1,103 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+class Solution {
+    public String[] solution(String[] orders, int[] course) {
+        String[] answer;
+        HashMap<Integer, String> courseCheck = new HashMap<>();
+        ArrayList<String> answerList = new ArrayList<>();
+        
+        for(int i : course) {
+            courseCheck.put(i, "");
+        }
+        
+        for(int i = 0; i < orders.length; i++) {
+            HashMap<String, Integer> menuCount = new HashMap<>();
+            String menuCombination = orders[i];
+            
+            for(int j = i+1; j < orders.length; j++) {
+                String menu = "";
+                
+                for(int k = 0; k < menuCombination.length(); k++) {
+                    if(orders[j].indexOf(menuCombination.substring(k, k+1)) != -1) {
+                        menu += menuCombination.substring(k, k+1);
+                    }
+                }
+                
+                for(int length : course) {
+                    if(length <= menu.length()) {
+                        makeCombination(length, menu, "", menuCount, 0);    
+                    }
+                }   
+            }
+                
+            for(String key : menuCount.keySet()) {
+                String menuAndCount = key+":"+Integer.toString(menuCount.get(key))+",";
+                String courseCheckValue = courseCheck.get(key.length());
+                
+                if(courseCheckValue.equals("")) {
+                    courseCheck.put(key.length(), menuAndCount);
+                } else {
+                    if(courseCheckValue.indexOf(key) == -1) {
+                        int count = Integer.parseInt(courseCheckValue.substring(courseCheckValue.indexOf(":")+1, courseCheckValue.indexOf(",")));
+                        
+                        if(count > menuCount.get(key)) {
+                            continue;
+                        } else if(count == menuCount.get(key)) {
+                            courseCheck.replace(key.length(), menuAndCount+courseCheckValue);
+                        } else {
+                            courseCheck.replace(key.length(), menuAndCount);
+                        }
+                    }else {
+                        continue;
+                    }
+                }
+            }
+        }
+        
+        for(int key : courseCheck.keySet()) {
+            String[] menu = courseCheck.get(key).split(",");
+            
+            for(int i = 0; i < menu.length; i++) {
+                if(menu[i].equals("")) {
+                    continue;
+                }
+                
+                answerList.add(menu[i].substring(0, menu[i].indexOf(":")));
+            }
+        }
+        answer = new String[answerList.size()];
+        
+        for(int i = 0; i < answerList.size(); i++) {
+            String[] stringSort = answerList.get(i).split("");
+            Arrays.sort(stringSort);
+            
+            answer[i] = "";
+            for(String s : stringSort) {
+                answer[i] += s;    
+            }
+        }
+        
+        Arrays.sort(answer);
+        return answer;
+    }
+    
+    public void makeCombination(int length, String menu, String currentMenu, HashMap<String, Integer> menuCount, int index) {
+        if(length == currentMenu.length()) {
+            if(menuCount.containsKey(currentMenu)) {
+                int count = menuCount.get(currentMenu);
+                menuCount.replace(currentMenu, count+1);
+            } else {
+                menuCount.put(currentMenu, 2);
+            }
+            
+            return;
+        }
+        for(int i = index; i < menu.length(); i++) {
+            currentMenu += menu.substring(i, i+1);
+            makeCombination(length, menu, currentMenu, menuCount, i+1);
+            currentMenu = currentMenu.substring(0, currentMenu.length()-1);
+        }
+    }
+}
