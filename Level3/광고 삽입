@@ -1,0 +1,83 @@
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+class Solution {
+    public String solution(String play_time, String adv_time, String[] logs) {
+        HashMap<Integer, Integer> startTimeMap = new HashMap<>();
+        HashMap<Integer, Integer> endTimeMap = new HashMap<>();
+        int playSecond = timeConvertToSecond(play_time);
+        int advSecond = timeConvertToSecond(adv_time);
+        long [][] timeCheckArr = new long[playSecond+1][2];
+        long max = 0, maxIndex = 0, totalTime = 0;
+        long addViewer = 0;
+
+        for(String log : logs) {
+            int key = timeConvertToSecond(log.substring(0,8));
+            int endKey = timeConvertToSecond(log.substring(9,log.length()));
+            
+            if(startTimeMap.containsKey(key)) {
+                int viewer = startTimeMap.get(key);
+                startTimeMap.replace(key, viewer+1);
+            }else {
+                startTimeMap.put(key, 1);
+            }
+                                             
+            if(endTimeMap.containsKey(endKey)) {
+                int viewer = endTimeMap.get(endKey);
+                endTimeMap.replace(endKey, viewer+1);
+            }else {
+                endTimeMap.put(endKey, 1);
+            }          
+        }
+        
+        for(int i = 0; i < timeCheckArr.length; i++) {
+            totalTime += addViewer;
+            
+            if(i < advSecond) {
+                timeCheckArr[i][0] = totalTime;
+                timeCheckArr[i][1] = totalTime;
+            } else {
+                timeCheckArr[i][0] = totalTime;
+                timeCheckArr[i][1] = totalTime - timeCheckArr[i - advSecond][0];
+                
+                if(timeCheckArr[i][1] > max) {
+                    max = timeCheckArr[i][1];
+                    maxIndex = i;
+                }
+            }
+            
+            if(startTimeMap.containsKey(i)) {
+                addViewer += startTimeMap.get(i);
+                startTimeMap.remove(i);
+            }
+            
+            if(endTimeMap.containsKey(i)) {
+                addViewer -= endTimeMap.get(i);
+                endTimeMap.remove(i);
+            }
+        }
+        
+        return timeToString(maxIndex-advSecond);
+    }
+    
+    public int timeConvertToSecond(String time) {
+        int timeToSecond = (Integer.parseInt(time.substring(0,2))*60*60) + (Integer.parseInt(time.substring(3,5))*60) + Integer.parseInt(time.substring(6,8));
+        return timeToSecond;
+    }
+    
+    public String timeToString(long time) {
+        String result = "";
+        int hour = 0, minute = 0, second = 0;
+        
+        hour = (int)time/3600;
+        time %= 3600;
+        minute = (int)time/60;
+        time %= 60;
+        second = (int)time;
+        
+        result = hour > 9 ? result + Integer.toString(hour) + ":" : result + "0" + Integer.toString(hour) + ":";
+        result = minute > 9 ? result + Integer.toString(minute) + ":" : result + "0" + Integer.toString(minute) + ":";
+        result = second > 9 ? result + Integer.toString(second) : result + "0" + Integer.toString(second);
+        return result;
+    }
+}
