@@ -1,0 +1,36 @@
+// 플로이드 와샬 문제
+import java.util.Arrays;
+
+class Solution {
+    public int solution(int n, int s, int a, int b, int[][] fares) {
+        int answer = 0;
+        int[][] floydWarshall = new int[n+1][n+1];
+        
+        for(int i = 0; i < floydWarshall.length; i++) {
+           Arrays.fill(floydWarshall[i], n*100000);
+            floydWarshall[i][i] = 0;
+        }
+        
+        for(int i = 0; i < fares.length; i++) {
+            floydWarshall[fares[i][0]][fares[i][1]] = fares[i][2];
+            floydWarshall[fares[i][1]][fares[i][0]] = fares[i][2];
+        }
+        
+        for(int i = 1; i < floydWarshall.length; i++) {
+            for(int j = 1; j < floydWarshall.length; j++) {
+                for(int k = 1; k < floydWarshall.length; k++) {
+                   floydWarshall[j][k] = Math.min(floydWarshall[j][k], floydWarshall[j][i] + floydWarshall[i][k]);
+                }
+            }
+        }
+        
+        answer = Integer.MAX_VALUE;
+        for(int i = 1; i < floydWarshall.length; i++) {
+           answer = Math.min(answer, floydWarshall[s][i] + floydWarshall[i][a] + floydWarshall[i][b]);
+        }
+        
+       answer = answer < floydWarshall[s][a] + floydWarshall[s][b] ? answer : floydWarshall[s][a] + floydWarshall[s][b];
+        
+        return answer;
+    }
+}
