@@ -1,0 +1,54 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+class Solution {
+    public int solution(int[] sales, int[][] links) {
+        HashMap<Integer, ArrayList<Integer>> organizationMap = new HashMap<>();
+        int[][] saleDp = new int[sales.length+1][2];
+        
+        for(int[] link : links) {
+            int leader = link[0];
+            int member = link[1];
+            
+            if(organizationMap.containsKey(leader)) {
+                organizationMap.get(leader).add(member);
+            } else {
+                ArrayList<Integer> save = new ArrayList<>();
+                save.add(member);
+                organizationMap.put(leader, save);
+            }
+        }
+        findSubNode(organizationMap, 1, sales, saleDp);
+
+        return saleDp[1][0] < saleDp[1][1] ? saleDp[1][0] : saleDp[1][1];
+    }
+    
+    public void findSubNode(HashMap<Integer, ArrayList<Integer>> organizationMap, int rootNode, int[] sales, int[][] saleDp) {
+        ArrayList<Integer> nodeList = organizationMap.get(rootNode);
+        
+        for(int i = 0; i < nodeList.size(); i++) {
+            if(organizationMap.containsKey(nodeList.get(i))) {
+                findSubNode(organizationMap, nodeList.get(i), sales, saleDp);
+            } else {
+                saleDp[nodeList.get(i)][0] = sales[nodeList.get(i)-1];
+            }
+        }
+        
+        int noAttendance = 0;
+        int min = Integer.MAX_VALUE;
+        for(int i = 0; i < nodeList.size(); i++) {
+            for(int j = 0; j < nodeList.size(); j++) {
+                if(i == j) {
+                    continue;
+                }
+                saleDp[nodeList.get(i)][0] += saleDp[nodeList.get(j)][0] < saleDp[nodeList.get(j)][1] ? saleDp[nodeList.get(j)][0] : saleDp[nodeList.get(j)][1];
+            }
+            min = saleDp[nodeList.get(i)][0] < min ? saleDp[nodeList.get(i)][0] : min;
+            noAttendance += saleDp[nodeList.get(i)][1];
+        }
+        
+        saleDp[rootNode][1] = min;
+        saleDp[rootNode][0] = sales[rootNode-1] + noAttendance;
+        saleDp[rootNode][0] = saleDp[rootNode][0] < sales[rootNode-1] + min ? saleDp[rootNode][0] : sales[rootNode-1] + min;
+    }
+}
