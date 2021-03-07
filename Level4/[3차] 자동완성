@@ -1,0 +1,60 @@
+import java.util.HashMap;
+
+class Solution {
+    public int solution(String[] words) {
+        Node tree = new Node(0,0);
+        int answer = 0;
+        
+        for(String word : words) {
+            makingTree(word,tree, 0);
+        }
+       
+        for(String word : words) {
+            Node node = tree;
+            int index = 0;
+            
+            while(index < word.length()) {    
+                String key = word.substring(index, index+1);
+                node = node.subWordMap.get(key);
+                
+                if(node.count == 1 || word.length() == node.depth) {
+                    answer += node.depth;
+                    break;
+                }
+                index++;
+            }
+        }
+        return answer;
+    }
+    
+class Node {
+    HashMap<String, Node> subWordMap;
+    int depth;
+    int count;
+    
+    public Node(int dep, int count) {
+        this.depth = dep;
+        this.count = count;
+        this.subWordMap = new HashMap<>();
+    }
+}
+    
+public void makingTree(String word, Node node, int depth) {
+    Node subNode = node;
+    
+    for(int i = 0; i < word.length(); i++) {
+        String key = word.substring(i, i+1);
+        
+        if(subNode.subWordMap.containsKey(key)) {
+            Node getNode = subNode.subWordMap.get(key);
+            getNode.count += 1;
+            subNode.subWordMap.replace(key, getNode);
+            subNode = getNode;
+        } else {
+            Node saveNode = new Node(i+1, 1);
+            subNode.subWordMap.put(key, saveNode);
+            subNode = saveNode;
+        }
+    }
+}
+}
