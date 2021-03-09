@@ -1,0 +1,64 @@
+// 내 풀이
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.ArrayList;
+
+class Solution {
+    public long[] solution(long k, long[] room_number) {
+        HashMap<Long, Long> bookedRoomMap = new HashMap<>();
+        long[] answer = new long[room_number.length];
+        long minRoomNumber = 1;
+        int index = 0;
+
+        for(long roomNumber : room_number) {
+            if(bookedRoomMap.containsKey(roomNumber)) {
+                ArrayList<Long> changeList = new ArrayList<>();
+                minRoomNumber = bookedRoomMap.get(roomNumber);
+
+                while(bookedRoomMap.containsKey(minRoomNumber)) {
+                    changeList.add(minRoomNumber);
+                    minRoomNumber = bookedRoomMap.get(minRoomNumber);
+                }
+
+                for(int i = 0; i < changeList.size(); i++) {
+                    bookedRoomMap.replace(changeList.get(i), minRoomNumber+1);
+                }
+
+                bookedRoomMap.replace(roomNumber, minRoomNumber+1);
+                bookedRoomMap.put(minRoomNumber, minRoomNumber+1);
+                answer[index] = minRoomNumber;
+            } else {
+                bookedRoomMap.put(roomNumber, roomNumber+1);
+                answer[index] = roomNumber;
+            }
+            index++;
+        }
+
+        return answer;
+    }
+}
+
+// 다른 사람의 풀이 (나보다 좋음 ...)
+
+import java.util.HashMap;
+class Solution {
+    HashMap<Long, Long> hash;
+    public long[] solution(long k, long[] room_number) {
+        hash = new HashMap<>(); 
+        long[] answer = new long[room_number.length];
+        for(int i=0; i<room_number.length; i++){
+            answer[i] = find(room_number[i])-1;
+        }
+        return answer;
+    }
+    long find(long number){
+        if(!hash.containsKey(number)){
+            hash.put(number, number+1);
+            return number+1;
+        }else{
+            long temp = find(hash.get(number));
+            hash.put(number, temp);
+            return temp;
+        }
+    }
+}
