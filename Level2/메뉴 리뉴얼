@@ -1,5 +1,106 @@
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Arrays;
+
+class Solution {
+    public String[] solution(String[] orders, int[] course) {
+        String[] answer;
+        HashMap<Integer, HashMap<String, Integer>> allMenu = new HashMap<>();
+        
+        for(int key : course) {
+            allMenu.put(key, new HashMap<String, Integer>());
+        }
+        
+        for(int i = 0; i < orders.length; i++) {
+            String[] orderToArr = orders[i].split("");
+            ArrayList<String> menu = new ArrayList<>();;
+            
+            for(int j = 0; j < orderToArr.length; j++) {
+                for(int k = 0; k < orders.length; k++) {
+                    if(orders[k].indexOf(orderToArr[j]) != -1) {
+                        menu.add(orderToArr[j]);
+                        break;
+                    }
+                }
+            }
+            
+            for(int target : course) {
+                if(target > menu.size()) {
+                    continue;
+                }
+                combination(menu, allMenu, "", target, 0);    
+            }
+        }
+        
+        ArrayList<String> answerList = new ArrayList<>();
+        for(int length : allMenu.keySet()) {
+            HashMap<String, Integer> getMap = allMenu.get(length);
+            ArrayList<String> saveList = new ArrayList<>();
+            int max = 2;
+                
+            for(String key : getMap.keySet()) {
+                int value = getMap.get(key);
+                
+                if(max < value) {
+                    max = value;
+                    saveList.clear();
+                    saveList.add(key);
+                } else if(max == value) {
+                    saveList.add(key);
+                }
+            }
+            
+            for(String save : saveList) {
+                answerList.add(save);
+            }
+        }
+        
+        answer = new String[answerList.size()];
+        for(int i = 0; i < answerList.size(); i++) {
+            answer[i] = answerList.get(i);
+        }
+        
+        Arrays.sort(answer);
+        return answer;
+    }
+    
+    public void combination(ArrayList<String> menuList, HashMap<Integer, HashMap<String, Integer>> allMenu, String makingMenu, int target, int index) {
+        if(makingMenu.length() == target) {
+           HashMap<String, Integer> getMap = allMenu.get(target);
+            makingMenu = stringSort(makingMenu);
+            
+            if(getMap.containsKey(makingMenu)) {
+                getMap.replace(makingMenu, getMap.get(makingMenu) +1);
+            } else {
+                getMap.put(makingMenu, 1);
+            }
+            
+            allMenu.replace(target, getMap);
+            return;
+        }
+        
+        for(int i = index; i < menuList.size(); i++) {
+            String menu = menuList.get(i);
+            combination(menuList, allMenu, makingMenu+menu, target, i+1);
+        }   
+    }
+    
+    public String stringSort(String str) {
+        String[] arr = str.split("");
+        String result = "";
+        
+        Arrays.sort(arr);
+        for(String a : arr) {
+            result += a;
+        }
+        
+        return result;
+    }
+}
+=============================================================================================================================================/
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 class Solution {
