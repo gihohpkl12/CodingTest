@@ -1,3 +1,95 @@
+// 최종.
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+class Solution {
+    static int answerSize;
+    public String[] solution(String[] orders, int[] course) {
+        String[] answer;
+        answerSize = 0;
+        HashMap<String, Integer> allMenu = new HashMap<>();
+        HashMap<Integer, MakingCourse> answerMap = new HashMap<>();
+        
+        for(int num : course) {
+            answerMap.put(num, new MakingCourse());
+        }
+        
+        for(int i = 0; i < orders.length; i++) {
+            for(int target : course) {
+                combination(stringSort(orders[i]), allMenu, "", target, 0, answerMap);
+            }
+        }
+        
+        answer = new String[answerSize];
+        int index = 0;
+         for(int key : answerMap.keySet()) {
+             MakingCourse result = answerMap.get(key);
+             
+             for(String newCourse : result.courseList) {
+                 answer[index++] = newCourse;
+             }
+        }
+        
+        Arrays.sort(answer);
+        return answer;
+    }
+    
+    public void combination(String order, HashMap<String, Integer> allMenu, String makingMenu, int target, int index, HashMap<Integer, MakingCourse> answerMap) {
+        if(makingMenu.length() == target) {
+            if(allMenu.containsKey(makingMenu)) {
+                allMenu.replace(makingMenu, allMenu.get(makingMenu) +1);
+                
+                if(answerMap.get(target).count < allMenu.get(makingMenu)) {
+                    MakingCourse newCourse = answerMap.get(target);
+                    answerSize -= newCourse.courseList.size();
+                    answerSize += 1;
+                    newCourse.courseList.clear();
+                    newCourse.courseList.add(makingMenu);
+                    newCourse.count = allMenu.get(makingMenu);
+                    answerMap.replace(target, newCourse);
+                } else if(answerMap.get(target).count == allMenu.get(makingMenu)) {
+                    MakingCourse newCourse = answerMap.get(target);
+                    newCourse.courseList.add(makingMenu);
+                    answerMap.replace(target, newCourse);
+                    answerSize += 1;
+                }
+            } else {
+                allMenu.put(makingMenu, 1);
+            }
+            
+            return;
+        }
+        
+        for(int i = index; i < order.length(); i++) {
+            String menu = order.substring(i, i+1);
+            combination(order, allMenu, makingMenu+menu, target, i+1, answerMap);
+        }   
+    }
+    
+    public String stringSort(String str) {
+        String[] arr = str.split("");
+        String result = "";
+        
+        Arrays.sort(arr);
+        for(String a : arr) {
+            result += a;
+        }
+        
+        return result;
+    }
+    
+    class MakingCourse {
+        int count;
+        ArrayList<String> courseList;
+        
+        public MakingCourse() {
+            this.courseList = new ArrayList<>();
+            this.count = 0;
+        }
+    }
+}
+===================================================================================================================================
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
