@@ -1,0 +1,37 @@
+import java.util.Queue;
+import java.util.LinkedList;
+
+// 클래스를 생성해서 풀면 느리다..
+
+class Solution {
+    public int solution(int[][] maps) {
+        int[][] disCount = new int[maps.length][maps[0].length];
+        int[][] movingDir = {{1 ,0}, {0, 1}, {-1, 0}, {0, -1}};
+        Queue<int[]> moveQ = new LinkedList<>();
+        moveQ.add(new int[] {0, 0});
+        
+        while(moveQ.size() != 0) {
+            int[] getArr = moveQ.poll();
+            int i = getArr[0], j = getArr[1];
+            
+            for(int[] arr : movingDir) {
+                int nextI = arr[0] +i, nextJ = arr[1] +j;
+                
+                if(rangeCheck(maps.length, maps[0].length, nextI, nextJ) && maps[nextI][nextJ] == 1 && disCount[nextI][nextJ] == 0) {
+                    disCount[nextI][nextJ] = disCount[i][j]+1;
+                    moveQ.add(new int[] {nextI, nextJ});
+                }
+            }
+        }
+        
+        return disCount[maps.length-1][maps[0].length-1] == 0 ? -1 : disCount[maps.length-1][maps[0].length-1] +1;
+    }
+    
+     public boolean rangeCheck( int height, int width, int i, int j) {
+        if(i >= 0 && i < height && j >= 0 && j < width) {
+            return true;
+        }
+        
+        return false;
+    }
+}
