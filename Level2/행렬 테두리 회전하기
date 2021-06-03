@@ -1,4 +1,3 @@
-import java.util.PriorityQueue;
 import java.util.ArrayList;
 
 class Solution {
@@ -15,11 +14,11 @@ class Solution {
         }
         
         for(int[] arr : queries) {
-            PriorityQueue<Integer> pq = new PriorityQueue<>();
             int[][] vertex = {{arr[0], arr[3]}, {arr[2], arr[3]}, {arr[2], arr[1]}, {arr[0], arr[1]}};
             int[] cur = new int[] {arr[0], arr[1]};
             int preValue = totalArr[arr[0]][arr[1]];
             int index = 0;
+            int min = Integer.MAX_VALUE;
             
             while(index != 3 || cur[0] != arr[0] || cur[1] != arr[1]) {
                 if(cur[0] == vertex[index][0] && cur[1] == vertex[index][1]) {
@@ -28,13 +27,13 @@ class Solution {
                 } else {
                     cur = indexChange(index, cur[0], cur[1]);
                 }
-                pq.add(preValue);
+                min = preValue < min ? preValue : min;
                 int temp = totalArr[cur[0]][cur[1]];
                 totalArr[cur[0]][cur[1]] = preValue;
                 preValue = temp;
             }
             
-            answer[answerIndex] = pq.poll();
+            answer[answerIndex] = min;
             answerIndex++;
         }
         
