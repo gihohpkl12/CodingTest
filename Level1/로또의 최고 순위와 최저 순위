@@ -1,0 +1,41 @@
+import java.util.HashMap;
+
+class Solution {
+    public int[] solution(int[] lottos, int[] win_nums) {
+        HashMap<Integer, Integer> correctNumMap = new HashMap<>();
+        int[] answer = new int[2];
+        int zeroCount = 0;
+        int correctNumCount = 0;
+        
+        for(int i : win_nums) {
+            correctNumMap.put(i, i);
+        }
+        
+        for(int i : lottos) {
+            if(correctNumMap.containsKey(i)) {
+                correctNumCount++;
+            } else if(i == 0) {
+                zeroCount++;
+            }
+        }
+        answer[0] = ranking(zeroCount + correctNumCount);
+        answer[1] = ranking(correctNumCount);
+        
+        return answer;
+    }
+    
+    public int ranking(int correctNumCount) {
+        if(correctNumCount == 6) {
+            return 1;
+        } else if(correctNumCount == 5) {
+            return 2;
+        } else if(correctNumCount == 4) {
+            return 3;
+        } else if(correctNumCount == 3) {
+            return 4;
+        } else if(correctNumCount == 2) {
+            return 5;
+        }
+        return 6;
+    }
+}
