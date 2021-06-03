@@ -16,33 +16,21 @@ class Solution {
         
         for(int[] arr : queries) {
             PriorityQueue<Integer> pq = new PriorityQueue<>();
-            ArrayList<int[]> movingList = new ArrayList<>();
             int[][] vertex = {{arr[0], arr[3]}, {arr[2], arr[3]}, {arr[2], arr[1]}, {arr[0], arr[1]}};
-            int curX = arr[0], curY = arr[1];
+            int[] cur = new int[] {arr[0], arr[1]};
+            int preValue = totalArr[arr[0]][arr[1]];
             int index = 0;
             
-            while(index != 3 || curX != arr[0] || curY != arr[1]) {
-                movingList.add(new int[] {curX, curY});
-                
-                if(curX == vertex[index][0] && curY == vertex[index][1]) {
+            while(index != 3 || cur[0] != arr[0] || cur[1] != arr[1]) {
+                if(cur[0] == vertex[index][0] && cur[1] == vertex[index][1]) {
                     index++;
-                    int[] result = indexChange(index, curX, curY);
-                    curX = result[0];
-                    curY = result[1];
+                    cur = indexChange(index, cur[0], cur[1]);
                 } else {
-                    int[] result = indexChange(index, curX, curY);
-                    curX = result[0];
-                    curY = result[1];
+                    cur = indexChange(index, cur[0], cur[1]);
                 }
-            }
-            movingList.add(new int[] {arr[0], arr[1]});
-            
-            int preValue = totalArr[arr[0]][arr[1]];
-            for(int i = 1; i < movingList.size(); i++) {
                 pq.add(preValue);
-                int indexI = movingList.get(i)[0], indexY = movingList.get(i)[1];
-                int temp = totalArr[indexI][indexY];
-                totalArr[indexI][indexY] = preValue;
+                int temp = totalArr[cur[0]][cur[1]];
+                totalArr[cur[0]][cur[1]] = preValue;
                 preValue = temp;
             }
             
