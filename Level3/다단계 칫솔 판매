@@ -1,0 +1,42 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+class Solution {
+    public int[] solution(String[] enroll, String[] referral, String[] seller, int[] amount) {
+        int[] answer = new int[enroll.length];
+        HashMap<String, NameAndAmount> nodeMap = new HashMap<>();
+        
+        nodeMap.put("-", new NameAndAmount("-"));
+        for(int i = 0; i < enroll.length; i++) {
+            nodeMap.put(enroll[i], new NameAndAmount(referral[i]));
+        }
+       
+        for(int i = 0; i < seller.length; i++) {
+            divideAmount(seller[i], amount[i]*100, nodeMap);
+        }
+        
+        for(int i = 0; i < enroll.length; i++) {
+            answer[i] = nodeMap.get(enroll[i]).amount;
+        }
+        
+        return answer;
+    }
+    
+    public void divideAmount(String name, int amount, HashMap<String, NameAndAmount> nodeMap) {
+        nodeMap.get(name).amount += (amount - (amount/10));
+        
+        if(!name.equals("-") && amount/10 != 0) {
+            divideAmount(nodeMap.get(name).parent, amount/10, nodeMap);
+        }
+    }
+    
+    class NameAndAmount {
+        String parent;
+        int amount;
+        
+        public NameAndAmount(String parent) {
+            this.parent = parent;
+            this.amount = 0;
+        }
+    }
+}
