@@ -1,0 +1,60 @@
+import java.util.ArrayList;
+/*
+트리 구조로 만듦. (0을 루트로 만듦.)
+트리를 DFS로 탐색하다가, 리프 노드에 도착하면 리프노드의 값을 부모 노드로 옮기고 동시에 count에 절대 값을 더함.
+*/
+class Solution {
+    public long solution(int[] a, int[][] edges) {
+        Tree tree = new Tree(a.length);
+        long answer = 0;
+        
+        for(int i = 0; i < a.length; i++) {
+            answer += a[i];
+            tree.edgeCheck[i] = new ArrayList<>();
+            tree.arr[i] = a[i];
+        }
+        
+        if(answer != 0) {
+            return -1;
+        }
+        
+        for(int[] arr : edges) {
+            int start = arr[0], end = arr[1];
+            tree.edgeCheck[start].add(end);
+            tree.edgeCheck[end].add(start);
+        }
+        dfs(0, 0, tree);
+        
+        return tree.count;
+    }
+    
+    public void dfs(int parent, int child, Tree tree) {
+        tree.visitCheck[parent] = true;
+        
+        for(int i = 0; i < tree.edgeCheck[child].size(); i++) {
+            int nextIndex = tree.edgeCheck[child].get(i);
+            
+            if(!tree.visitCheck[nextIndex]) {
+                dfs(child, nextIndex, tree);
+            }
+        }
+        
+        tree.arr[parent] += tree.arr[child];
+        tree.count += Math.abs(tree.arr[child]);
+        tree.arr[child] = 0;
+    }
+    
+    class Tree {
+        long[] arr;
+        ArrayList<Integer>[] edgeCheck;
+        boolean[] visitCheck;
+        long count;
+        
+        public Tree(int length) {
+            this.edgeCheck = new ArrayList[length];
+            this.visitCheck = new boolean[length];
+            this.count = 0;
+            this.arr = new long[length];
+        }
+    }
+}
