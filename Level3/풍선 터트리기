@@ -1,0 +1,57 @@
+import java.util.Arrays;
+import java.util.HashMap;
+
+/*
+내 풀이랑 다른 사람 풀이가 같이 있음.
+아이디어는 다른 사람 풀이가 더 좋음.
+근데 속도는 내 풀이가 더 빠름. (자료구조 차이인 듯)
+*/
+
+class Solution {
+    public int solution(int[] a) {
+        int min1 = Integer.MAX_VALUE;
+        int min2 = Integer.MAX_VALUE;
+        HashMap<Integer, Integer> map = new HashMap<>();
+
+        for(int i=0;i<a.length;i++){
+            min1 = Math.min(min1,a[i]);
+            min2 = Math.min(min2,a[a.length-1-i]);
+            map.put(min1, 0);
+            map.put(min2, 0);
+        }
+
+        return map.size();
+        // 이 줄 기준, 상단은 타인 하단은 내 풀이.
+        /*
+        int answer = 0;
+        boolean[] leftCheck = new boolean[a.length];
+        boolean[] rightCheck = new boolean[a.length];
+        
+        int min = Integer.MAX_VALUE;
+        for(int i = 0; i < a.length; i++) {
+            if(a[i] < min) {
+                min = a[i];
+            } else {
+                leftCheck[i] = true;
+            }
+        }
+        
+        min = Integer.MAX_VALUE;
+        for(int i = a.length-1; i >= 0; i--) {
+            if(a[i] < min) {
+                min = a[i];
+            } else {
+                rightCheck[i] = true;
+            }
+        }
+        
+        for(int i = 0; i < a.length; i++) {
+            if(!rightCheck[i] || !leftCheck[i]) {
+                answer++;
+            }
+        }
+        
+        return answer;
+        */
+    }
+}
