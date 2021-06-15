@@ -1,0 +1,57 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+class Solution {
+    public int solution(int[] a) {
+        HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
+        int answer = 0;
+        
+        for(int i = 0; i < a.length; i++) {
+            if(map.containsKey(a[i])) {
+                map.get(a[i]).add(i);
+            } else {
+                ArrayList<Integer> list = new ArrayList<>();
+                list.add(i);
+                map.put(a[i], list);
+            }
+        }
+        
+        for(int key : map.keySet()) {
+            ArrayList<Integer> getList = map.get(key);
+            ArrayList<Integer> makingList = new ArrayList<>();
+            
+            for(int i = 0; i < getList.size(); i++) {
+                int index = getList.get(i);
+                boolean save = false;
+                
+                if(index-1 >= 0) {
+                    int start = makingList.size() == 0 ? 0 : makingList.get(makingList.size()-1)+1;
+                    
+                    for(int j = start; j <= index -1; j++) {
+                        if(a[j] != key) {
+                            makingList.add(j);
+                            makingList.add(index);  
+                            save = true;
+                            break;
+                        }
+                    }
+                }
+                if(!save && index+1 <= a.length-1) {
+                    int end = i+1 < getList.size() ? getList.get(i+1) : a.length;
+                    
+                    for(int j = index+1; j < end; j++) {
+                        if(a[j] != key) {
+                            makingList.add(index);
+                            makingList.add(j);     
+                            break;
+                        }
+                    }
+                }
+            }
+
+            answer = makingList.size() > answer ? makingList.size() : answer;
+        }
+        
+        return answer;
+    }
+}
