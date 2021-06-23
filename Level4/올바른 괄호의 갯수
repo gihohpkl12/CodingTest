@@ -1,0 +1,74 @@
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.HashMap;
+
+class Solution {
+    public int solution(int n) {
+        Queue<Box> q = new LinkedList<>();
+        HashMap<String, String> map = new HashMap<>();
+        q.add(new Box(n*2));
+        
+        while(q.size() != 0) {
+            Box getBox = q.poll();
+            
+            if(getBox.count == 0) {
+                map.put(getBox.makingBox, "");
+                continue;
+            }
+            
+            if(getBox.puttingBoxCheck(0)) {
+                q.add(getBox.putBox(getBox, 0));
+            }
+            
+            if(getBox.puttingBoxCheck(1)) {
+                q.add(getBox.putBox(getBox, 1));
+            }
+        }
+        
+        return map.size();
+    }
+    
+    class Box {
+        int right = 0, left = 0, count;
+        String makingBox = "";
+        
+        public Box(int count) {
+            this.count = count;
+        }
+        
+        public Box(Box box) {
+            this.right = box.right;
+            this.left = box.left;
+            this.count = box.count;
+            this.makingBox = box.makingBox;
+        }
+        
+        public Box putBox(Box box, int type) {
+            Box resultBox = new Box(box);
+            
+            if(type == 0) {
+                resultBox.left += 1;
+                resultBox.makingBox += "(";
+            } else {
+                resultBox.right += 1;
+                resultBox.makingBox += ")";
+            }
+            resultBox.count -=1;
+            
+            return resultBox;
+        }
+        
+        public boolean puttingBoxCheck(int type) {
+            if(type == 0) {
+                if(this.left >= this.right && (this.left - this.right) < this.count) {
+                    return true;
+                }
+            }else {
+                if(this.left > this.right) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+}
