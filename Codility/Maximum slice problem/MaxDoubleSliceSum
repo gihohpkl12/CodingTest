@@ -1,1 +1,28 @@
-d
+https://app.codility.com/programmers/lessons/9-maximum_slice_problem/
+
+/*
+부분 합? 문제와 비슷한데 이렇게도 나눠서 생각할 수 있음.
+*/
+
+class Solution {
+    public int solution(int[] A) {
+       int[] left = new int[A.length], right = new int[A.length];
+       int answer = 0;
+
+       for(int i = 1; i <= A.length-2; i++) {
+           left[i] = left[i-1] + A[i];
+           left[i] = left[i] < 0 ? 0 : left[i];
+       }
+
+       for(int i = A.length-2; i >= 1; i--) {
+           right[i] = right[i+1] + A[i];
+           right[i] = right[i] < 0 ? 0 : right[i];
+       }
+
+       for(int i = 1; i < A.length-1; i++) {
+           answer = left[i-1] + right[i+1] > answer ? left[i-1] + right[i+1] : answer;
+       }
+       
+        return answer;
+    }
+}
