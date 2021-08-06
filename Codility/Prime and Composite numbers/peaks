@@ -1,0 +1,75 @@
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.HashSet;
+
+class Solution {
+    public int solution(int[] A) {
+        ArrayList<Integer> prime = new ArrayList<>();
+        ArrayList<Integer> index = new ArrayList<>();
+        HashSet<Integer> primeSet = new HashSet<>();
+        PriorityQueue<Integer> primeQ = new PriorityQueue<>();
+
+        for(int i = 1; i < Math.sqrt(A.length); i++) {
+            if(A.length % i == 0) {
+                prime.add(i);
+            }
+        }
+
+        for(int key : prime) {
+            primeSet.add(key);
+            primeSet.add(A.length/key);
+        }
+
+        if(Math.sqrt(A.length) % 1 == 0) {
+            primeSet.add((int)Math.sqrt(A.length));
+        }
+
+        for(int key : primeSet) {
+            primeQ.add(key);
+        }
+
+        for(int i = 1; i < A.length-1; i++) {
+            if(A[i] > A[i-1] && A[i] > A[i+1]) {
+                index.add(i);
+                i++;
+            }
+        }
+        
+        if(index.size() == 0) {
+            return 0;
+        }
+
+        int result = 0;
+        boolean check = true;
+        while(primeQ.size() > 0) {
+            result = primeQ.poll();
+            if(A.length/result > index.size()) {
+                continue;
+            }
+            check = true;
+
+            int start = 0, end = result-1;
+            for(int i = 0; i < index.size(); i++) {
+                if(index.get(i) >= start && index.get(i) <= end) {
+                    continue;
+                } else {
+                    start = end+1;
+                    end = start + result-1;
+                     if(index.get(i) >= start && index.get(i) <= end) {
+                        continue;
+                    } else {
+                        check = false;
+                        break;
+                    }
+                }
+            }
+
+            if(check && end == A.length-1) {
+                break;
+            }
+        }
+
+        return check ? A.length/result : 0;
+    }
+}
