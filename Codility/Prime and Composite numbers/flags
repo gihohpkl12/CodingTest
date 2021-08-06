@@ -1,54 +1,43 @@
 import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.Comparator;
-import java.util.HashMap;
 
 class Solution {
     public int solution(int[] A) {
-        HashMap<Integer, Integer> remove = new HashMap<>(); 
-        PriorityQueue<Flag> flags = new PriorityQueue<>(new Comparator<Flag>(){
-            public int compare(Flag o1, Flag o2) {
-                return o1.dis - o2.dis;
-            }
-        });
+        ArrayList<Integer> flags = new ArrayList<>();
 
-        int lastIndex = -1, index = 0;
         for(int i = 1; i < A.length-1; i++) {
             if(A[i] > A[i-1] && A[i] > A[i+1]) {
-               if(lastIndex != -1) {
-                   flags.add(new Flag(index, i - lastIndex));
-                   index++;
-               }
-               lastIndex = i;
-               i++;
+                flags.add(i);
+                i++;
             }
         }
 
-        while(flags.size() != 0) {
-            if(flags.peek().dis >= flags.size()+1) {
-                break;
-            } else {
-                Flag getFlag = flags.poll();
-                if(remove.containsKey(getFlag.index-1)) {
-                    getFlag.dis += remove.get(getFlag.index-1);
-                    flags.add(getFlag);
-                    continue;
+        if(flags.size() == 0) {
+            return 0;
+        }
+
+        int flagCount = (int)Math.sqrt(flags.get(flags.size()-1) - flags.get(0));
+        flagCount++;
+
+        while(flagCount > 0) {
+            int count = 1, lastIndex = flags.get(0);
+            for(int i = 1; i < flags.size(); i++) {
+                if(flags.get(i) - lastIndex < flagCount) {
+                    if(count + (flags.size()-i-1) < flagCount) {
+                        break;
+                    }
                 } else {
-                    remove.put(getFlag.index, getFlag.dis);
+                    count++;
+                    lastIndex = flags.get(i);
                 }
             }
+
+            if(count >= flagCount) {
+                break;
+            } else {
+                flagCount--;
+            }
         }
 
-        return flags.size()+1;
-    }
-
-    class Flag {
-        int index;
-        int dis;
-
-        public Flag(int index, int dis) {
-            this.index = index;
-            this.dis = dis;
-        }
+        return flagCount;
     }
 }
