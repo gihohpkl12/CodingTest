@@ -1,0 +1,64 @@
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Comparator;
+import java.util.Collections;
+import java.util.PriorityQueue;
+
+class Solution {
+    public int[] solution(int[] A) {
+        int[] answer = new int[A.length];
+        PriorityQueue<Integer> sortKey = new PriorityQueue<>();
+        HashMap<Integer, Integer> setOfA = new HashMap<>();
+        HashMap<Integer,  Integer> prime = new HashMap<>();
+
+        for(int i = 0; i < A.length; i++) {
+            sortKey.add(A[i]);
+            if(setOfA.containsKey(A[i])) {
+                setOfA.put(A[i], setOfA.get(A[i]) +1);
+            } else {
+                setOfA.put(A[i], 1);
+            }
+        }
+
+        int i = 0, size = sortKey.size();
+        while(sortKey.size() > 0) {
+            int key = sortKey.poll();
+            if(prime.containsKey(key)) {
+                i++;
+                continue;
+            } 
+
+            int count = i;
+            for(int j = 1; j < Math.sqrt(key); j++) {
+                if(key % j == 0) {
+                    if(setOfA.containsKey(j)) {
+                        count -= setOfA.get(j);
+                    }
+                    if(key/j != key && setOfA.containsKey((key/j))) {
+                        count -= setOfA.get(key/j);
+                    }
+                    if(count <= 0) {
+                        count = 0;
+                        break;
+                    }
+                }
+            }
+            
+            if(count > 0 && Math.sqrt(key) % 1 == 0 
+                         && setOfA.containsKey((int)Math.sqrt(key))) {
+                count -= setOfA.get((int)Math.sqrt(key));
+            }
+            
+            count += size - i -1;
+            count -= setOfA.get(key) -1;
+            prime.put(key, count);
+            i++;
+        }
+
+        for(int j = 0; j < A.length; j++) {
+            answer[j] = prime.get(A[j]);
+        }
+        
+        return answer;
+    }
+}
