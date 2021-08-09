@@ -5,7 +5,6 @@ class Solution {
     public int[] solution(int N, int[] P, int[] Q) {
         int[] answer = new int[P.length];
         HashMap<Integer, Integer> primeCheck = new HashMap<>();
-        HashMap<Integer, Integer> primeMap = new HashMap<>();
         int[] makingByPrime = new int[N+1];
         
         // N까지 소수를 구하면서, 이를 이용해서 소수로 만들 수 있는 숫자들 생성.
@@ -20,14 +19,12 @@ class Solution {
                 makingByPrime[i*i] = 1;
             }
 
-            
-            primeMap.put(i, 0);
             int count = 2;
             // 에스토스테네스의 체 규칙 적용. 2가 소수면 2의 배수는 전부 제거.
             while(i * count <= N) {
                 primeCheck.put(i*count, 0);
                 // i는 이미 소수로 판별이 된 숫자임. 그리고 count가 i 보다 작을 때, primeMap에 있다면 이는 i보다 이전에 나온 소수임. 고로 이걸로 숫자를 만듦.
-                if(count < i && primeMap.containsKey(count)) {
+                if(count < i && !primeCheck.containsKey(count)) {
                     makingByPrime[i*count] = 1;
                 }
                 count++;
