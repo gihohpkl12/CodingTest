@@ -1,0 +1,82 @@
+class Solution {
+    public int[] solution(String[][] places) {
+        int[] answer = new int[places.length];
+        
+        for(int i = 0; i < places.length; i++) {
+            String[] curRoom = places[i];
+            boolean result = true;
+            
+            for(int j = 0; j < curRoom.length; j++)  {
+                for(int k = 0; k < curRoom[j].length(); k++) {
+                    if(curRoom[j].charAt(k) == 'P') {
+                        result = checkDis(curRoom, j, k);
+                        if(!result) {
+                            break;
+                        }
+                    }
+                }
+                if(!result) {
+                    break;
+                }
+            }
+            
+            if(!result) {
+                answer[i] = 0;
+            } else {
+                answer[i] = 1;
+            }
+        }
+        return answer;
+    }
+    
+    public boolean checkDis(String[] curRoom, int x, int y) {
+        // 상부터 시계방향
+        int[][] move = {{-1, 0}, {-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}};
+        boolean result = true;
+        
+        for(int i = 0; i < move.length; i++) {
+            int[] add = move[i];
+            int curX = x, curY = y;
+            
+            if(i%2 == 0) {
+                for(int j = 0; j < 2; j++) {
+                    curX += add[0];
+                    curY += add[1];
+
+                    if(curX >= 0 && curX <= 4 && curY >= 0 && curY <= 4) {
+                        if(curRoom[curX].charAt(curY) == 'X') {
+                            break;
+                        } else if(curRoom[curX].charAt(curY) == 'P') {
+                            result = false;
+                            break;
+                        }
+                    }
+                }
+            
+                if(!result) {
+                    return result;
+                }
+            } else {
+                curX += add[0];
+                curY += add[1];
+                if(curX >= 0 && curX <= 4 && curY >= 0 && curY <= 4) {
+                    if(curRoom[curX].charAt(curY) == 'P') {
+                        int checkX = curX < x ? curX : x;
+                        int checkY = curY < y ? curY : y;
+                        
+                        if((checkX == x && checkY == y) || (checkX == curX && checkY == curY)) {
+                            if(curRoom[checkX].charAt(checkY+1) != 'X' || curRoom[checkX+1].charAt(checkY) != 'X') {
+                                return false;
+                            }
+                        } else {
+                            if(curRoom[checkX].charAt(checkY) != 'X' || curRoom[checkX+1].charAt(checkY+1) != 'X') {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }   
+        }
+        return result;
+    }
+}
