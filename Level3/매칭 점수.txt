@@ -1,167 +1,128 @@
-class Solution {
-   public int solution(String word, String[] pages) {
-        int answer = 0;
-        int length = pages.length;
-        page[] page_arr = new page[length];
-        
-        for(int i=0; i<length; i++)
-        {
-        	page_arr[i] = new page(pages[i]);
-        	page_arr[i].find_word(word, "<body>");
-        	page_arr[i].find_page_address_own("content=", "<head>");
-        	page_arr[i].find_out_link_address("<a href=", "<body>");
-        	page_arr[i].set_link_score();
+import java.util.HashMap;
+import java.util.ArrayList;
 
+/*
+로직
+웹페이지를 읽고, bagic link와 out link를 만듦.
+반복 횟수를 줄이기 위해서 out link가 생성됐을 때, map에 없더라도 일단 생성하고 외부 링크값을 넣어줌.
+나중에 위의 out link가 bagic link로 나왔을 때, 나머지 값을 넣어줌.
+단, 외부 링크가 꼭 bagic link로 나오는 건 아님.
+따라서 외부링크지만 우선적으로 추가한 경우에는 index를 -1로 넣고, 마지막으로 값을 비교할 때 -1은 넘어감.
+*/
+class Solution {
+    public int solution(String word, String[] pages) {
+        int answer = 0;
+        HashMap<String, Page> pageData = new HashMap<>();
+        word = word.toLowerCase();
+        
+        for(int i = 0; i < pages.length; i++) {
+            String page = pages[i];
+            String head = page.substring(page.indexOf("<meta property="), page.indexOf("</head>"));
+            String body = page.substring(page.indexOf("<body>"), page.indexOf("</body>"));
+            String addr = head.substring(head.indexOf("<meta property="), head.indexOf("\"/>"));
+            addr = head.substring(head.indexOf("http"), head.indexOf("/>"));
+            addr = addr.replace("\"", "");
+            double bagicCount = 0;    
+            
+            // 우선 나왔던 외부 링크인 경우 체크
+            Page curPage;
+            if(pageData.containsKey(addr)) {
+                curPage = pageData.get(addr);
+                curPage.index = i;
+            } else {
+                curPage = new Page(addr);
+                curPage.index = i;
+            }
+            
+            // 외부 링크 계산
+            int index = 0;
+            while(index != -1) {
+                index = body.indexOf("<a href=\"https", index);
+                
+                if(index != -1) {
+                    curPage.link.add(body.substring(body.indexOf("https", index), body.indexOf("\">", index)));
+                    index++;
+                }
+            }
+            
+            // 기본 점수 계산
+            index = 0;
+            body = body.toLowerCase();
+            while(index != -1) {
+                index = body.indexOf(word, index);
+                if(index != -1) {
+                    char front = body.charAt(index-1), end = body.charAt(index+word.length());
+                    index++;
+                    if(front >= 'a' && front <= 'z') {
+                        continue;
+                    }
+                    
+                    if(end >= 'a' && end <= 'z') {
+                        continue;
+                    }
+                    bagicCount++;
+                }
+            }
+            curPage.bagicScore = bagicCount;
+            
+            // 외부 링크 점수 계산 및 기존에 나온 링크가 아닌 경우에 우선적으로 넣어줌.
+            for(String outLink : curPage.link) {
+                if(pageData.containsKey(outLink)) {
+                    pageData.get(outLink).linkScore += bagicCount/curPage.link.size();
+                } else {
+                    pageData.put(outLink, new Page(outLink));
+                    pageData.get(outLink).linkScore += bagicCount/curPage.link.size();
+                }
+            }
+            pageData.put(addr, curPage);
         }
-        //System.out.println("out_address~ "+page_arr[1].out_address[1]);
-        for(int i=0; i<length; i++)
-        {
-        	page_arr[i].give_match_score(page_arr, i);
+        
+        double maxScore = -1;
+        for(String addr : pageData.keySet()) {
+            Page curPage = pageData.get(addr);
+            if(curPage.index == -1) {
+                continue;
+            }
+            
+            double score = curPage.bagicScore + curPage.linkScore;
+            if(score > maxScore) {
+                maxScore = score;
+                answer = curPage.index;
+            } else if(score == maxScore) {
+                answer = answer > curPage.index ? curPage.index : answer;
+            }
         }
-        float max=page_arr[0].matching_score;
-        answer = 0;
-        for(int i=1; i<length; i++)
-        {
-        	if(page_arr[i].matching_score>max)
-        	{
-        		max = page_arr[i].matching_score;
-        		answer = i;
-        	}
-        }
-    
+        
+        // for(String key : pageData.keySet()) {
+        //     Page cur = pageData.get(key);
+        //     System.out.println("addr "+ cur.addr);
+        //     System.out.println("index "+ cur.index);
+        //     System.out.println("score "+cur.bagicScore);
+        //     System.out.println("score - out "+cur.linkScore);
+        //     System.out.println("total  "+((float)cur.linkScore+cur.bagicScore));
+        //     System.out.println("link "+ cur.link.size());
+        //     for(String a : cur.link) {
+        //         System.out.println(" -> "+a);
+        //     }
+        //     System.out.println();
+        // }
+        
         return answer;
     }
-	
-	class page
-	{
-		float word_count = 0;
-		float out_link_count = 0;
-		String page_address;
-		String[] out_address;
-		String total;
-		float link_score = 0;
-		float matching_score = 0;
-		public page(String page_info)
-		{
-			this.total = page_info;
-		}
-		public void find_page_address_own(String word, String for_split)
-		{
-			int start_index = this.total.indexOf("<meta property=");
-			String a = for_split.replace("<", "</");;
-			int end_index = this.total.indexOf(a);
-			String temp_total = this.total.substring(start_index,end_index);
-			int index = temp_total.indexOf(word);
-			int end = temp_total.indexOf("/>");
-			this.page_address = temp_total.substring(index+word.length(),end);
-			this.page_address = this.page_address.replaceAll("\"", "");
-			//System.out.println("this is my page |"+this.page_address+"|");
-			
-		}
-		// must fix it!. word must be find by word. considering space! 
-		public void find_word(String word, String for_split)
-		{
-			int start_index = this.total.indexOf(for_split);
-			String a =for_split.replace("<", "</");;
-			int end_index = this.total.indexOf(a);
-			String temp_total = this.total.substring(start_index, end_index);
-			temp_total = temp_total.toLowerCase();
-			word = word.toLowerCase();
-			int index = 0;
-			int count = 0;
-			while(index!=-1)
-			{
-				index = temp_total.indexOf(word,index+1);
-				if(index!=-1)
-				{
-					if((int)temp_total.charAt(index-1)>=65 && (int)temp_total.charAt(index-1) <= 90)
-					{
-						//System.out.println("one "+temp_total.substring(index-1,index+5)+" sival "+temp_total.charAt(index-1));
-					}
-					else if((int)temp_total.charAt(index-1)>=97 && (int)temp_total.charAt(index-1) <= 122)
-					{
-						//System.out.println("two "+temp_total.substring(index-1,index+5)+" sival "+temp_total.charAt(index-1));
-					}
-					else if((int)temp_total.charAt(index+word.length())>=65 && (int)temp_total.charAt(index+word.length()) <= 90)
-					{
-						//System.out.println("tre "+temp_total.substring(index-1,index+5)+" sival "+temp_total.charAt(index+word.length()));
-					}
-					else if((int)temp_total.charAt(index+word.length())>=97 && (int)temp_total.charAt(index+word.length()) <= 122)
-					{
-						//System.out.println("four "+temp_total.substring(index-1,index+5)+" sival "+temp_total.charAt(index+word.length()));
-					}
-					else
-					{
-						//System.out.println("fuck "+temp_total.substring(index-1,index+5)+" sival "+temp_total.charAt(index-1));
-						count++;
-					}
-				}
-			}
-			this.word_count = count;
-			this.matching_score += this.word_count;
-			
-		}
-		public void find_out_link_address(String word, String for_split)
-		{
-			int start_index = this.total.indexOf(for_split);
-			String a =for_split.replace("<", "</");;
-			int end_index = this.total.indexOf(a);
-			String temp_total = this.total.substring(start_index, end_index);
-			int href_index=0;
-			int link_count =0;
-			while(href_index!=-1)
-			{
-				href_index = temp_total.indexOf(word,href_index+1);
-				if(href_index!=-1)
-				{
-					link_count++;
-					
-				}
-			}
-			this.out_link_count = link_count;
-			if(link_count!=0)
-			{
-				this.out_address = temp_total.substring(temp_total.indexOf(word)+word.length()).split(word);
-				for(int i=0; i<out_address.length; i++)
-				{
-					//System.out.println("before change |"+out_address[i]);
-					int loc = out_address[i].indexOf(">");
-					out_address[i] = out_address[i].substring(0,loc);
-					out_address[i] = out_address[i].replaceAll("\"", "");
-					//System.out.println("after change |"+out_address[i]+"|");
-				}
-			}
-			
-		}
-		public void set_link_score()
-		{
-			if(this.word_count!=0 && this.out_link_count!=0)
-			{
-				this.link_score = (float)this.word_count/(float)this.out_link_count;
-			}
-			
-		}
-		public void give_match_score(page[] page,int index)
-		{
-			if(this.out_address!=null && this.out_address.length!=0)
-			{
-				//System.out.println("hi "+this.page_address);
-				for(int i =0; i<this.out_address.length;i++)
-				{
-					for(int j=0;j<page.length;j++)
-					{
-						if(j!=index)
-						{
-							if(this.out_address[i].equals(page[j].page_address))
-							{
-
-								page[j].matching_score+=(float)this.link_score;
-							}
-						}
-					}
-				}
-			}
-			
-		}
-	}
+    
+    class Page {
+        int index;
+        double bagicScore;
+        double linkScore;
+        ArrayList<String> link;
+        String addr;
+        
+        public Page(String addr) {
+            this.addr = addr;
+            this.index = -1;
+            this.bagicScore = 0;
+            this.link = new ArrayList<>();
+            this.linkScore = 0;
+        }
+    }
 }
