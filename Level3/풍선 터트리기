@@ -2,6 +2,25 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /*
+어떤 인덱스를 하나 고름.
+그 인덱스를 기준으로 오른쪽, 왼쪽에 자기보다 작은 놈이 하나만 있으면 살 수 있음.
+양쪽 모두에 자기보다 작은 애가 있으면 살 수 없음.
+(한 쪽에만 있으면 살 수 있는 이유가 1회권을 쓰면 됨.)
+
+++ 왼쪽, 오른쪽에 작은 것이 있는지 확인하는 법.
+반복문 1회에 왼쪽, 오른쪽을 모두 체크가 가능함.
+왼쪽을 기준으로 적으면(오른쪽은 인덱스만 반대로 하면 됨.)
+맨 왼쪽은 무조건 성공임. 얘보다 왼쪽에 작은 애가 없으니까.
+그래서 1번부터 시작하고, 최소값은 0번 인덱스로 시작함.
+1번부터 현재 최소값이 본인보다 작다? 그럼 본인보다 작은 애가 왼쪽에 있으므로 true임.
+만약 현재 최소값이 본인보다 크다? 그럼 최소값을 갱신하고 본인은 false임.
+왜냐? 본인 이전에 제일 최소값이 자기보다 크니까 자기보다 왼쪽에는 본인보다 작은 애가 없음.
+오른쪽은 인덱스만 반대로
+*/
+
+
+
+/*
 내 풀이랑 다른 사람 풀이가 같이 있음.
 아이디어는 다른 사람 풀이가 더 좋음.
 근데 속도는 내 풀이가 더 빠름. (자료구조 차이인 듯)
@@ -21,37 +40,41 @@ class Solution {
         }
 
         return map.size();
-        // 이 줄 기준, 상단은 타인 하단은 내 풀이.
-        /*
-        int answer = 0;
-        boolean[] leftCheck = new boolean[a.length];
-        boolean[] rightCheck = new boolean[a.length];
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------
+// 이 줄 기준, 상단은 타인 하단은 내 풀이.
+
+class Solution {
+    public int solution(int[] a) {
+        int answer = a.length;
+        boolean[] leftStart = new boolean[a.length];
+        boolean[] rightStart = new boolean[a.length];
         
-        int min = Integer.MAX_VALUE;
-        for(int i = 0; i < a.length; i++) {
-            if(a[i] < min) {
-                min = a[i];
+        int leftMin = a[0], leftMinIndex = 0;
+        int rightMin = a[a.length-1], rightMinIndex = a.length-1;
+        for(int i = 1; i < a.length; i++) {
+            if(a[i] > leftMin) {
+                leftStart[i] = true;
             } else {
-                leftCheck[i] = true;
+                leftMin = a[i];
+                leftMinIndex = i;
+            }
+            
+            if(a[a.length-1-i] > rightMin) {
+                rightStart[a.length-1-i] = true;
+            } else {
+                rightMin = a[a.length-1-i];
+                rightMinIndex = a.length-1-i;
             }
         }
         
-        min = Integer.MAX_VALUE;
-        for(int i = a.length-1; i >= 0; i--) {
-            if(a[i] < min) {
-                min = a[i];
-            } else {
-                rightCheck[i] = true;
-            }
-        }
-        
         for(int i = 0; i < a.length; i++) {
-            if(!rightCheck[i] || !leftCheck[i]) {
-                answer++;
+            if(leftStart[i] && rightStart[i]) {
+                answer--;
             }
         }
         
         return answer;
-        */
     }
 }
