@@ -94,3 +94,79 @@ class Solution {
         return answer;
     }
 }
+
+------------------------------------------------------------------------------------------------------
+// import java.util.Stack;
+
+// class Solution {
+//     public String[] solution(String[] s) {
+//         String[] answer = new String[s.length];
+        
+//         for(int i = 0; i < s.length; i++) {
+//             Stack<Character> stack = new Stack<>();
+//             int count = 0;
+//             String cur = s[i];
+            
+//             for(int j = 0; j < cur.length(); j++) {
+//                 if(stack.size() < 2) {
+//                     stack.add(cur.charAt(j));
+//                     continue;
+//                 }
+//                 if(cur.charAt(j) == '0' && stack.size() > 1) {
+//                     char first = stack.pop(), second = stack.pop();
+//                     if(first == '1' && second == '1') {
+//                         count++;
+//                     } else {
+//                         stack.add(second);
+//                         stack.add(first);
+//                         stack.add('0');
+//                     }
+//                 } else {
+//                     stack.add(cur.charAt(j));
+//                 }
+//             }
+            
+//             StringBuilder sb = new StringBuilder();
+//             while(count > 0) {
+//                 sb.append("110");
+//                 count--;
+//             }
+//             if(stack.size() == 0) {
+//                 answer[i] = sb.toString();
+//                 continue;
+//             }
+            
+//             StringBuilder recover = new StringBuilder();
+//             int lastZeroIndex = -1, firstOneIndex = -1, curIndex = stack.size()-1;
+//             while(stack.size() > 0) {
+//                 char get = stack.pop();
+                
+//                 if(get == '0') {
+//                     if(lastZeroIndex == -1) {
+//                         lastZeroIndex = curIndex;    
+//                     }
+//                     recover.insert(0, "0"); 
+//                 } else {
+//                     if(recover.length() > 0 && recover.charAt(0) == '1') {
+//                         firstOneIndex = curIndex;
+//                     }
+//                     recover.insert(0, '1');
+//                 }
+//                 curIndex--;
+//             }
+            
+//             lastZeroIndex = lastZeroIndex == -1 ? recover.length() : lastZeroIndex;
+//             if(recover.length() == 1 && recover.charAt(0) == '1') {
+//                 recover.insert(0, sb.toString());
+//             } else if(firstOneIndex != -1) {
+//                 recover.insert(firstOneIndex, sb.toString());
+//             } else {
+//                 recover.insert(lastZeroIndex+1, sb.toString());
+//                 // System.out.println(lastZeroIndex+" "+recover+" "+sb);
+//             }
+            
+//             answer[i] = recover.toString();
+//         }
+//         return answer;
+//     }
+// }
