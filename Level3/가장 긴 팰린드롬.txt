@@ -1,69 +1,39 @@
-class Solution
-{
-    public int solution(String s)
-    {
-		int answer = s.length()==0? 0 : 1;
-		String[] sArr = s.split("");
-		for(int i = 1; i<= sArr.length-1; i++)
-		{
-			
-			if(i+1<=sArr.length-1 && sArr[i-1].equals(sArr[i+1]) || i+1<=sArr.length-1 && sArr[i].equals(sArr[i+1]))
-			{
-				if(sArr[i-1].equals(sArr[i+1]))
-				{
-					int temp = palindrome(1,i,sArr);
-					answer = temp>answer ? temp : answer;
-				}
-				if(sArr[i].equals(sArr[i+1]))
-				{
-					int temp = palindrome(2,i,sArr);
-					answer = temp>answer ? temp : answer;
-				}
-			}
-		}
-		return answer;
+/*
+크게 생각할 게 없었던 문제.
+1부터 s의 끝가지 돌면서 확인함.
+확인할 유형은 2가지임.(홀수형, 짝수형)
+
+홀수형 조건은 현재 인덱스 기준으로 좌우가 같으면 1씩 범위를 늘리면서 체크함.
+ex.	aba
+
+짝수형 조건은 현재 인덱스 기준으로 다음 인덱스의 값이 같으면 마찬가지로 범위를 1씩 늘리면서 체크함
+ex. abba
+*/
+class Solution {
+    public int solution(String s) {
+        int answer = 1;
+        for(int i = 1; i < s.length(); i++) {
+            int count = 1;
+            while(i-count >= 0 && i+count <= s.length()-1) {
+                if(s.charAt(i-count) == s.charAt(i+count)) {
+                    answer = count*2+1 > answer ? count*2+1 : answer;
+                    count++;
+                } else {
+                    break;
+                }
+            }
+            count = 1;
+            if(i+count <= s.length()-1 && s.charAt(i+1) == s.charAt(i)) {
+                while(i-count >= 0 && i+count+1 <= s.length()-1) {
+                    if(s.charAt(i-count) == s.charAt(i+count+1)) {
+                        answer = count*2+2 > answer ? count*2+2 : answer;
+                        count++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        return answer;
     }
-	public int palindrome(int type, int index, String[] s)
-	{
-		int length=1;
-		int gap =1;
-		if(type==1)
-		{
-			while(true)
-			{
-				if(index-gap>=0 && index+gap<=s.length-1)
-				{
-					if(s[index-gap].equals(s[index+gap]))
-					{
-						length = (index+gap) - (index-gap)+1;
-						gap++;
-					}
-					else
-						break;
-				}
-				else
-					break;
-			}
-		}
-		else if(type==2)
-		{
-			length =2;
-			gap = 0;
-			while(true)
-			{
-				if(index-gap>=0 && index+gap+1<=s.length-1)
-				{
-					if(s[index+gap+1].equals(s[index-gap]))
-					{
-						length = (index+gap+1) -(index-gap) +1;
-						gap ++;
-					}else
-						break;
-				}
-				else 
-					break;
-			}
-		}
-		return length;
-	}
 }
