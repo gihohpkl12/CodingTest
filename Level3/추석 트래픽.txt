@@ -1,37 +1,54 @@
+/*
+고려해야할 점.
+1. 소수 String을 Float으로 바꿀 때, 값이 제대로 전환 안 될 수 있음.
+Math.round 해야 함.
+
+2. 끝나는 시간을 기준으로 되어있는데, 안 맞는다고 break하면 안 됨. 
+시작시간이 한참 전에 시작할 수 있어서 끝까지 돌아야 함.
+*/
 class Solution {
-   public int solution(String[] lines) {
-	      int answer = 0;
-	      int[][] time = new int[lines.length][2];
-	      
-	      for(int i=0; i< lines.length; i++)
-	      {
-	    	  String[] end = lines[i].split(" ");
-	    	  time[i][1] = make_time(end[1]);
-	    	  time[i][0] = time[i][1] - (int)(Math.round((Float.parseFloat(end[2].replace("s", ""))*1000)))+1;
-	      } 
-	      for(int i=0; i<time.length; i++)
-	      {
-	    	  int work =1;
-	    	  int standard = time[i][1];
-	    	  for(int j=i; j<time.length; j++)
-	    	  {
-	    		  if(i==j) continue;
-	    		  if( time[j][1]-standard<1000 || (time[j][0]-standard<1000 && time[j][0]-standard>0 ) || (time[j][0]<=standard && time[j][1]>=standard) )
-	    			  work++;
-	    	  }
-	    	  answer = Math.max(answer, work);
-	      }
-	     
-	      
-	      return answer;
-	  }
-	
-	 public int make_time(String day)
-	 {
-		 String[] temp = day.split(":");
-		 int time = Integer.parseInt(temp[0])*60*60*1000;
-		 time += Integer.parseInt(temp[1])*60*1000;
-		 time +=  (int)Math.round((Float.parseFloat(temp[2])*1000));
-		 return time;
-	 }
+    public int solution(String[] lines) {
+        int answer = 0, index = 0;
+        int[][] timeRecord = new int[lines.length][2];
+        
+        // time change start
+        for(String line : lines) {
+            String[] times = line.split(" ");
+            int end = timeConversionToNum(times[1]);
+            int start = end - timeConversionToNum(times[2])+1;
+            timeRecord[index][0] = start;
+            timeRecord[index++][1] = end;
+        }
+        
+        // time count start
+        for(int i = 0; i < timeRecord.length; i++) {
+            int curStart = timeRecord[i][0], curEnd = timeRecord[i][1];
+            int count = 1;
+            
+            for(int j = i+1; j < timeRecord.length; j++) {
+                int nextStart = timeRecord[j][0], nextEnd = timeRecord[j][1];
+                if(curEnd >= nextStart || (curEnd <= nextStart && nextStart - curEnd < 1000)) {
+                    count++;
+                }
+            }
+            answer = count > answer ? count : answer;
+        }
+        
+        return answer;
+    }
+    
+    public int timeConversionToNum(String time) {
+        int result = 0;
+        if(time.indexOf(":") != -1) {
+            String[] hourMinuteSecond = time.split(":");
+            result = Integer.parseInt(hourMinuteSecond[0])*1000*60*60;
+            result += Integer.parseInt(hourMinuteSecond[1])*1000*60;
+            result += (int)(Math.round(Float.parseFloat(hourMinuteSecond[2])*1000));
+        } else {
+            time = time.replace("s", "");
+            result = (int)(Math.round(Float.parseFloat(time)*1000));
+        }
+        
+        return result;
+    }
 }
