@@ -1,38 +1,52 @@
 import java.util.HashMap;
+
+/*
+DP라는데, DP인줄 몰랐던 문제.
+경우의 수로 분류하는 게 더 맞는 듯.
+전형적인 경우의 수 문제로, 경우의 수를 빨리 파악하는 게 중요함.
+i = 4일 때, 생성되는 경우의 수는
+3개에서 1개씩 사칙연산만 하면 되는 게 아님.
+1 & 3
+2 & 2
+3 & 1
+그리고 /나 -의 경우에는 순서에 따라 값이 바뀜을 알아야 함
+*/
 class Solution {
     public int solution(int N, int number) {
-        int answer = -1;
-        int nn = N;
-        HashMap<Integer, Integer>[] numMap = new HashMap[9];
+        int answer = -1, increseNum = 1, nn = N;
+        HashMap<Integer, Integer>[] cases = new HashMap[9];
         
-        for(int i = 1; i <= 8; i++) {
-            numMap[i] = new HashMap<>();
-            numMap[i].put(nn, 0);
-            nn = nn*10 + N;
+        for(int i = 1; i < cases.length; i++) {
+            cases[i] = new HashMap<>();
+            cases[i].put(nn, 0);
+            increseNum *= 10;
+            nn += increseNum * N;
         }
         
-        for(int i = 1; i <= 8; i++) {
+        for(int i = 1; i < cases.length; i++) {
             for(int j = 1; j <= i/2; j++) {
-                for(int firstKey : numMap[j].keySet()){
-                    for(int secondKey : numMap[i-j].keySet()) {
-                        numMap[i].put(firstKey+secondKey, 0);
-                        numMap[i].put(firstKey*secondKey, 0);
+                for(int first : cases[j].keySet()) {
+                    for(int second : cases[i-j].keySet()) {
+                        cases[i].put(first+second, 0);
+                        cases[i].put(first*second, 0);
                         
-                        if(firstKey - secondKey > 0) {
-                            numMap[i].put(firstKey-secondKey, 0);    
+                        if(first - second > 0) {
+                            cases[i].put(first - second, 0);
                         }
-                        if(firstKey/secondKey > 0) {
-                            numMap[i].put(firstKey/secondKey, 0);
+                        if(first / second > 0) {
+                            cases[i].put(first / second, 0);
                         }
-                        if(secondKey/firstKey > 0) {
-                            numMap[i].put(secondKey/firstKey, 0);
+                        if(second / first > 0) {
+                            cases[i].put(second / first, 0);
                         }
                         
+                        if(second - first > 0) {
+                            cases[i].put(second - first, 0);
+                        }
                     }
                 }
             }
-            //System.out.println(numMap[i].keySet());
-            if(numMap[i].keySet().contains(number)) {
+            if(cases[i].containsKey(number)) {
                 answer = i;
                 break;
             }
