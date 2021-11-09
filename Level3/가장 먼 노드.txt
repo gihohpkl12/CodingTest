@@ -1,3 +1,65 @@
+/*
+플로이드 와샬 vs 다익스트라 중에 선택하는 문제.
+여기서는 다익스트라를 선택할 듯.
+*/
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+
+class Solution {
+    public int solution(int n, int[][] edge) {
+        int answer = 0, max = 0;
+        int[] values = new int[n+1];
+        HashMap<Integer, ArrayList<Integer>> roads = new HashMap<>();
+        
+        for(int i = 0; i < values.length; i++) {
+            values[i] = -1;
+        }
+        values[1] = 0;
+        
+        for(int[] road : edge) {
+            int start = road[0], end = road[1];
+            
+            if(roads.containsKey(start)) {
+                roads.get(start).add(end);
+            } else {
+                roads.put(start, new ArrayList<Integer>());
+                roads.get(start).add(end);
+            }
+            
+            if(roads.containsKey(end)) {
+                roads.get(end).add(start);
+            } else {
+                roads.put(end, new ArrayList<Integer>());
+                roads.get(end).add(start);
+            }
+        }
+        
+        Queue<Integer> q = new LinkedList<>();
+        q.add(1);
+        
+        while(q.size() != 0) {
+            int cur = q.poll(), curDis = values[cur];
+           
+            for(int next : roads.get(cur)) {
+                if(values[next] == -1 && next != 1) {
+                    values[next] = curDis +1;
+                    q.add(next);
+                    
+                     if(max < curDis +1) {
+                        max = curDis+1;
+                        answer = 1;
+                    } else {
+                         answer++;
+                     }
+                }
+            }
+        }
+        return answer;
+    }
+}
+----------------------------------------------------------------------------------------------------------------------
 // 효율성 갱신 
 import java.util.ArrayList;
 import java.util.LinkedList;
