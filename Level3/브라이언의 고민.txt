@@ -1,91 +1,201 @@
-import java.util.LinkedHashMap; 
-class Solution {
-public String solution(String sentence)
-	{
-		String answer ="";
-		LinkedHashMap<String,int[]> map_index = new LinkedHashMap<>(); 
-		LinkedHashMap<String,Integer> map_count = new LinkedHashMap<>();
-		LinkedHashMap<String,int[]> map_index_inner = new LinkedHashMap<>();
-		int[] arr = new int[sentence.length()];
-		for(int i =0; i<sentence.length(); i++)
-		{
-			if(sentence.substring(i,i+1).charAt(0)<'A' || sentence.substring(i,i+1).charAt(0)>'Z')
-			{
-				int[] index = new int[2];
-				index[0] = i;
-				index[1] = sentence.lastIndexOf(sentence.substring(i,i+1));
-				
-				map_index.put(sentence.substring(i,i+1), index);
-				if(index[0]!=index[1])
-					map_count.put(sentence.substring(i,i+1), 2);
-				else
-					map_count.put(sentence.substring(i,i+1), 1);
-				int count =0;
-				for(int j =index[0]+1; j<index[1]; j++)
-				{
-					if(sentence.substring(j,j+1).charAt(0)<'A' || sentence.substring(j,j+1).charAt(0)>'Z')
-					{
-						if(map_count.containsKey(sentence.substring(j,j+1)))
-							map_count.replace(sentence.substring(j,j+1), map_count.get(sentence.substring(j,j+1))+1);
-						else
-						{
-							map_count.put(sentence.substring(j,j+1), 1);
-							count++;
-							if(count>=2)
-							{
-								answer = "invalid";
-								return answer;
-							}
-						}
-						if(!map_index_inner.containsKey(sentence.substring(j,j+1)))
-						{
-							int[] index2 = new int[2];
-							index2[0] = j;
-							index2[1] = sentence.lastIndexOf(sentence.substring(j,j+1));
-							map_index_inner.put(sentence.substring(j,j+1), index2);
-						}		
-					}
-				}
-				i = index[1];
-			}
-		}
-		for(String i : map_index.keySet())
-		{
-			int start = map_index.get(i)[0];
-			int end = map_index.get(i)[1];
-			if(map_count.get(i)==2)
-				sentence = sentence.replace(i," ");
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.Stack;
 
-			else if(map_count.get(i)==1)
-			{
-				if(end-start!=0)
-					return "invalid";
-				else if(end-start ==0)
-				{
-					start = sentence.indexOf(i)-1;
-					sentence = sentence.substring(0,start)+" "+sentence.substring(start,sentence.length());
-					end = sentence.lastIndexOf(i)+1;
-					sentence = sentence.substring(0,end+1)+" "+sentence.substring(end+1,sentence.length());
-					sentence = sentence.replace(i, "*");
-				}
-			}
-			else if(map_count.get(i)>2)
-			{
-				start = sentence.indexOf(i)-1;
-				sentence = sentence.substring(0,start)+" "+sentence.substring(start,sentence.length());
-				end = sentence.lastIndexOf(i)+1;
-				sentence = sentence.substring(0,end+1)+" "+sentence.substring(end+1,sentence.length());
-				sentence = sentence.replace(i, "*");	
-			}
-		}
-		for(String i : map_index_inner.keySet())
-			sentence = sentence.replace(i, "*");
-		sentence = sentence.replace("*",""); 
-		sentence = sentence.replace("  ", " ");
-		sentence = sentence.replace("  ", " ");
-        answer = sentence;
-        answer = answer.trim();
+class Solution {
+    public String solution(String sentence) {
+        StringBuilder answer = new StringBuilder();
+        LinkedHashMap<Character, ArrayList<Integer>> ads = new LinkedHashMap<>();
+        LinkedHashMap<Integer, Character> indexs = new LinkedHashMap<>();
+        int lastSaveIndex = -1;
+        
+        if(sentence.indexOf(" ") != -1) {
+            return "invalid";
+        }
+        
+        for(int i = 0; i < sentence.length(); i++) {
+            if(lowerCaseCheck(sentence.charAt(i))) {
+                char key = sentence.charAt(i);
+                if(ads.containsKey(key)) {
+                    ads.get(key).add(i);
+                } else {
+                    ads.put(key, new ArrayList<Integer>());
+                    ads.get(key).add(i);
+                }
+                indexs.put(i, key);
+            }
+        }
+        
+        for(char key : ads.keySet()) {
+            ArrayList<Integer> indexList = new ArrayList<>();
+            ArrayList<Integer> adsList = ads.get(key);
+            
+            // 2개짜리
+            if(adsList.size() == 2) {
+            // 거리가 2이상이어야 함.
+                // 거리가 2가 넘어갈 때
+                if(adsList.get(1) - adsList.get(0) > 2) {
+                    // 중간에 다른 광고문자가 끼어있음.
+                    if(lowerCaseCheck(sentence.charAt(adsList.get(0)+2))) {
+                        for(int i = adsList.get(0) +1; i < adsList.get(1); i++) {
+                            // 소문자 자리에 대문자가 나옴.
+                            if((i - adsList.get(0)) % 2 == 0 && !lowerCaseCheck(sentence.charAt(i))) {
+                                return "invalid";
+                            // 대문자 자리에 소문자가 나옴 
+                            } else if((i - adsList.get(0)) % 2 == 1 && lowerCaseCheck(sentence.charAt(i))) {
+                                return "invalid";
+                            // 소문자는 2개만 나와야 하는데 3개가 나옴.
+                            } else if(lowerCaseCheck(sentence.charAt(i)) && sentence.charAt(i) != indexs.get(adsList.get(0)) && sentence.charAt(i) != indexs.get(adsList.get(0)+2)) {
+                                return "invalid";
+                            }
+                         }
+                    } else {
+                        // 중간에 소문자가 나오면 안 되는 케이스인데 소문자가 나옴
+                        for(int i = adsList.get(0) +1; i < adsList.get(1); i++) {
+                            if(lowerCaseCheck(sentence.charAt(i))) {
+                                return "invalid";
+                            }
+                         }
+                    }
+                    // aAa 같은 케이스인데, 가운데 대문자가 나와야 하는데 소문자가 나옴
+                } else if(adsList.get(1) - adsList.get(0) == 2) {
+                    if(lowerCaseCheck(sentence.charAt(adsList.get(0)+1))) {
+                        return "invalid";
+                    }
+                } else {
+                    return "invalid";
+                }
+            // 1개짜리
+            } else if(adsList.size() == 1) {
+            // 위치가 0이나 마지막이면 안 됨.
+            // 앞 뒤로 대문자가 아니면 안 됨.
+                if(adsList.get(0) == 0 || adsList.get(0) == sentence.length()-1) {
+                    return "invalid";
+                } else if(lowerCaseCheck(sentence.charAt(adsList.get(0)-1)) || lowerCaseCheck(sentence.charAt(adsList.get(0)+1))) {
+                    return "invalid";
+                }
+                
+            // 3개 이상짜리
+            } else {
+                // 1번 규칙으로 맨 처음과 맨 마지막으로 나온 소문자의 앞과 뒤에 대문자가 나와야 함.
+                if(adsList.get(0) -1 >= 0 && adsList.get(adsList.size()-1) +1 <= sentence.length()-1) {
+                    if(lowerCaseCheck(sentence.charAt(adsList.get(0)-1)) || lowerCaseCheck(sentence.charAt(adsList.get(adsList.size()-1)+1))) {
+                        return "invalid";
+                    }
+                } else {
+                    return "invalid";
+                }
+                // 1번 규칙에서 인덱스들 사이에 거리가 2가 아니면 invalid임. ed AaAaAaa or AaAAa 이런 식.
+                for(int i = 1; i < adsList.size(); i++) {
+                    if(adsList.get(i) - adsList.get(i-1) != 2) {
+                        return "invalid";
+                    } else if(lowerCaseCheck(sentence.charAt(adsList.get(i)-1))) {
+                        return "invalid";
+                    }
+                }
+            }
+        }
+        // 위는 1차로 검증하는 로직.
+        // 아래부터는 저장하는 로직.
+        // 저장할 때, 이미 저장된 부분을 또 저장하려고 하면 invalid 해야 함.
+        // 앞에서 소문자가 없어서 그냥 넘어간 부분들은 우선적으로 저장을 해줘야 함. ex. AAAaAAa면 앞에 AA를 먼저 저장해줘야 함
+        for(int i = 0; i < sentence.length(); i++) {
+            // 소문자가 있는 위치.
+            // 2번과 1번 규칙 중에 무조건 2번 규칙이 먼저 나오게 됨으로 해당 소문자 저장 처리를 끝낸 다음 위치로 i를 이동시킴.
+            if(indexs.containsKey(i)) {
+                ArrayList<Integer> adsIndexList = ads.get(sentence.charAt(i));
+                String sub = "";
+                
+                if(adsIndexList.size() == 2) {
+                    // 2번 규칙인데, 1번 규칙도 중첩된 경우
+                    if(i+2 <= sentence.length()-1 && indexs.containsKey(i+2) && indexs.get(i) != indexs.get(i+2)) {
+                        // 저장한 부분 다시 저장하려고 하면 invalid
+                        if(lastSaveIndex != -1 && adsIndexList.get(0)+1 <= lastSaveIndex) {
+                            System.out.println(lastSaveIndex+" "+answer);
+                            return "invalid";
+                        }
+                        saveForPass(adsIndexList.get(0)-1, answer, sentence, lastSaveIndex);
+                        sub = sentence.substring(adsIndexList.get(0)+1, adsIndexList.get(1));
+                        sub = sub.replace(String.valueOf(indexs.get(i)), "");
+                        sub = sub.replace(String.valueOf(indexs.get(i+2)), "");
+                        lastSaveIndex = adsIndexList.get(1);
+                        saveForRemoveAd(sub, answer);
+                    // 2번 규칙만 적용된 부분
+                    } else {
+                        if(lastSaveIndex != -1 && adsIndexList.get(0)+1 <= lastSaveIndex) {
+                            System.out.println(lastSaveIndex+" "+answer);
+                            return "invalid";
+                        }
+                        saveForPass(adsIndexList.get(0)-1, answer, sentence, lastSaveIndex);
+                        sub = sentence.substring(adsIndexList.get(0)+1, adsIndexList.get(1));
+                        sub = sub.replace(String.valueOf(indexs.get(i)), "");
+                        lastSaveIndex = adsIndexList.get(1);
+                        saveForRemoveAd(sub, answer);
+                    }
+                // 소문자가 1개만 나오는 경우 AaA 같은 케이스 
+                } else if(adsIndexList.size() == 1) {
+                    // 저장한 부분 다시 저장하려고 하면 invalid
+                    if(lastSaveIndex != -1 && adsIndexList.get(0)-1 <= lastSaveIndex) {
+                        System.out.println(lastSaveIndex+" "+answer);
+                            return "invalid";
+                        }
+                    saveForPass(adsIndexList.get(0)-2, answer, sentence, lastSaveIndex);
+                    sub = sentence.substring(adsIndexList.get(0)-1, adsIndexList.get(0)+2);
+                    sub = sub.replace(String.valueOf(indexs.get(i)), "");
+                    lastSaveIndex = adsIndexList.get(0)+1;
+                    saveForRemoveAd(sub, answer);
+                // 1번 규칙만 적용된 부분
+                } else {
+                    // 저장한 부분 다시 저장하려고 하면 invalid
+                    if(lastSaveIndex != -1 && adsIndexList.get(0)-1 <= lastSaveIndex) {
+                        System.out.println(lastSaveIndex+" "+answer);
+                            return "invalid";
+                        }
+                    saveForPass(adsIndexList.get(0)-2, answer, sentence, lastSaveIndex);
+                    sub = sentence.substring(adsIndexList.get(0)-1, adsIndexList.get(adsIndexList.size()-1)+2);
+                    sub = sub.replace(String.valueOf(indexs.get(i)), "");
+                    lastSaveIndex = adsIndexList.get(adsIndexList.size()-1)+1;
+                    saveForRemoveAd(sub, answer);
+                }
+                i = lastSaveIndex;
+                
+            } 
+        }
+        // 끝가지 돌았는데, 소문자가 없어서 저장이 안 된 부분이 남아있으면 저장.
+        if(lastSaveIndex+1 <= sentence.length()-1) {
+            saveForPass(sentence.length()-1, answer, sentence, lastSaveIndex);
+        }
+        
+        return answer.toString();
+    }
     
-		return answer;
-	}
+    // 광고를 제거한 부분을 저장하는 메소드
+    public void saveForRemoveAd(String sub, StringBuilder sb) {
+        if(sb.length() != 0) {
+            sb.append(" ");
+        }
+        for(int i = 0; i < sub.length(); i++) {
+            sb.append(sub.charAt(i));
+        }
+    }
+    
+    // 이전에 광고가 없어서 그냥 통과된 부분들을 저장하는 부분. ex AAaAAa 면 앞에 AA 부분
+    public void saveForPass(int end, StringBuilder sb, String sentence, int lastSaveIndex) {
+        Stack<Character> stack = new Stack<>();
+        if(sb.length() != 0 && lastSaveIndex+1 <= end) {
+            sb.append(" ");
+        }
+        for(int i=lastSaveIndex+1; i <= end; i++) {
+            if(!lowerCaseCheck(sentence.charAt(i))) {
+                sb.append(sentence.charAt(i));
+            }
+        }
+    }
+    
+    public boolean lowerCaseCheck(char ad) {
+        if(ad >= 'a' && ad <= 'z') {
+            return true;
+        } 
+        return false;
+    }
 }
