@@ -1,6 +1,7 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
+
 /*
 좀 쓸데없는 코드가 들어갔지만...
 
@@ -88,13 +89,15 @@ class Solution {
                 start++;
             }
             
+            // 우선 직선으로 움직임.
             if(copyBoard[start][up[1]] == '*' || (copyBoard[start][up[1]] != '.' && copyBoard[start][up[1]] != key)) {
                 check = false;
                 break;
             }
             
         }
-
+        
+        // 직선으로 움직이는 게 성공했으면 가로로. (여기까지 동작하면 |_ 혹은 |- 이 모양으로 움직인 것)
         if(check) {
             start = up[1]; end = down[1];
             while(start != end) {
@@ -115,6 +118,7 @@ class Solution {
             check = true;
         }
 
+        // 위에서 틀렸으면 이제 가로 먼저 움직임. -| 혹은 _| 이런 모양임
         start = up[1]; end = down[1];
         while(start != end) {
             if(start > end) {
