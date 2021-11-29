@@ -1,7 +1,24 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
+/*
+좀 쓸데없는 코드가 들어갔지만...
 
+아이디어가 중요한 문제.
+1) 시간 초과
+처음에 보고 모든 케이스를 다 만들어서 돌리는 걸 생각했는데, 그렇게 하면 시간초과임.
+2) 메모리 용량
+모든 케이스를 만들어서 저장하면 메모리를 너무 많이 씀.
+어차피 사전순서고, 만들 수 없으면 impossible라면
+key들을 정렬하고, 순서대로 돌려봄. 
+통과하면 해당 키를 remove하고, 통과하지 못하면 일단 넘어감.
+반복문이 끝났는데 만든 정답의 길이가 전체 key의 사이즈와 다르면 impossible임
+
+++
+이런 타일에 이동문제에서 조건으로 막 따지는 것보다 좋은 풀이를 생각함.
+up, down으로 나눔.(x 기준)
+그리고 start, end를 하고 이거를 start > end면 start-- , 반대면 start++ 해서 이동하면 조건문이 훨씬 줄어듦.
+*/
 class Solution {
     public String solution(int m, int n, String[] board) {
         String answer = "IMPOSSIBLE";
