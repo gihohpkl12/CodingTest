@@ -1,3 +1,156 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+
+class Solution {
+    public String solution(int m, int n, String[] board) {
+        String answer = "IMPOSSIBLE";
+        StringBuilder result = new StringBuilder();
+        HashMap<Character, int[]> tilesMap = new HashMap<>();
+        ArrayList<Character> tilesList = new ArrayList<>();
+        char[][] copyBoard = new char[board.length][board[0].length()];
+        makingBoard(board, copyBoard);
+            
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board[i].length(); j++) {
+                if(upperCase(board[i].charAt(j))) {
+                    if(tilesMap.containsKey(board[i].charAt(j))) {
+                        tilesMap.get(board[i].charAt(j))[2] = i;
+                        tilesMap.get(board[i].charAt(j))[3] = j;
+                    } else {
+                        tilesMap.put(board[i].charAt(j), new int[4]);
+                        tilesMap.get(board[i].charAt(j))[0] = i;
+                        tilesMap.get(board[i].charAt(j))[1] = j;
+                    }    
+                }
+            }
+        }
+        
+        for(char key : tilesMap.keySet()) {
+            tilesList.add(key);
+        }
+        Collections.sort(tilesList);
+        
+        for(int i = 0; i < tilesList.size(); i++) {
+            char cur = tilesList.get(i);
+            
+            if(routeCheck(copyBoard, cur, tilesMap.get(cur))) {
+                copyBoard[tilesMap.get(cur)[0]][tilesMap.get(cur)[1]] = '.';
+                copyBoard[tilesMap.get(cur)[2]][tilesMap.get(cur)[3]] = '.';
+                result.append(String.valueOf(cur));
+                tilesList.remove(i);
+                i = -1;
+            }
+        }
+  
+        answer = result.length() != tilesMap.size() ? "IMPOSSIBLE" : result.toString();
+        return answer;
+    }
+    
+    public boolean routeCheck(char[][] copyBoard, char key, int[] positions) {
+        int[] up = new int[2], down = new int[2];
+        boolean check = true;
+
+        if(positions[0] < positions[2]) {
+            up[0] = positions[0];
+            up[1] = positions[1];
+            down[0] = positions[2];
+            down[1] = positions[3];
+        } else  {
+            up[0] = positions[2];
+            up[1] = positions[3];
+            down[0] = positions[0];
+            down[1] = positions[1];
+        }
+        
+        int start = up[0], end = down[0];
+        while(start != end) {
+            if(start > end) {
+                start--;
+            } else {
+                start++;
+            }
+            
+            if(copyBoard[start][up[1]] == '*' || (copyBoard[start][up[1]] != '.' && copyBoard[start][up[1]] != key)) {
+                check = false;
+                break;
+            }
+            
+        }
+
+        if(check) {
+            start = up[1]; end = down[1];
+            while(start != end) {
+                if(start > end) {
+                    start--;
+                } else {
+                    start++;
+                }
+                if(copyBoard[down[0]][start] == '*' || (copyBoard[down[0]][start] != '.' && copyBoard[down[0]][start] != key)) {
+                    check = false;
+                    break;
+                }
+            }
+        } 
+        if(check) {
+            return true;
+        } else {
+            check = true;
+        }
+
+        start = up[1]; end = down[1];
+        while(start != end) {
+            if(start > end) {
+                start--;
+            } else {
+                start++;
+            }
+            
+            if(copyBoard[up[0]][start] == '*' || (copyBoard[up[0]][start] != '.' && copyBoard[up[0]][start] != key)) {
+                check = false;
+                break;
+            }
+        }
+        if(check) {
+            start = up[0]; end = down[0];
+            while(start != end) {
+                if(start > end) {
+                    start--;
+                } else {
+                    start++;
+                }
+                if(copyBoard[start][down[1]] == '*' || (copyBoard[start][down[1]] != '.' && copyBoard[start][down[1]] != key)) {
+                    check = false;
+                    break;
+                }
+            }
+        } 
+        if(!check) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    public void makingBoard(String[] board, char[][] copyBoard) {
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board[i].length(); j++) {
+                copyBoard[i][j] = board[i].charAt(j);
+            }
+        }
+    }
+    
+    public boolean upperCase(char tile) {
+        if(tile >= 'A' && tile <= 'Z') {
+            return true;
+        } 
+        return false;
+    }
+}
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
