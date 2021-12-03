@@ -1,4 +1,69 @@
+import java.util.PriorityQueue;
+import java.util.Comparator;
+import java.util.ArrayList;
 
+class Solution {
+    public int solution(int[][] jobs) {
+        int answer = 0, curTime = 0;
+        PriorityQueue<Job> jobQ = new PriorityQueue<>(new Comparator<Job>(){
+            public int compare(Job o1, Job o2) {
+                if(o1.workTime - o2.workTime != 0) {
+                    return o1.workTime - o2.workTime;
+                }
+                return o1.inputTime - o2.inputTime;
+            }
+        });
+        
+        for(int i = 0; i < jobs.length; i++) {
+            jobQ.add(new Job(jobs[i][0], jobs[i][1]));
+        }
+        
+        while(jobQ.size() != 0) {
+            ArrayList<Job> backUpJob = new ArrayList<>();
+            Job nextJob = null;
+            
+            while(jobQ.size() > 0) {
+                nextJob = jobQ.poll();
+		// 할 수 있는 작업 중에 시간이 가장 작은 값.
+                if(nextJob.inputTime <= curTime) {
+                    break;
+                } else {
+                    backUpJob.add(nextJob);
+                    nextJob = null;
+                }
+            }
+            
+            
+            if(nextJob != null) {
+                // System.out.println("before "+" : "+curTime);
+                answer += nextJob.workTime + curTime - nextJob.inputTime;
+                curTime += nextJob.workTime;
+                
+                // System.out.println("while end "+nextJob.inputTime+" "+nextJob.workTime+" curTime "+curTime+" answer "+answer);
+            } else {
+                // System.out.println("non "+" curTime "+curTime+" answer "+answer);
+		// 지금 기준으로 할 수 있는 작업이 없어서 curTime을 늘림.
+                curTime++;
+            }
+            
+            for(int i = 0; i < backUpJob.size(); i++) {
+                jobQ.add(backUpJob.get(i));
+            }
+        }
+        return answer/jobs.length;
+    }
+    class Job {
+        int inputTime;
+        int workTime;
+        
+        public Job(int inputTime, int workTime) {
+            this.inputTime = inputTime;
+            this.workTime = workTime;
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.Arrays;
