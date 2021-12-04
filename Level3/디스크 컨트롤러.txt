@@ -1,3 +1,90 @@
+import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
+/*
+시간 관련 계산을 빨리 파악하는 게 중요한 문제
+정답에는 일을 못 해서 대기하고 있는 시간이 없어야 함.
+(순수하게 대기 시간만 계산)
+근데 그 시간을 계산하는 기준은 일을 못 한 전체 시간을 기준으로 함.
+그리고 일을 최소한으로 할 기준은 요청 시간이 짧은 일을 우선으로 해야 함.
+그래서 일단 작업 시간을 기준으로 정렬하고,
+만약에 현재 시간을 기준으로 작업을 못하면 먼저 들어온 애를 처리함.
+*/
+
+class Solution {
+    public int solution(int[][] jobs) {
+        int answer = 0;
+        JobHandler jobHandler = new JobHandler();
+        jobHandler.jobSetting(jobs);
+        jobHandler.sort();
+        
+        while(jobHandler.jobs.size() != 0) {
+            // 작업한 시간을 계산함.
+            answer += jobHandler.getJob();
+        }
+        
+        return answer/jobs.length;
+    }
+    
+    // 작업 자체를 다루는 클래스
+    class JobHandler {
+        ArrayList<int[]> jobs = new ArrayList<>();
+        int curTime = 0;
+        
+        // 작업 목록 저장
+        public void jobSetting(int[][] job) {
+            for(int i = 0; i < job.length; i++) {
+                this.jobs.add(job[i]);
+            }
+        }
+        
+        // 정렬함.
+        public void sort() {
+            Collections.sort(jobs, new Comparator<int[]>(){
+                public int compare(int[] o1, int[] o2) {
+                    if(o1[1] - o2[1] != 0) {
+                        return o1[1] - o2[1];
+                    }
+                    return o1[0] - o2[0];
+                }
+            });
+        }
+        
+        // 가장 먼저 들어온 요청을 처리함.
+        // curTime이 무조건 먼저 들어온 시간보다 작기 때문에 해당 시간으로 초기화를 해줘야 함.
+        public int getEarlyCommingJob() {
+            int min = Integer.MAX_VALUE, index = 0, result;
+            
+            for(int i = 0; i < jobs.size(); i++) {
+                if(min > jobs.get(i)[0]) {
+                    min = jobs.get(i)[0];
+                    index = i;
+                }
+            }
+            this.curTime = jobs.get(index)[0];
+            result = this.curTime + jobs.get(index)[1] - jobs.get(index)[0];
+            this.curTime += jobs.get(index)[1];
+            this.jobs.remove(index);
+            return result;
+        }
+        
+        // 작업을 가져옴.
+        // 만약에 현재 일을 할 수 있는 작업이 없으면 가장 먼저 온 요청을 처리하는 함수 호출
+        public int getJob() {
+            int result = 0;
+            for(int i = 0; i < this.jobs.size(); i++) {
+                if(this.jobs.get(i)[0] <= curTime) {
+                    result = this.curTime + jobs.get(i)[1] - jobs.get(i)[0];
+                    this.curTime += jobs.get(i)[1];
+                    this.jobs.remove(i);
+                    return result;
+                }    
+            }
+            return getEarlyCommingJob();
+        }
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.ArrayList;
