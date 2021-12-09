@@ -2,7 +2,7 @@ import java.util.HashSet;
 
 /*
 DFS나 BFS로 풀 수 있는 문제지만, 동시에 유니온 파인드로도 풀 수 있음.
-케이스 9번 반례는 맨 마지막
+케이스 9번이 이상함
 */
 class Solution {
     public int solution(int n, int[][] computers) {        
