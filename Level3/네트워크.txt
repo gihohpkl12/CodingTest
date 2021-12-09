@@ -2,10 +2,10 @@ import java.util.HashSet;
 
 /*
 DFS나 BFS로 풀 수 있는 문제지만, 동시에 유니온 파인드로도 풀 수 있음.
-케이스 9번이 이상함.
+케이스 9번 반례는 맨 마지막
 */
 class Solution {
-    public int solution(int n, int[][] computers) {
+    public int solution(int n, int[][] computers) {        
         int[] nodes = new int[n];
         for(int i = 0; i < nodes.length; i++) {
             nodes[i] = i;
@@ -23,7 +23,7 @@ class Solution {
             }
         }
         
-        // 이게 이상함. 그냥 nodes 배열로 하면 9번이 틀림.
+        // 그냥 nodes 배열로 하면 9번이 틀림.
         HashSet<Integer> group = new HashSet<>();
         for(int i : nodes) {
             group.add(findGroup(nodes, i));
@@ -49,6 +49,58 @@ class Solution {
         return nodes[nodeNum] = findGroup(nodes, nodes[nodeNum]);
     }
 }
+/*
+
+int[] test = {0,1,2,3,4,5,6,7,8,9};
+        int a = findGroup(test, 0);
+        int b = findGroup(test, 1);
+        union(a, b, test);
+        
+        for(int i : test) {
+            System.out.print(i+" ");
+        }
+        System.out.println();
+        
+        a = findGroup(test, 0);
+        b = findGroup(test, 2);
+        union(a, b, test);
+        
+        for(int i : test) {
+            System.out.print(i+" ");
+        }
+        System.out.println();
+        
+         a = findGroup(test, 0);
+        b = findGroup(test, 9);
+        union(a, b, test);
+        
+        for(int i : test) {
+            System.out.print(i+" ");
+        }
+        System.out.println();
+        
+         a = findGroup(test, 4);
+        b = findGroup(test, 5);
+        union(a, b, test);
+        
+        for(int i : test) {
+            System.out.print(i+" ");
+        }
+        System.out.println();
+        
+         a = findGroup(test, 4);
+        b = findGroup(test, 9);
+        union(a, b, test);
+        
+        for(int i : test) {
+            System.out.print(i+" ");
+        }
+        System.out.println();
+        
+
+
+
+*/
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 import java.util.LinkedHashMap;
