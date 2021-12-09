@@ -1,3 +1,56 @@
+import java.util.HashSet;
+
+/*
+DFS나 BFS로 풀 수 있는 문제지만, 동시에 유니온 파인드로도 풀 수 있음.
+케이스 9번이 이상함.
+*/
+class Solution {
+    public int solution(int n, int[][] computers) {
+        int[] nodes = new int[n];
+        for(int i = 0; i < nodes.length; i++) {
+            nodes[i] = i;
+        }
+        
+        for(int i = 0; i < computers.length; i++) {
+            for(int j = 0; j < computers[i].length; j++) {
+                if(j == i) {
+                    continue;
+                }
+                
+                if(computers[i][j] != 0 && nodes[i] != nodes[j]) {
+                    union(i, j, nodes);
+                }
+            }
+        }
+        
+        // 이게 이상함. 그냥 nodes 배열로 하면 9번이 틀림.
+        HashSet<Integer> group = new HashSet<>();
+        for(int i : nodes) {
+            group.add(findGroup(nodes, i));
+        }
+        
+        return group.size();
+    }
+    public void union(int i, int j, int[] nodes) {
+        int groupA = findGroup(nodes, i);
+        int groupB = findGroup(nodes, j);
+
+        if(groupA < groupB) {
+            nodes[groupB] = groupA;
+        } else {
+            nodes[groupA] = groupB;
+        }
+    }
+    
+    public int findGroup(int[] nodes, int nodeNum) {
+        if(nodes[nodeNum] == nodeNum) {
+            return nodeNum;   
+        }
+        return nodes[nodeNum] = findGroup(nodes, nodes[nodeNum]);
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
 class Solution {
