@@ -1,4 +1,73 @@
-// 새로운 코드
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
+/*
+그래프라고 하는데 나는 그냥 구현 문제로 생각함.
+승패를 기록함.
+내가 이긴 애들은 내가 패배한 애들한테 짐.
+내가 진 애들은 내가 이긴 애들을 이김.
+이 법칙을 기준으로 승패가 n-1 이면 순위를 매길 수 있음.
+*/
+class Solution {
+    public int solution(int n, int[][] results) {
+        int answer = 0;
+        HashMap<Integer, Player> playerManagement = new HashMap<>();
+        
+        for(int i = 1; i <= n; i++) {
+            playerManagement.put(i, new Player(i));
+        }
+        
+        // 승패 기록
+        for(int i = 0; i < results.length; i++) {
+            int winner = results[i][0], loser = results[i][1];
+            playerManagement.get(winner).win.add(loser);
+            playerManagement.get(loser).lose.add(winner);
+        }
+        
+        for(int i = 1; i <= n; i++) {
+            Player curPlayer = playerManagement.get(i);
+            
+            // 현재 선수가 이겼던 애들한테 현재 플레이어가 패배한 선수들을 추가해줌
+            // 내가 이긴 애들은 내가 진 애들한테 진다.
+            for(int j : curPlayer.win) {
+                for(int loser : curPlayer.lose) {
+                    playerManagement.get(j).lose.add(loser);
+                }
+            }
+            
+            // 현재 선수가 졌던 애들한테 현재 플레이어가 이겼던 선수들을 추가해줌.
+            // 내가 진 애들은 내가 이긴 애들을 이긴다.
+            for(int j : curPlayer.lose) {
+                for(int winner : curPlayer.win) {
+                    playerManagement.get(j).win.add(winner);
+                }
+            }
+        }
+        
+        // 승패 기록 체크
+        for(int i = 1; i <= n; i++) {
+            // System.out.println(i+" win "+playerManagement.get(i).win.toString());
+            // System.out.println(i+" lose "+playerManagement.get(i).lose.toString());
+            answer = playerManagement.get(i).win.size() + playerManagement.get(i).lose.size() == n-1 ? answer +1 : answer;
+        }
+        return answer;
+    }
+    
+    class Player {
+        int num;
+        HashSet<Integer> win;
+        HashSet<Integer> lose;
+        
+        public Player(int num) {
+            this.num = num;
+            this.win = new HashSet<>();
+            this.lose = new HashSet<>();
+        }
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
