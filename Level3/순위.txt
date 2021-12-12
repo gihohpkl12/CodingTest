@@ -1,3 +1,44 @@
+/*
+내가 생각했던 풀이는 아니고, 다른 사람 풀이 참고함.
+플로이드 와샬로 푸는 풀이임.
+"내가 이긴 상대가 이전 경기에서 이겼던 선수들은 나도 이긴다"를 플로이드 와샬로 풀이함.
+현재 [i][j]를 기준으로 [i][k]가 true면 내가 이겼던 애이고, [k][j]가 true면 내가 이겼던 애가 이겼던 애임.
+이렇게 되면 [i][j] = true임.
+*/
+class Solution {
+    public int solution(int n, int[][] results) {
+        int answer = 0;
+        boolean[][] playRecord = new boolean[n+1][n+1];
+        
+        for(int[] record : results) {
+            int winner = record[0], loser = record[1];
+            playRecord[winner][loser] = true;
+        }
+        
+        for(int k = 1; k <= n; k++) {
+            for(int i = 1; i <= n; i++) {
+                for(int j = 1; j <= n; j++) {
+                    playRecord[i][j] = playRecord[i][k] && playRecord[k][j] ? true : playRecord[i][j];
+                }
+            }
+        }
+        
+        for(int i = 1; i <= n; i++) {
+            int recordCount = 0;
+            
+            for(int j = 1; j <= n; j++) {
+                recordCount = playRecord[i][j] || playRecord[j][i] ? recordCount +1 : recordCount;    
+            }
+            
+            answer = recordCount == n-1 ? answer +1 : answer;
+        }
+        
+        return answer;
+    }
+}
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
