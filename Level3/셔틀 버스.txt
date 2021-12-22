@@ -1,3 +1,87 @@
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
+/*
+알고리즘이 있는지 찾아봐야하지만, 없다면 그냥 단순한 구현 문제.
+그냥 전부 다 탄다고 생각하고 구현함
+*/
+class Solution {
+    public String solution(int n, int t, int m, String[] timetable) {
+        int answer = 0, busTime = timeConvertToInt("09:00");
+        PriorityQueue<Integer> crewManager = new PriorityQueue<>();
+        ArrayList<Bus> busManager = new ArrayList<>();
+        busManager.add(new Bus(busTime, m));
+        
+        // bus 운행표를 만듦.
+        for(int i = 1; i < n; i++) {
+            busTime += t;
+            busManager.add(new Bus(busTime, m));
+        }
+        
+        // bus에 탈 사람들의 시간 및 정렬(정렬이 되어있다는 보장이 없음.)
+        for(int i = 0; i < timetable.length; i++) {
+            int curCrewTime = timeConvertToInt(timetable[i]);
+            crewManager.add(curCrewTime);
+        }
+        
+        // 직원들을 버스에 차례대로 태움.
+        // 앞에부터 시간이 맞고, 버스에 여유가 있으면 태움.
+        while(crewManager.size() != 0) {
+            int curCrewTime = crewManager.poll();
+            
+            for(int i = 0; i < busManager.size(); i++) {
+                if(busManager.get(i).time >= curCrewTime && busManager.get(i).capacity > 0) {
+                    busManager.get(i).capacity -= 1;
+                    busManager.get(i).lastTime = curCrewTime;
+                    break;
+                }
+            }
+        }
+        
+        // 맨 뒤부터 따짐. 
+        // 버스에 여유가 있으면 버스시간에 맞게, 아니면 맨 마지막에 탄 직원보다 1분 빨리.
+        for(int i = busManager.size() -1; i >= 0; i++) {
+            if(busManager.get(i).capacity > 0) {
+                answer = busManager.get(i).time;
+                break;
+            } else {
+                answer = busManager.get(i).lastTime -= 1;
+                break;
+            }
+        }
+        return timeConvertToString(answer);
+    }
+    
+    // String -> int
+    public int timeConvertToInt(String time) {
+        String[] timeSplit = time.split(":");
+        return Integer.parseInt(timeSplit[0])*60 + Integer.parseInt(timeSplit[1]);
+    }
+    
+    // int -> String
+    public String timeConvertToString(int time) {
+        String hour = "", minute = "";
+        hour = Integer.toString(time/60);
+        minute = Integer.toString(time%60);
+        hour = hour.length() == 2 ? hour : "0" + hour;
+        minute = minute.length() == 2 ? minute : "0" + minute;
+        return hour + ":" + minute;
+    }
+    
+    class Bus {
+        int time;
+        int capacity;
+        int lastTime;
+        
+        public Bus(int time, int capacity) {
+            this.time = time;
+            this.capacity = capacity;
+            this.lastTime = 0;
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.Arrays;
 class Solution {
     public String solution(int n, int t, int m, String[] timetable) {
