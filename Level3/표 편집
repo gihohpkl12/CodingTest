@@ -1,5 +1,51 @@
 import java.util.Stack;
 
+/*
+효율성이 어려운 문제.
+표를 ArrayList로 구현하는 순간 끝남.
+일단 자료구조상 복구하는 걸 Stack으로 생각하는 건 쉬움.
+표를 따로 만들지 않고, index만 관리하고
+마지막에 OX를 따질 때, 어차피 Stack에 저장된 index가 지워진 시점에 따르므로,
+String에 insert해도 순서가 변함이 없음을 파악하는 게 중요한 문제.
+*/
+
+class Solution {
+    public String solution(int n, int k, String[] cmd) {
+        Stack<Integer> removeHistory = new Stack<>();
+        int cur = k, max = n;
+
+        for(int i = 0; i < cmd.length; i++) {
+            if(cmd[i].charAt(0) == 'U') {
+                cur -= Integer.parseInt(cmd[i].substring(2, cmd[i].length()));
+            } else if(cmd[i].charAt(0) == 'D') {
+                cur += Integer.parseInt(cmd[i].substring(2, cmd[i].length()));
+            } else if(cmd[i].charAt(0) == 'C') {
+                removeHistory.add(cur);
+                max--;
+                cur = cur == max ? cur -1 : cur;
+            } else if(cmd[i].charAt(0) == 'Z') {
+                int recover = removeHistory.pop();
+                max++;
+                cur = recover <= cur ? cur +1 : cur; 
+            }
+        }
+        
+        StringBuffer answer = new StringBuffer();
+        for(int i = 0; i < max; i++) {
+            answer.append("O");
+        }
+        
+        while(removeHistory.size() != 0) {
+            answer.insert(removeHistory.pop(), "X");
+        }
+        
+        return answer.toString();
+    }
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+import java.util.Stack;
+
 class Solution {
     public String solution(int n, int k, String[] cmd) {
         Stack<Integer> remove = new Stack<>();
