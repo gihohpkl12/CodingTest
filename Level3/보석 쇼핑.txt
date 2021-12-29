@@ -1,3 +1,81 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
+/*
+효율성 때문에 어려운 문제.
+그냥 2중 반복문하면 정답은 바로 구할 수 있는데 효율성에서 바로 끝남.
+++
+효율성을 고려할 경우 아이디어가 어려운 문제임.
+gems를 한 번 반복문으로 돌면서 체크함.
+해당 보석이 없으면, map에 추가하고,
+있으면 해당 보석의 인덱스를 갱신함.
+이렇게 하면 가장 최근 보석을 기준으로 값들이 정해짐.
+그리고 매번 추가할 때마다 map에 size가 전체 보석의 수와 같은지 체크해야 함.
+
+전체 보석의 수와 map의 크기가 같으면
+바로 범위를 체크해서 answer에 반영해야 함.
+
+여기서도 문제가 있는데, 값을 그냥 map을 돌면서 min, max해서 구하면 시간 초과임.
+max는 무조건 방금 갱신된 i가 될 것임.
+고로 min은 사전에 미리 priorityQueue에 값을 넣어놓고 동시에 map에 들어간 인덱스들을 관리할 다른 map을 만들어서 min값을 뽑아야 함.
+*/
+class Solution {
+    public int[] solution(String[] gems) {
+        int[] answer = new int[] {0, Integer.MAX_VALUE};
+        HashMap<String, String> gemTypes = new HashMap<>();
+        HashMap<String, Integer> selectGems = new HashMap<>();
+        
+        // 전체 보석 수 파악.
+        for(String key : gems) {
+            gemTypes.put(key, "");
+        }
+        
+        // gems를 한 번 돌음.
+        // min 인덱스를 구하기 위한 Q
+        PriorityQueue<Integer> minGemIndexCheck = new PriorityQueue<>();
+        // selectGems에 들어간 인덱스를 관리할 map
+        HashMap<Integer, Integer> indexManage = new HashMap<>();
+        for(int i = 0; i < gems.length; i++) {
+            // 보석이 있으면 갱신, 없으면 추가
+            if(selectGems.containsKey(gems[i])) {
+                // 갱신된 보석은 제거
+                indexManage.remove(selectGems.get(gems[i]));
+                selectGems.replace(gems[i], i);
+                minGemIndexCheck.add(i);
+                indexManage.put(i,i);
+            } else {
+                selectGems.put(gems[i], i);
+                minGemIndexCheck.add(i);
+                indexManage.put(i,i);
+            }
+            
+            int min = 0;
+            // 보석 수가 같기 때문에 answer 체크를 위함.
+            if(selectGems.size() == gemTypes.size()) {
+                // Q에서 값을 뽑고, 그게 selectGems에 있는지 확인하기 위해서 indexManage에 있는지 없는지 확인함
+                while(minGemIndexCheck.size() != 0) {
+                    min = minGemIndexCheck.poll();
+                    if(indexManage.containsKey(min)) {
+                        if(answer[1] - answer[0] > i - min) {
+                            answer[1] = i;
+                            answer[0] = min;
+                        }
+                        minGemIndexCheck.add(min);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        answer[0]++;
+        answer[1]++;
+        return answer;
+    }
+}
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
