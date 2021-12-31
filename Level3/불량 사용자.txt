@@ -1,3 +1,4 @@
+// 참고로 이것보다 아래에 코딩했던 게 속도가 더 빠름..
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.LinkedList;
