@@ -1,4 +1,3 @@
-// 참고로 이것보다 아래에 코딩했던 게 속도가 더 빠름..
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.LinkedList;
@@ -6,6 +5,11 @@ import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 /*
+경우의 수를 따지는 게 어려운 문제.
+그냥 해당되는 아이디를 전부 뽑아서 경우의 수를 따지는 게 아님.
+Banned_id 마다 해당되는 case들이 있는데, 그 자리에 그 case들이 꼭 들어가야 함. 
+그리고 각 Banned_id에 해당되는 case들이 중복되지 않으라는 법이 없음.
+ex. 
 banned_id 1)의 케이스 : aa, bb, cc
 banned_id 2)의 케이스 : aa, dd, ff
 라고 하면
@@ -15,8 +19,8 @@ banned_id 2)의 케이스 : aa, dd, ff
 
 그리고 노드를 만들어서 트리구조처럼 만들어서 하면 스택 오버플로우가 나는 듯.
 
-아 여기서는 userID가지고 모든 케이스를 만들어서 풀었는데 그거 개떡같은 듯 ㅅㅂ 
-나중에 바꿔보자
+아 여기서는 userID가지고 모든 케이스를 만들어서 풀었는데 그럴 필요가 없음.
+그냥 아이디 양식에 맞춰보고 결정하면 됨.
 
 이렇게 Banned 아이디에 해당하는 케이스를 전부 구했으면
 DFS로 돌면서 위에서 banned_id 마다 나온 케이스들을 가지고 전체 경우의 수를 만듦.
@@ -34,17 +38,21 @@ class Solution {
         // banned_id 배열에서 해당되는 케이스들을 저장하는 맵
         HashMap<Integer, ArrayList<String>> bannedIdMap = new HashMap<>();
 
-        for(String key : user_id) {
-            makingAllCase(caseSaveMap, key);
-        }
-        
         // 위치를 따지기 위해서 index. (위치는 위에서 "banned_id 1)의 케이스" 라고 설명한 개념임)
         int index = 0;
-        for(int i = 0; i < banned_id.length; i++) {
-            String key = banned_id[i];
-            if(caseSaveMap.containsKey(key)) {
-                bannedIdMap.put(index++, caseSaveMap.get(key));
-            }   
+        for(String bannedId : banned_id) {
+            for(String userId : user_id) {
+                // 형식이 맞으면 banned된 것.
+                if(banFormatCheck(userId, bannedId)) {
+                    if(bannedIdMap.containsKey(index)) {
+                        bannedIdMap.get(index).add(userId);
+                    } else {
+                        bannedIdMap.put(index, new ArrayList<>());
+                        bannedIdMap.get(index).add(userId);
+                    }
+                }
+            }
+            index++;
         }
         
         // 정답이 될 가능성이 있는 케이스들을 저장하는 리스트.
@@ -67,6 +75,23 @@ class Solution {
         }
         
         return answerCheckMap.size();
+    }
+    
+    public boolean banFormatCheck(String userId, String bannedId) {
+        if(bannedId.length() != userId.length()) {
+            return false;
+        }
+        
+        for(int i = 0; i < bannedId.length(); i++) {
+            if(bannedId.charAt(i) == '*') {
+                continue;
+            } else {
+                if(bannedId.charAt(i) != userId.charAt(i)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     // 정답이 될 수 있는 모든 케이스를 저장함. 위에서 말한 banned_id에 해당되는 케이스들 중에 중복이 있기 때문에 makingCase를 HashMap으로 함.
@@ -96,7 +121,9 @@ class Solution {
         }
     }
     
-    // user_id로 만들 수 있는 모든 케이스를 생성함.
+    /*
+    이 메소드는 안 쓰는 걸로 바꿈.
+    // user_id로 만들 수 있는 모든 케이스를 생성함. 
     public void makingAllCase(HashMap<String, ArrayList<String>> saveMap, String id) {
         Queue<String> caseQ = new LinkedList<>();
         caseQ.add("");
@@ -119,6 +146,7 @@ class Solution {
             }
         }
     }
+    */
 }
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
