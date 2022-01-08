@@ -1,3 +1,62 @@
+import java.util.ArrayList;
+
+/*
+간단한 DFS 문제.
+물론 BFS로도 가능함.
+*/
+class Solution {
+    static int answer = 0;
+    public int solution(String begin, String target, String[] words) {
+        answer = Integer.MAX_VALUE;
+        
+        // DFS를 위한 리스트 생성
+        ArrayList<String> wordList = new ArrayList<>();
+        for(String word : words) {
+            wordList.add(word);
+        }
+        
+        searchForWordChange(target, begin, wordList, 0);
+        return answer == Integer.MAX_VALUE ? 0 : answer;
+    }
+    
+    // DFS
+    public void searchForWordChange(String target, String curWord, ArrayList<String> words, int count) {
+        // 목표거나 더이상 체크할 경우가 없으면 return
+        if(curWord.equals(target)) {
+            answer = count != 0 && answer > count ? count : answer;
+            return;
+        } else if(words.size() == 0) {
+            return;
+        }
+        
+        // 변환할 리스트 확인
+        for(int i = 0; i < words.size(); i++) {
+            String getWord = words.get(i);
+            
+            if(wordChangeCheck(curWord, getWord)) {
+                words.remove(i);
+                searchForWordChange(target, getWord, words, count+1);
+                words.add(i, getWord);    
+            }
+        }
+    }
+    
+    // 단어 변환 가능 여부 체크
+    public boolean wordChangeCheck(String pre, String next) {
+        int count = 0;
+        for(int i = 0; i < next.length(); i++) {
+            count += pre.charAt(i) != next.charAt(i) ? 1 : 0;
+            if(count > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.HashMap;
