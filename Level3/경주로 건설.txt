@@ -1,5 +1,117 @@
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.HashMap;
+
+/*
+--- 기준 맨 밑에 푼 코드는 케이스 추가로 에러가 남. 
+케이스 : [[0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 1, 1, 1, 1, 1, 0], [1, 0, 0, 1, 0, 0, 0, 0], [1, 1, 0, 0, 0, 1, 1, 1], [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 0]]
+답 : 4500
+
+[0, 0, 0, 0, 0, 0, 0, 0]
+[1, 0, 1, 1, 1, 1, 1, 0]
+[1, 0, 0, 1, 0, 0, 0, 0]
+[1, 1, 0, 0, 0, 1, 1, 1]
+[1, 1, 1, 1, 0, 0, 0, 0]
+[1, 1, 1, 1, 1, 1, 1, 0]
+[1, 1, 1, 1, 1, 1, 1, 0]
+[1, 1, 1, 1, 1, 1, 1, 0]
+
+0 100  200 300  400  500  600  700 
+0 700  0   0    0    0    0    1300 
+0 800 1400 0    2200 2100 2000 1400 
+0 0   2000 2600 2700 0    0    0 
+0 0   0    0    3300 3900 4000 4100 
+0 0   0    0    0    0    0    4700 
+0 0   0    0    0    0    0    4800 
+0 0   0    0    0    0    0    4900 
+
+새로운 케이스가 추가돼서 틀린 문제.
+
+개떡같은 문제임.
+우선 BFS든 DFS든 아무거나 하면 됨.
+중요한 건 이게 위에 케이스처럼 그냥 2중 배열로 생성해서 위치의 값을 따지면 틀림.
+(특정 위치 기준으로 현재 값에서는 해당 위치의 최소값 보다 커서 continue 시켰는데 다음 위치를 기준으로 보면 역전되는 경우가 있음.)
+
+따라서 위치를 고려할 때 이전 값에서 방향성 까지 따져야 함. 
+ex. [0][0][0]이면 0,0이 위치고, 마지막 0은 이전에 0의 방향에서 온 것임.
+
+그리고 중요한 게 BFS든 DFS든 케이스를 최소화 해야 함.
+그냥 Q에 넣고 나중에 꺼냈을 때 값 비교해서 continue하는 것보다 애초에 Q에 안 넣는 게 훨씬 빠름.
+
+그리고 이동할 방향에서
+상 - 하,  하 - 상,  좌 - 우,  우 - 좌 처럼 방향을 꺾는 게 아니라 아예 이전으로 돌아가는 건 continue 해주면 더 빠름.
+*/
+
+class Solution {
+    public int solution(int[][] board) {
+        int answer = Integer.MAX_VALUE;
+        Queue<Car> buildingRoadQ = new LinkedList<>();
+        buildingRoadQ.add(new Car(5, 0, new int[] {0,0}));
+        // 상하좌우
+        int[][] move = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        // 값을 비교할 배열. 마지막 4는 방향까지 포함시키 것임.
+        int[][][] costCheckBoard = new int[board.length][board.length][4];
+        
+        while(buildingRoadQ.size() != 0) {
+            Car curCar = buildingRoadQ.poll();
+          
+            // 4가지 방향
+            for(int i = 0; i < move.length; i++) {
+                int[] nextDir = new int[] {curCar.position[0] + move[i][0], curCar.position[1] + move[i][1]};
+                // 이전으로 돌아가는 경우는 pass
+                if(curCar.curDir == 0 && i == 1 || curCar.curDir == 1 && i == 0 || curCar.curDir == 2 && i == 3 || curCar.curDir == 3 && i == 2) {
+                    continue; 
+                }
+                
+                if(rangeCheck(board.length, nextDir)) {
+                    // 벽 패스
+                    if(board[nextDir[0]][nextDir[1]] == 1) {
+                        continue;
+                    }
+                    Car saveCar = new Car(i, curCar.curDir == 5 || curCar.curDir == i ? curCar.cost + 100 : curCar.cost + 600, nextDir);
+                    // 값을 따졌을 때, 고려할 필요가 없는 경우면 애초에 Q에 넣지 않는다.
+                    if(costCheckBoard[saveCar.position[0]][saveCar.position[1]][saveCar.curDir] == 0) {
+                        costCheckBoard[saveCar.position[0]][saveCar.position[1]][saveCar.curDir] = saveCar.cost;
+                        buildingRoadQ.add(saveCar);
+                    } else if(costCheckBoard[saveCar.position[0]][saveCar.position[1]][saveCar.curDir] > saveCar.cost) {
+                        costCheckBoard[saveCar.position[0]][saveCar.position[1]][saveCar.curDir] = saveCar.cost;
+                        buildingRoadQ.add(saveCar);
+                    }
+                    
+                }
+            }
+        }
+       
+        // 마지막 위치에서 4가지 방향 중에 가장 적은 값이 answer
+        for(int i = 0 ; i < 4; i++) {
+            answer = costCheckBoard[board.length-1][board.length-1][i] != 0 ? Math.min(costCheckBoard[board.length-1][board.length-1][i], answer) : answer;
+        }
+        return answer;
+    }
+    
+    public boolean rangeCheck(int range, int[] curPosition) {
+        if(curPosition[0] >= 0 && curPosition[1] >= 0 && curPosition[0] < range && curPosition[1] < range) {
+            return true;
+        }
+        return false;
+    }
+    class Car {
+        int curDir;
+        int cost;
+        int[] position;
+        
+        public Car(int curDir, int cost, int[] position) {
+            this.position = position;
+            this.curDir = curDir;
+            this.cost = cost;
+        }
+    }
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+import java.util.Queue;
+import java.util.LinkedList;
 class Solution {
     public int solution(int[][] board) {
         int answer = Integer.MAX_VALUE;
