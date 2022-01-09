@@ -3,7 +3,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 
 /*
---- 기준 맨 밑에 푼 코드는 케이스 추가로 에러가 남. 
+--- 기준 맨 밑에 푼 코드는 케이스 추가로 에러가 남. 그리고 여기가 제일 
 케이스 : [[0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 1, 1, 1, 1, 1, 0], [1, 0, 0, 1, 0, 0, 0, 0], [1, 1, 0, 0, 0, 1, 1, 1], [1, 1, 1, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 1, 1, 1, 1, 0]]
 답 : 4500
 
@@ -109,7 +109,102 @@ class Solution {
 }
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.HashMap;
 
+/*
+위랑 같은데 방향 4개로 고려하지 않고, 기회 1번 더주는 방식.
+특정 노드에 도착했을 때, 현재 값이 해당 노드의 최소값 보다 큰 경우, 한 번만 기회를 줌. 
+그리고 해당 케이스가 다음 번에도 그 위치의 최소값보다 크면 그때 ㅂㅂ.
+*/
+
+class Solution {
+    public int solution(int[][] board) {
+        int answer = Integer.MAX_VALUE;
+        Queue<Car> buildingRoadQ = new LinkedList<>();
+        buildingRoadQ.add(new Car(5, 0, new int[] {0,0}));
+        // 상하좌우
+        int[][] move = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        // 값을 비교할 배열.
+        int[][] costCheckBoard = new int[board.length][board.length];
+        
+        while(buildingRoadQ.size() != 0) {
+            Car curCar = buildingRoadQ.poll();
+          
+            // 4가지 방향
+            for(int i = 0; i < move.length; i++) {
+                int[] nextDir = new int[] {curCar.position[0] + move[i][0], curCar.position[1] + move[i][1]};
+                // 이전으로 돌아가는 경우는 pass
+                if(curCar.curDir == 0 && i == 1 || curCar.curDir == 1 && i == 0 || curCar.curDir == 2 && i == 3 || curCar.curDir == 3 && i == 2) {
+                    continue; 
+                }
+                
+                if(rangeCheck(board.length, nextDir)) {
+                    // 벽 패스
+                    if(board[nextDir[0]][nextDir[1]] == 1) {
+                        continue;
+                    }
+                    Car saveCar = new Car(i, curCar.curDir == 5 || curCar.curDir == i ? curCar.cost + 100 : curCar.cost + 600, nextDir, curCar.warming);
+                    // 값을 따졌을 때, 고려할 필요가 없는 경우면 애초에 Q에 넣지 않는다.
+                    if(costCheckBoard[saveCar.position[0]][saveCar.position[1]] == 0) {
+                        costCheckBoard[saveCar.position[0]][saveCar.position[1]] = saveCar.cost;
+                        saveCar.warming = false;
+                        buildingRoadQ.add(saveCar);
+                    } else if(costCheckBoard[saveCar.position[0]][saveCar.position[1]] >= saveCar.cost) {
+                        costCheckBoard[saveCar.position[0]][saveCar.position[1]] = saveCar.cost;
+                        saveCar.warming = false;
+                        buildingRoadQ.add(saveCar);
+			// 기회 1번 더 주는 경우
+                    } else if(costCheckBoard[saveCar.position[0]][saveCar.position[1]] < saveCar.cost) {
+                        if(!saveCar.warming) {
+                            saveCar.warming = true;
+                            buildingRoadQ.add(saveCar);
+                        }
+                    }
+                    
+                }
+            }
+        }
+       
+        for(int i = 0; i < costCheckBoard.length; i++) {
+            for(int j = 0; j <costCheckBoard.length; j++) {
+                System.out.print(costCheckBoard[i][j]+" ");
+            }
+            System.out.println();
+        }
+       
+        return costCheckBoard[board.length-1][board.length-1];
+    }
+    
+    public boolean rangeCheck(int range, int[] curPosition) {
+        if(curPosition[0] >= 0 && curPosition[1] >= 0 && curPosition[0] < range && curPosition[1] < range) {
+            return true;
+        }
+        return false;
+    }
+    class Car {
+        int curDir;
+        int cost;
+        int[] position;
+        boolean warming;
+        
+        public Car(int curDir, int cost, int[] position) {
+            this.position = position;
+            this.curDir = curDir;
+            this.cost = cost;
+            this.warming = false;
+        }
+        
+        public Car(int curDir, int cost, int[] position, boolean warming) {
+            this.position = position;
+            this.curDir = curDir;
+            this.cost = cost;
+            this.warming = warming;
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.Queue;
 import java.util.LinkedList;
 class Solution {
