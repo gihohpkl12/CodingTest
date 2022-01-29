@@ -2,6 +2,102 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+/*
+문제 자체는 어렵지 않음.
+근데 Map.entrySet()을 쓴 풀이임.
+속도는 테스트 안 해봤는데, key값을 기준으로 리스트에 저장한 다음에 정렬하는 것보다 훨씬 편함.
+entrySet.getValue, getKey를 쓰면 됨.
+*/
+class Solution {
+    public int[] solution(String[] genres, int[] plays) {
+        ArrayList<Integer> answer = new ArrayList<>();
+        // 장르별 재생횟수를 저장
+        HashMap<String, Integer> genresCountMap = new HashMap<>();
+        // 노래의 인덱스 및 재생 횟수를 저장
+        HashMap<String, ArrayList<Song>> playListMap = new HashMap<>();
+        
+        // 값들 저장.
+        for(int i = 0; i < plays.length; i++) {
+            String genre = genres[i];
+            int count = plays[i];
+            Song newSong = new Song(i, count);
+            
+            if(genresCountMap.containsKey(genre)) {
+                genresCountMap.replace(genre, genresCountMap.get(genre)+count);
+            } else {
+                genresCountMap.put(genre, count);
+            }
+            
+            if(playListMap.containsKey(genre)) {
+                playListMap.get(genre).add(newSong);
+            } else {
+                playListMap.put(genre, new ArrayList<>());
+                playListMap.get(genre).add(newSong);
+            }
+        }
+        
+        // 장르별 재생횟수를 기준으로 정렬함.
+        ArrayList<HashMap.Entry<String, Integer>> orderByGenreCount = new ArrayList<>(genresCountMap.entrySet());
+        orderByGenreCount.sort(new Comparator<HashMap.Entry<String, Integer>>() {
+            public int compare(HashMap.Entry<String, Integer> o1, HashMap.Entry<String, Integer> o2) {
+                return o2.getValue() - o1.getValue();
+            }
+        });
+        
+        // 정렬된 장르의 재생횟수를 기준으로 저장한 노래를 가져옴.
+        for(int i = 0; i < orderByGenreCount.size(); i++) {
+            // 선택된 장르 (재생횟수 기준 정렬된 값)
+            String genre = orderByGenreCount.get(i).getKey();
+            
+            ArrayList<Song> playListOfCurGenre = playListMap.get(genre);
+            // 선택된 장르의 노래들을 해당 노래의 재생횟수를 기준으로 정렬함.
+            playListOfCurGenre.sort(new Comparator<Song>() {
+                public int compare(Song o1, Song o2) {
+                    if(o2.playCount == o1.playCount) {
+                        return o1.songNum - o2.songNum;
+                    }
+                    return o2.playCount - o1.playCount;
+                }
+            });
+            
+            // 2곡 이상이면 2곡, 1곡이면 1곡
+            int end = playListOfCurGenre.size() >= 2 ? 2 : playListOfCurGenre.size();
+            for(int j = 0; j < end; j++) {
+                answer.add(playListOfCurGenre.get(j).songNum);
+            }
+        }
+        
+        return convertListToArray(answer);
+    }
+    
+    // Array로 바꿈.
+    public int[] convertListToArray(ArrayList<Integer> list) {
+        int[] answer = new int[list.size()];
+        int index = 0;
+        
+        for(int i : list) {
+            answer[index++] = i;
+        }
+        return answer;
+    }
+    
+    class Song {
+        int songNum;
+        int playCount;
+        
+        public Song(int songNum, int playCount) {
+            this.songNum = songNum;
+            this.playCount = playCount;
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
 class Solution {
