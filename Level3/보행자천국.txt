@@ -1,3 +1,52 @@
+/*
+DP랑 개념이 비슷한 문제
+현재 값 -> 이전 값 기준.
+근데 여기서 이전 값을 가져올 때, 신호를 봐야 함.
+이전의 신호가 2였을 경우에는 up 방향에서는 위 방향으로 진행된 값만, 왼쪽 방향에서는 왼쪽에서 진행된 값만.
+그래서 특정 위치의 값을 정할 때, 애초에 왼쪽, 위쪽, 둘을 더한 값으로 나눠서 정의함.
+*/
+class Solution {
+    int MOD = 20170805;
+    public int solution(int m, int n, int[][] cityMap) {
+        int answer = 0;
+        // 0은 왼쪽, 1은 위쪽, 2는 둘의 합
+        int[][][] disCalculation = new int[cityMap.length][cityMap[0].length][3];
+        // 시작 노드의 값은 1로 고정시킴.
+        disCalculation[0][0][2] = 1;
+        
+        for(int i = 0; i < disCalculation.length; i++) {
+            for(int j = 0; j < disCalculation[0].length; j++) {
+                if(i == 0 && j == 0) {
+                    continue;
+                }
+                
+                int leftDirValue = 0, upDirValue = 0;
+                if(i >= 1) {
+                    upDirValue = getDir(i-1, j, cityMap, disCalculation, 1);
+                }
+                if(j >= 1) {
+                    leftDirValue = getDir(i, j-1, cityMap, disCalculation, 0);
+                }
+                disCalculation[i][j][0] = leftDirValue % MOD;
+                disCalculation[i][j][1] = upDirValue % MOD;
+                disCalculation[i][j][2] = (leftDirValue + upDirValue) % MOD;
+            }
+        }
+        return disCalculation[m-1][n-1][2] % MOD;
+    }
+    
+    public int getDir(int i, int j, int[][] cityMap, int[][][] disCalculation, int dir) {
+        if(cityMap[i][j] == 0) {
+            return disCalculation[i][j][2];
+        } else if(cityMap[i][j] == 2) {
+            return disCalculation[i][j][dir];
+        }
+        return 0;
+    }
+}
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 class Solution {
      int MOD = 20170805;
 	 public int solution(int m, int n, int[][] cityMap) 
