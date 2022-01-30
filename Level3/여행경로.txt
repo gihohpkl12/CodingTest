@@ -1,4 +1,88 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Collections;
+
+/*
+전형적인 DFS문제.
+(BFS 아님)
+
+항공권 정보를 저장하고, 알파벳 순서로 정렬함.
+그리고 DFS로 탐색해서 맨 처음 모든 항공권을 사용하면 return
+*/
+class Solution {
+    public String[] solution(String[][] tickets) {
+        String[] answer = new String[tickets.length+1];
+        HashMap<String, ArrayList<String>> ticketInfo = new HashMap<>();
+        // 항공권 정보 셋팅
+        setTicketInfo(ticketInfo, tickets);
+        // 항공권 알파벳 순서로 정렬
+        sortTicketOrder(ticketInfo);
+        
+        ArrayList<String> makingAanswer = new ArrayList<>();
+        // 시작 도시 설정
+        makingAanswer.add("ICN");
+        // 탐색
+        findCityRoad(makingAanswer, ticketInfo, "ICN", answer.length);
+        
+        // list를 Array로
+        convertListToStringArray(makingAanswer, answer);
+        return answer;
+    }
+    
+    public boolean findCityRoad(ArrayList<String> makingAanswer, HashMap<String, ArrayList<String>> ticketInfo, String lastCity, int endCount) {
+        // 맨 처음 항공권을 전부 사용해서 break하기 위함.
+        boolean breakPoint = false;
+        // 맨 처음 항공권을 전부 사용했으면 true로 바꾸고 리턴
+        if(makingAanswer.size() == endCount) {
+            return true;
+            // 이동 불가
+        } else if(!ticketInfo.containsKey(lastCity)) {
+            return false;
+        }
+        
+        for(int i = 0; i < ticketInfo.get(lastCity).size(); i++) {
+            String nextCity = ticketInfo.get(lastCity).get(i);
+            ticketInfo.get(lastCity).remove(i);
+            makingAanswer.add(nextCity);
+            
+            breakPoint = findCityRoad(makingAanswer, ticketInfo, nextCity, endCount);
+            if(breakPoint) {
+                return true;
+            } else {
+                ticketInfo.get(lastCity).add(i, nextCity);
+                makingAanswer.remove(makingAanswer.size()-1);
+            }
+        }
+        return breakPoint;
+    }
+    
+    public void setTicketInfo(HashMap<String, ArrayList<String>> ticketInfo, String[][] tickets) {
+        for(int i = 0; i < tickets.length; i++) {
+            String start = tickets[i][0], end = tickets[i][1];
+            if(ticketInfo.containsKey(start)) {
+                ticketInfo.get(start).add(end);
+            } else {
+                ticketInfo.put(start, new ArrayList<>());
+                ticketInfo.get(start).add(end);
+            }
+        }
+    }
+    
+    public void sortTicketOrder(HashMap<String, ArrayList<String>> ticketInfo) {
+        for(String key : ticketInfo.keySet()) {
+            Collections.sort(ticketInfo.get(key));
+        }
+    }
+    
+    public void convertListToStringArray(ArrayList<String> makingAanswer, String[] answer) {
+        int index = 0;
+        for(String key : makingAanswer) {
+            answer[index++] = key;
+        }
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 class Solution {
