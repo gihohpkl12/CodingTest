@@ -1,38 +1,73 @@
 import java.util.Arrays;
 
+/*
+누적 시간을 구하는 문제.
+이게 가장 정석적인 풀이라고 생각함.
+단순하게 시청자가 제일 많은 구간을 고르는 게 아니라, 시청자에 따른 누적시간을 계산해야 함.
+따라서 배열을 생성하고, 거기에 시청자가 들어오고 나가는 지점을 셋팅함.
+그 다음 배열을 돌면서 시청자에 따른 변화를 적용함. (i+1에 i의 값을 더함.)
+그리고 다시 배열을 돌면서 누적 시청률을 구함.
+*/
 class Solution {
     public String solution(String play_time, String adv_time, String[] logs) {
-        int playTime = parseTime(play_time);
-        int advTime = parseTime(adv_time);
-        long playNums[] = new long[playTime+10];
+        int totalPlayTime = convertTimeToInt(play_time);
+        int advTime = convertTimeToInt(adv_time);
+        long[] viewTimeCheck = new long[totalPlayTime+1];
 
-        for(String log : logs){
-            String splitted[] = log.split("-");
-            playNums[parseTime(splitted[0])]++;
-            playNums[parseTime(splitted[1])]--;
-        }
-        for(int i = 0; i < playNums.length-1; i++)
-            playNums[i+1] += playNums[i];
-
-
-        int startTime = 0;
-        long timeSum = 0;
-        long max = timeSum;
-        long maxStartTime = 0;
-        while(startTime+advTime <= playTime){
-            if(max < timeSum){
-                max = timeSum;
-                maxStartTime = startTime;
-            }
-            timeSum -= playNums[startTime];
-            timeSum += playNums[startTime+advTime];
-            startTime++;
-        }
-        return String.format("%02d:%02d:%02d",
-                maxStartTime/3600,
-                (maxStartTime/60)%60,
-                maxStartTime%60);
+        // 시청률 셋팅
+        viewTimeSetting(logs, viewTimeCheck);
+        // 결과 반환
+        return convertTimeToString(calculateMaxViewTime(totalPlayTime, advTime, viewTimeCheck));
     }
+    
+    public long calculateMaxViewTime(int totalPlayTime, int advTime, long[] viewTimeCheck) {
+        // 시작 시간
+        int advStartTime = 0;
+        // 누적 시간 계산용
+        long totalTimeSum = 0;
+        // 최대지점 저장용
+        long maxPoint = totalTimeSum;
+        // 최대 누적 시청률 저장용
+        long maxAdvStartTime = 0;
+        // 시작시간 + 광고시간이 플레이타임 이내.
+        while(advStartTime + advTime <= totalPlayTime){
+            if(maxPoint < totalTimeSum){
+                maxPoint = totalTimeSum;
+                maxAdvStartTime = advStartTime;
+            }
+            // 값이 +1됨으로, 지나갈 1초 전에 애들은 빼고, 앞으로 올 1초에 애들은 더함.
+            totalTimeSum -= viewTimeCheck[advStartTime];
+            totalTimeSum += viewTimeCheck[advStartTime+advTime];
+            advStartTime++;
+        }
+        return maxAdvStartTime;
+    }
+    
+    public void viewTimeSetting(String[] logs, long[] viewTimeCheck) {
+        // 시청률 셋팅
+        for(String log : logs) {
+            String splitted[] = log.split("-");
+            viewTimeCheck[convertTimeToInt(splitted[0])]++;
+            viewTimeCheck[convertTimeToInt(splitted[1])]--;
+        }
+        
+        // 누적 시청률 적용
+        for(int i = 0; i < viewTimeCheck.length-1; i++) {
+            viewTimeCheck[i+1] += viewTimeCheck[i];
+        }
+    }
+    
+    public int convertTimeToInt(String time) {
+        String[] timeSplit = time.split(":");
+        return Integer.parseInt(timeSplit[0])*3600
+                + Integer.parseInt(timeSplit[1])*60
+                + Integer.parseInt(timeSplit[2]);
+    }
+    
+    public String convertTimeToString(long time) {
+        return String.format("%02d:%02d:%02d", time/3600, (time/60)%60, time%60);
+    }
+}
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
