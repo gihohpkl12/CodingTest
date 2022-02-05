@@ -1,4 +1,135 @@
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Comparator;
+import java.util.Arrays;
+
+/*
+전형적인 구현문제.
+이걸 조건을 다 하나씩 따져가면서 구현하려면 되게 까다로움.
+간단하게 하려면 건설이든 철거든 일단 먼저 함.
+그 다음에 건물의 상태를 봄.
+건물에 조건이 안 맞는 부분이 있으면 롤백, 아니면 그대로 현상 유지.
+
+++
+속도는 아래 풀이가 훨씬 더 빠름.
+아무래도 사용한 자료구조의 차이인 거 같음.
+근데 클린코드 입장이나 보는 면에서는 이게 더 좋음.
+*/
+class Solution {
+    public int[][] solution(int n, int[][] build_frame) {
+        LinkedHashMap<String, String> history = new LinkedHashMap<>();
+        
+        for(int[] buildOrder : build_frame) {
+            // 바꿈. 기둥 == 1, 보 == 2 (이전에 배열을 썼는데 그것 때문에 바꿨었음. 지금은 그대로 사용해도 상관은 없음.)
+            int y = buildOrder[0], x = buildOrder[1], type = buildOrder[2]+1, job = buildOrder[3];
+            String key = makingKey(x, y, type);
+            // 일단 건물 상태 반영
+            manageHistory(history, key, job);
+            
+            // 상태가 이상하면 rollBack
+            if(!checkBuildingCondition(history)) {
+                rollBack(history, job, key);
+            }
+        }
+        
+        int[][] answer = new int[history.size()][3];
+        int index = 0;
+        for(String key : history.keySet()) {
+            String[] arrForConvert = key.split(",");
+            int y = Integer.parseInt(arrForConvert[0]), x = Integer.parseInt(arrForConvert[1]), type = Integer.parseInt(arrForConvert[2]);
+            answer[index][0] = x; 
+            answer[index][1] = y;
+            answer[index][2] = type-1;
+            index++;
+        }
+        
+        // 문제 조건에 맞게 정렬.
+        Arrays.sort(answer, new Comparator<int[]>(){
+            public int compare(int[] o1, int[] o2) {
+                if(o1[0] - o2[0] == 0) {
+                    if(o1[1] - o2[1] == 0) {
+                        return o1[2] - o2[2];
+                    }
+                    return o1[1] - o2[1];
+                }
+                return o1[0] - o2[0];
+            }
+        });
+        return answer;
+    }
+    
+    public boolean checkBuildingCondition(LinkedHashMap<String, String> history) {
+        for(String key : history.keySet()) {
+            String[] arrForConvert = key.split(",");
+            int x = Integer.parseInt(arrForConvert[0]), y = Integer.parseInt(arrForConvert[1]), type = Integer.parseInt(arrForConvert[2]);
+            // 기둥 케이스
+            if(type == 1) {
+                if(x == 0) {
+                    continue;
+                // 밑에 기둥이 있거나
+                } else if(history.containsKey(makingKey(x-1, y, 1))) {
+                    continue;
+                // 밑으로 한칸, 왼쪽으로 한칸에 보가 있거나
+                } else if(history.containsKey(makingKey(x, y-1, 2))) {
+                    continue;
+                // 밑에 보가 있는 케이스
+                } else if(history.containsKey(makingKey(x, y, 2)))  {
+                    continue;
+                } else {
+                    return false;
+                }
+            // 보 케이스
+            } else if(type == 2) {
+                // 아래에 기둥이 있거나
+                if(history.containsKey(makingKey(x-1, y, 1))) {
+                    continue;
+                // 아래, 오른쪽에 기둥이 있거나
+                } else if(history.containsKey(makingKey(x-1, y+1, 1))) {
+                    continue;
+                // 양 옆에 보가 있거나
+                } else if(history.containsKey(makingKey(x, y-1, 2)) && history.containsKey(makingKey(x, y+1, 2))) {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    public void rollBack(LinkedHashMap<String, String> history, int job, String key) {
+        String[] arrForConvert = key.split(",");
+        int x = Integer.parseInt(arrForConvert[0]), y = Integer.parseInt(arrForConvert[1]), type = Integer.parseInt(arrForConvert[2]);
+        
+        if(job == 1) {
+            manageHistory(history, key, 0);
+        } else {
+            manageHistory(history, key, 1);
+        }
+    }
+    
+    public void manageHistory(LinkedHashMap<String, String> history, String key, int job) {
+        if(job == 0) {
+            history.remove(key);
+        } else {
+            history.put(key, "");
+        }
+    }
+    
+    public String makingKey(int x, int y, int type) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Integer.toString(x))
+            .append(",")
+            .append(Integer.toString(y))
+            .append(",")
+            .append(Integer.toString(type));
+        return sb.toString();
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
