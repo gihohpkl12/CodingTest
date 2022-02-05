@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.Arrays;
 
@@ -17,7 +17,7 @@ import java.util.Arrays;
 */
 class Solution {
     public int[][] solution(int n, int[][] build_frame) {
-        LinkedHashMap<String, String> history = new LinkedHashMap<>();
+        HashMap<String, String> history = new HashMap<>();
         
         for(int[] buildOrder : build_frame) {
             // 바꿈. 기둥 == 1, 보 == 2 (이전에 배열을 썼는데 그것 때문에 바꿨었음. 지금은 그대로 사용해도 상관은 없음.)
@@ -58,7 +58,7 @@ class Solution {
         return answer;
     }
     
-    public boolean checkBuildingCondition(LinkedHashMap<String, String> history) {
+    public boolean checkBuildingCondition(HashMap<String, String> history) {
         for(String key : history.keySet()) {
             String[] arrForConvert = key.split(",");
             int x = Integer.parseInt(arrForConvert[0]), y = Integer.parseInt(arrForConvert[1]), type = Integer.parseInt(arrForConvert[2]);
@@ -98,7 +98,7 @@ class Solution {
         return true;
     }
     
-    public void rollBack(LinkedHashMap<String, String> history, int job, String key) {
+    public void rollBack(HashMap<String, String> history, int job, String key) {
         String[] arrForConvert = key.split(",");
         int x = Integer.parseInt(arrForConvert[0]), y = Integer.parseInt(arrForConvert[1]), type = Integer.parseInt(arrForConvert[2]);
         
@@ -109,7 +109,7 @@ class Solution {
         }
     }
     
-    public void manageHistory(LinkedHashMap<String, String> history, String key, int job) {
+    public void manageHistory(HashMap<String, String> history, String key, int job) {
         if(job == 0) {
             history.remove(key);
         } else {
