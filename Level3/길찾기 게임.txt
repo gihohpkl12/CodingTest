@@ -1,3 +1,197 @@
+import java.util.Comparator;
+import java.util.ArrayList;
+
+/*
+pre, post는 DFS로 간단하게 구현하면 되는 문제임.
+근데 트리를 설정하는 게 어려움.
+
+우선 트리의 번호가 인덱스임으로 노드들을 만듦.
+그리고 노드들을 정렬함 (y값을 기준으로 계층이 정해지므로 미리 정렬해놓으면 탐색에서 유리함)
+ArrayList<ArrayList<Node>>를 만들고, 층마다 각각 노드를 저장함.
+
+각 노드는 본인에 올 수 있는 범위가 미리 셋팅됨.
+(이진트리의 규칙에 맞게 설정됨)
+
+그래프는 부모세대에서 반복문을 돌면서 자식세대 애들을 넘겨서
+부모 -> 자식 순으로 셋팅함.
+이렇게 해야 lastCheck 인덱스로 탐색 시간을 줄일 수 있음. (이미 선택된 자식들은 ㅂㅂ)
+*/
+class Solution {
+    int index = 0;
+    
+    public int[][] solution(int[][] nodeinfo) {
+        int[][] answer = new int[2][nodeinfo.length];
+        ArrayList<ArrayList<Node>> nodeManage = new ArrayList<>();
+        
+        // 노드 초기화.
+        initNodes(nodeinfo, nodeManage);
+        // 그래프 그리기.
+        setGraphOfNode(nodeManage);
+        
+        preOrder(answer, nodeManage.get(0).get(0));
+        index = 0;
+        postOrder(answer, nodeManage.get(0).get(0));
+        
+        return answer;
+    }
+    
+    public void postOrder(int[][] answer, Node node) {
+        if(node.leftChild != null) {
+            postOrder(answer, node.leftChild);
+        }
+        if(node.rightChild != null) {
+            postOrder(answer, node.rightChild);
+        }
+        answer[1][index++] = node.nodeNum+1;
+    }
+    
+    public void preOrder(int[][] answer, Node node) {
+        answer[0][index++] = node.nodeNum+1;    
+        
+        if(node.leftChild != null) {
+            preOrder(answer, node.leftChild);
+        } 
+        
+        if(node.rightChild != null) {
+            preOrder(answer, node.rightChild);
+        }
+    }
+    
+    public void setGraphOfNode(ArrayList<ArrayList<Node>> nodeManage) {
+        nodeManage.get(0).get(0).range[0] = 0;
+        nodeManage.get(0).get(0).range[1] = Integer.MAX_VALUE;
+        
+        for(int i = 0; i < nodeManage.size()-1; i++) {
+            ArrayList<Node> curGeneration = nodeManage.get(i);
+            ArrayList<Node> childGeneration = nodeManage.get(i+1);
+            int lastCheck = 0;
+            
+            for(int j = 0; j < curGeneration.size(); j++) {
+                Node parent = curGeneration.get(j);
+                int[] childs = findChild(childGeneration, parent, lastCheck);
+                // 자식이 정해지면
+                // 자식에 부모노드, 자식을 갖을 수 있는 범위를 셋팅함.
+                // 부모노드에 좌우에 맞게 자식 노드를 셋팅함.
+                if(childs[0] != -1) {
+                    parent.leftChild = childGeneration.get(childs[0]);
+                    childGeneration.get(childs[0]).parent = parent;
+                    childGeneration.get(childs[0]).range[0] = parent.range[0];
+                    childGeneration.get(childs[0]).range[1] = parent.x;
+                }
+                if(childs[1] != -1) {
+                    parent.rightChild = childGeneration.get(childs[1]);
+                    childGeneration.get(childs[1]).parent = parent;
+                    childGeneration.get(childs[1]).range[0] = parent.x;
+                    childGeneration.get(childs[1]).range[1] = parent.range[1];
+                }
+                lastCheck = childs[0] != -1 ? childs[0]+1 : lastCheck;
+                lastCheck = childs[1] != -1 ? childs[1]+1 : lastCheck;
+            }
+        }
+    }
+    
+    public int[] findChild(ArrayList<Node> childGeneration, Node parent, int lastCheck) {
+        int[] result = new int[] {-1, -1};
+        int count = 0;
+        
+        for(int i = lastCheck; i < childGeneration.size(); i++) {
+            if(count >= 2) {
+                break;
+            }
+            
+            Node child = childGeneration.get(i);
+            // 부모가 갖을 수 있는 자식의 범위 내에 자식 노드의 x값이 들어가면 맞음.
+            if(child.x >= parent.range[0] && child.x <= parent.range[1]) {
+                if(child.x < parent.x) {
+                    result[0] = i;
+                } else {
+                    result[1] = i;
+                }
+                count++;
+            }
+            lastCheck = i;
+        }
+        
+        return result;
+    }
+    
+    public void initNodes(int[][] nodeinfo, ArrayList<ArrayList<Node>> nodeManage) {
+        ArrayList<Node> tempNodeStorage = new ArrayList<>();
+        for(int i = 0; i < nodeinfo.length; i++) {
+            tempNodeStorage.add(new Node(nodeinfo[i][0], nodeinfo[i][1], i));
+        }
+        
+        tempNodeStorage.sort(new Comparator<Node>() {
+            public int compare(Node o1, Node o2) {
+                if(o2.y - o1.y == 0) {
+                    return o1.x - o2.x;
+                }
+                return o2.y - o1.y;
+            }
+        });
+        
+        // y값을 기준으로 계층을 나눔
+        int curNodeY = tempNodeStorage.get(0).y, index = 0;
+        nodeManage.add(new ArrayList<>());
+        for(int i = 0; i < tempNodeStorage.size(); i++) {
+            if(curNodeY == tempNodeStorage.get(i).y) {
+                nodeManage.get(index).add(tempNodeStorage.get(i));
+            } else {
+                nodeManage.add(new ArrayList<>());
+                index++;
+                nodeManage.get(index).add(tempNodeStorage.get(i));
+                curNodeY = tempNodeStorage.get(i).y;
+            }
+        }
+    }
+    
+    class Node {
+        int x, y;
+        int nodeNum;
+        int[] range;
+        Node leftChild = null;
+        Node rightChild = null;
+        Node parent = null;
+            
+        public Node(int x, int y, int nodeNum) {
+            this.x = x;
+            this.y = y;
+            this.nodeNum = nodeNum;
+            this.range = new int[2];
+        }
+    }
+}
+
+/*
+public void print(ArrayList<ArrayList<Node>> nodeManage) {
+        for(int i = 0; i < nodeManage.size(); i++) {
+            for(int j = 0; j < nodeManage.get(i).size(); j++) {
+                System.out.println("cur Num "+ (nodeManage.get(i).get(j).nodeNum+1));
+                if(nodeManage.get(i).get(j).parent != null) {
+                    System.out.println("parent "+ (nodeManage.get(i).get(j).parent.nodeNum+1));
+                } else {
+                    System.out.println("parent "+ "Grand");
+                }
+                
+                if(nodeManage.get(i).get(j).leftChild != null) {
+                    System.out.println("left child " + (nodeManage.get(i).get(j).leftChild.nodeNum+1));
+                } else {
+                    System.out.println("left child " + "end");
+                }
+                
+                if(nodeManage.get(i).get(j).rightChild != null) {
+                    System.out.println("right child " + (nodeManage.get(i).get(j).rightChild.nodeNum+1));
+                } else {
+                    System.out.println("right child " + "end");
+                }
+                
+                System.out.println("------------------------------------------------");
+            }
+        }
+    }
+*/
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Solution {
     	static int a=0,b=0;
 	public int[][] solution(int[][] nodeinfo) {
