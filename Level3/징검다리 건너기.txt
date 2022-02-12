@@ -1,3 +1,52 @@
+/*
+전형적인 이분탐색 문제.
+이분탐색에서 answer를 정하는 조건은 통과된 값(avr)을 answer에 넣는 것임.
+(min값을 갱신하는 avr+1을 넣는 것이 아님)
+근데 여기서는 문제 조건 때문에 avr+1을 넣어서 착각할 수 있음.
+(여기서 avr+1을 넣는 것은 문제를 해석해보면 됨.
+avr이 3일 때를 해보면 false가 됨. 근데 이게 친구가 이미 3명 건넌 다음에 또 건널 수 있냐임
+즉, 2에서 true 3에서 false면 2명이 이미 건넌 상태에서 또 건널 수 있냐? 에 대해 true임
+고로 3명)
+*/
+class Solution {
+    public int solution(int[] stones, int k) {
+        int min = 1, max = 200000000;
+        int answer = -1;
+        
+        while(min <= max) {
+            int avr = (min+max)/2;
+
+            if(check(avr, stones, k)) {
+                min = avr+1;
+                answer = Math.max(avr+1, answer);
+            } else {
+                max = avr-1;
+            }
+        }
+        
+        return answer;
+    }
+    
+    public boolean check(int avr, int[] stones, int k) {
+        int passCount = 0;
+        
+        for(int i = 0; i < stones.length; i++) {
+            int curStoneNum = stones[i] - avr;
+            if(curStoneNum <= 0) {
+                passCount++;
+            } else {
+                passCount = 0;
+            }
+            
+            if(passCount == k) {    
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 class Solution {
     public int solution(int[] stones, int k) {
         int max = Integer.MIN_VALUE;
