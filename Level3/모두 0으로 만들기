@@ -58,3 +58,123 @@ class Solution {
         }
     }
 }
+
+
+--------------------------------------------------------------------------------------
+에러 나긴 함.
+import java.util.ArrayList;
+import java.util.TreeMap;
+import java.util.HashMap;
+/*
+트리 구조로 만듦. (0을 루트로 만듦.)
+트리를 DFS로 탐색하다가, 리프 노드에 도착하면 리프노드의 값을 부모 노드로 옮기고 동시에 count에 절대 값을 더함.
+*/
+class Solution {
+    public long solution(int[] a, int[][] edges) {
+        TreeMap<Integer, ArrayList<Integer>> childCountMap = new TreeMap<>();
+        HashMap<Integer, ArrayList<Integer>> route = new HashMap<>();
+        ArrayList<Node> nodes = new ArrayList<>();
+        long answer = 0;
+        
+        if(setNode(nodes, a) != 0) {
+            return -1;
+        }
+        
+        setRoute(route, edges);
+        setTree(route, nodes, 0);
+        // setChildNodeCountMapForLeafNodeFind(childCountMap, nodes);
+        
+        return moveValueToRootFromLeaf(childCountMap, nodes);
+    }
+    
+    public long moveValueToRootFromLeaf(TreeMap<Integer, ArrayList<Integer>> childCountMap, ArrayList<Node> nodes) {
+        long count = 0;
+        boolean check = true;
+        
+        while(nodes.size() > 1) {
+            int end = nodes.size(), removeCount = 0;
+            for(int i = 0; i < end; i++) {
+                if(nodes.get(i - removeCount).num == 0) {
+                    continue;
+                }
+                
+                if(nodes.get(i - removeCount).childs.size() == 0) {
+                    nodes.get(i - removeCount).parent.value += nodes.get(i - removeCount).value;
+                    count += Math.abs(nodes.get(i - removeCount).value);
+                    nodes.get(i - removeCount).parent.childs.remove(nodes.get(i - removeCount));
+                    nodes.remove(i - removeCount++);
+                }
+            }
+        }
+        
+        return  count;
+    }
+    
+    public void setChildNodeCountMapForLeafNodeFind(TreeMap<Integer, ArrayList<Integer>> childCountMap, ArrayList<Node> nodes) {
+        for(int i = 0; i < nodes.size(); i++) {
+            int childNodeCount = nodes.get(i).childs.size();
+            if(childCountMap.containsKey(childNodeCount)) {
+                childCountMap.get(childNodeCount).add(i);
+            } else {
+                childCountMap.put(childNodeCount, new ArrayList<>());
+                childCountMap.get(childNodeCount).add(i);
+            }
+        }
+    }
+
+    public int setNode(ArrayList<Node> nodes, int[] a) {
+        int sum = 0;
+        for(int i = 0; i < a.length; i++) {
+            sum += a[i];
+            nodes.add(new Node(i, a[i]));
+        }
+        return sum;
+    }
+    
+    public void setRoute(HashMap<Integer, ArrayList<Integer>> route, int[][] edges) {
+        for(int[] edge : edges) {
+            int start = edge[0], end = edge[1];
+            
+            if(route.containsKey(start)) {
+                route.get(start).add(end);
+            } else {
+                route.put(start, new ArrayList<>());
+                route.get(start).add(end);
+            }
+            
+            if(route.containsKey(end)) {
+                route.get(end).add(start);
+            } else {
+                route.put(end, new ArrayList<>());
+                route.get(end).add(start);
+            }
+        }
+    }
+    
+    public void setTree(HashMap<Integer, ArrayList<Integer>> route, ArrayList<Node> nodes, int parentNum) {
+        Node parent = nodes.get(parentNum);
+        
+        for(int i = 0; i < route.get(parentNum).size(); i++) {
+            int childNum = route.get(parentNum).get(i);
+            Node child = nodes.get(childNum);
+            child.parent = parent;
+            parent.childs.add(child);
+            route.get(childNum).remove(Integer.valueOf(parentNum));
+            setTree(route, nodes, childNum);
+        }
+    }
+    
+    
+    class Node {
+        int num;
+        long value;
+        ArrayList<Node> childs;
+        Node parent;
+        
+        public Node(int num, long value) {
+            this.num = num;
+            this.value = value;
+            this.childs = new ArrayList<>();
+        }
+    }
+}
