@@ -1,3 +1,86 @@
+import java.util.*;
+
+class Solution {
+    
+    static int[] parent;
+    static PriorityQueue<Edge> pq;
+    
+    public int solution(int n, int[][] costs) {
+        int answer = 0;
+        parent = new int[n];
+        pq = new PriorityQueue<Edge>();
+
+        // 정점들의 부모 설정
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+
+        // 비용 적은 순서부터 우선순위 큐에 삽입
+        for (int i = 0; i < costs.length; i++) {
+            pq.offer(new Edge(costs[i][0], costs[i][1], costs[i][2]));
+        }
+
+        while (!pq.isEmpty()) {
+            Edge edge = pq.poll();
+
+            // 정점의 부모가 같으면 건너뜀 (사이클이 형성된 것으로 판단)
+            if (find(edge.start) == find(edge.end)) continue;
+            else {
+                union(edge.start, edge.end);
+                answer += edge.cost;
+            }
+        }
+        System.out.println("last check ");
+        for(int a : parent) {
+            System.out.print(a+" ");
+        }
+        return answer;
+    }
+    
+    // find --> 정점의 부모를 찾아줌.
+    public static int find(int p) {
+        if (parent[p] == p) return p;
+        return parent[p] = find(parent[p]);
+    }
+
+    // union --> 정점의 부모를 변경시킴으로써 서로 연결되었다는 것을 표시해줌.
+    public static void union(int a, int b) {
+        System.out.println("start part of union "+a+", "+b);
+        System.out.println("before ");
+            for(int A : parent) {
+                System.out.print(A+" ");
+            }
+            System.out.println();
+        int rootA = find(a);
+        int rootB = find(b);
+        System.out.println("rootA "+rootA +" RootB "+rootB );
+        
+        if (rootA != rootB) {
+            parent[rootB] = rootA;
+            System.out.println("check ");
+            for(int A : parent) {
+                System.out.print(A+" ");
+            }
+            System.out.println();
+        }
+    }
+    
+    class Edge implements Comparable<Edge> {
+    int start, end, cost;
+
+    public Edge(int start, int end, int cost) {
+        this.start = start;
+        this.end = end;
+        this.cost = cost;
+    }
+
+    @Override
+    public int compareTo(Edge o) {
+        return this.cost - o.cost;
+    }
+}
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.HashMap;
 class Solution {
     public int solution(int n, int[][] costs) {
