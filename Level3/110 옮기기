@@ -1,3 +1,97 @@
+import java.util.Stack;
+
+/*
+스택을 이용한 풀이.
+char[] 배열보다 속도는 느림.
+이유는 110 체크를 위헤서 그냥 인덱스로 찾아서 계산하는 것이 아니라 직접 꺼내서 비교하고 다시 넣는 작업이 필요함.
+그냥 아이디어 접근 측면에서 이렇게 풀었다고 생각하면 될 듯.
+우선 110을 전부 제거함.
+그리고 남는 문자열에서
+11, 0, 1 순으로 찾음.
+11이 있으면 그것보다 앞에, 11이 없으면 마지막 0에 뒤에, 11, 0 둘 다 해당되지 않을 경우 즉 1만 있는 경우에는 1보다 앞에 넣으면 됨.
+*/
+
+class Solution {
+    public String[] solution(String[] s) {
+        String[] answer = new String[s.length];
+        
+        for(int i = 0; i < s.length; i++) {
+            Stack<Character> removeStrSave = new Stack<>();
+            answer[i] = makeResultStr(removeStrSave, findRemoveStr(removeStrSave, s[i]));
+        }
+        return answer;
+    }
+    
+    public String makeResultStr(Stack<Character> removeStrSave, int count) {
+        StringBuilder sb = new StringBuilder();
+        int zeroIndex = -1, oneIndex = -1, index = removeStrSave.size()-1, doubleOneIndex = -1;
+        while(removeStrSave.size() != 0) {
+            char get = removeStrSave.pop();
+
+            if(get == '0') {
+                sb.insert(0, "0");
+            } else {
+                sb.insert(0, "1");
+            }
+            
+            if(get == '0') {
+                zeroIndex = zeroIndex == -1 ? index : zeroIndex;
+            } else if(get == '1') {
+                if(oneIndex - index == 1) {
+                    doubleOneIndex = index;
+                }
+                oneIndex = index;
+            }
+            index--;
+        }
+
+        if(doubleOneIndex != -1) {
+            for(int i = 0; i < count; i++) {
+                sb.insert(doubleOneIndex, "110");
+            }
+        } else if(zeroIndex != -1) {
+            for(int i = 0; i < count; i++) {
+                sb.insert(zeroIndex+1, "110");
+            }
+        } else if(oneIndex != -1){
+            for(int i = 0; i < count; i++) {
+                sb.insert(oneIndex, "110");
+            }
+        } else {
+            for(int i = 0; i < count; i++) {
+                sb.insert(0, "110");
+            }
+        }
+        
+        return sb.toString();
+    }
+    
+    public int findRemoveStr(Stack<Character> removeStrSave, String curStr) {
+        int count = 0;
+        for(int i = 0; i < curStr.length(); i++) {
+            if(curStr.charAt(i) == '0') {
+                if(removeStrSave.size() >= 2) {
+                    char second = removeStrSave.pop();
+                    char first = removeStrSave.pop();
+                    if(first == '1' && second == '1') {
+                        count++;
+                    } else {
+                        removeStrSave.add(first);
+                        removeStrSave.add(second);
+                        removeStrSave.add('0');
+                    }
+                } else {
+                    removeStrSave.add('0');
+                }
+            } else {
+                removeStrSave.add('1');
+            }
+        }
+        return count;
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------
+
 class Solution {
     public String[] solution(String[] s) {
         String[] answer = new String[s.length];
