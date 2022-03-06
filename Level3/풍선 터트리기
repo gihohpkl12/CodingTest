@@ -1,3 +1,52 @@
+/*
+문제 해석이 중요함.
+규칙상 따지고 보면
+특성 인덱스를 기준으로 해당 인덱스의 좌측이나 우측 둘 중에 한 곳이라도
+해당 인덱스의 값보다 적은 값이 없으면 터트리는 것이 가능함.
+ex. 5, 5, 5, 5, 4, 6, 7, 8, 9, 10
+4를 없애려고 한다면 자측에서는 전부 4가 이김.
+그리고 우측에서는 자연스럽게 6이 이기게 냅두고 
+4 vs 6 상황에서 1번 작은 수가 이기는 규칙을 쓰면 됨.
+
+고로,
+a 길이 만큼 배열을 만들고,
+0 ~ 길이까지 돌면서
+한 번에 0번 인덱스랑 length - i 인덱스 2개를 왼쪽, 오른쪽 최소값 변수를 두고 비교해서
+해당 인덱스의 특정 방향에서 본인이 최소값이라는 말이므로 false -> true로 바뀔 때
+count++ 하면 됨. (중복으로 count 될 수 있으므로 false -> true 체크)
+*/
+class Solution {
+    public int solution(int[] a) {
+        boolean[] minValueCheck = new boolean[a.length];
+        return countRemoveBalloon(minValueCheck, a);
+    }
+    
+    public int countRemoveBalloon(boolean[] minValueCheck, int[] a) {
+        // 왼쪽부터 체크하면서 동시에 오른쪽방향도 체크하기 위함.
+        int length = a.length-1;
+        // 왼쪽, 오른쪽을 따로 체크
+        int leftMin = Integer.MAX_VALUE, rightMin = Integer.MAX_VALUE;
+        int count = 0;
+        
+        for(int i = 0; i < a.length; i++) {
+            // a[i]는 왼쪽 기준으로 최소값이 됨. 즉, a[i]보다 왼쪽에 a[i]보다 작은 값은 없음.
+            if(a[i] < leftMin) {
+                leftMin = a[i];
+                // 처음 변경되면 ++
+                count = !minValueCheck[i] ? count+1 : count;
+                minValueCheck[i] = true;
+            }
+            // a[length - i] 기준으로 오른쪽 방향에 얘보다 작은 애가 없음.
+            if(a[length - i] < rightMin) {
+                rightMin =  a[length - i];
+                count = !minValueCheck[length - i] ? count+1 : count;
+                minValueCheck[length - i] = true;
+            }
+        }
+        return count;
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.Arrays;
 import java.util.HashMap;
 
