@@ -1,4 +1,43 @@
 /*
+그냥 s를 돌면서 바로 뒤, 혹은 2칸 뒤를 비교해서 같으면 팰린드롬 여부를 체크하면 됨.
+근데 abbb 같은 케이스 때문에 두가지 모두 적용되는 케이스는 둘 다 체크해야 함.
+그리고 펠린드롬이 없을 경우에는 answer가 1이 되어야 함.
+*/
+class Solution {
+    public int solution(String s) {
+        // 아무것도 없는 경우 대비
+        int answer = 1;
+        
+        for(int i = 1; i < s.length(); i++) {
+            // 한 칸 뒤가 같은 경우
+            if(s.charAt(i) == s.charAt(i-1)) {
+                answer = Math.max(answer, check(s, i, i-1));
+            }
+            // 두 칸 뒤가 같은 경우
+            if(i >= 2 && s.charAt(i) == s.charAt(i-2)) {
+                answer = Math.max(answer, check(s, i, i-2));
+            }
+        }
+        return answer;
+    }
+    
+    public int check(String s, int index, int reverseIndex) {
+        for(int i = index; i < s.length(); i++) {
+            // 같으면 reverseIndex를 줄여서 계속 체크함
+            if(reverseIndex >= 0 && s.charAt(i) == s.charAt(reverseIndex)) {
+                reverseIndex--;
+                index = i;
+            } else {
+                break;
+            }
+        }
+        return index - reverseIndex;
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/*
 크게 생각할 게 없었던 문제.
 1부터 s의 끝가지 돌면서 확인함.
 확인할 유형은 2가지임.(홀수형, 짝수형)
