@@ -1,6 +1,68 @@
 import java.util.HashMap;
 import java.util.ArrayList;
 
+/*
+별 거 없는 문제.
+스타수열 조건에 순서를 바꾸면 안 된다는 조건만 기억해야 함.
+(이거 없으면 그냥 제일 많이 나온 숫자에 *2 해서 그게 전체 배열에 숫자랑 맞으면 리턴하면 그만임)
+
+우선 맵을 돌면서 숫자 종류를 체크하고, 동시에 같은 숫자들의 인덱스를 확인함.
+굳이 정렬을 할 필요는 없는 거 같음.
+
+set이 끝나면 keySet()을 돌면서 직접 스타수열을 만들어보면 됨
+다음 인덱스에 영향이 적게 하기 위해서 되도록이면 왼쪽에 있는 숫자를 먼저 넣음
+*/
+class Solution {
+    public int solution(int[] a) {
+        int answer = 0;
+        HashMap<Integer, ArrayList<Integer>> numAndIndexsMap = new HashMap<>();
+        setMap(numAndIndexsMap, a);
+        
+        for(int key : numAndIndexsMap.keySet()) {
+            ArrayList<Integer> indexs = numAndIndexsMap.get(key);
+            // 이미 answer가 정해졌을 때, 이번 케이스가 최대치로 만들어져도 answer보다 적으면 패스
+            if(answer != 0 && indexs.size() * 2 <= answer) {
+                continue;
+            }
+            answer = Math.max(answer, makeStarSequence(a, indexs));
+        }
+        return answer;
+    }
+    
+    public int makeStarSequence(int[] a, ArrayList<Integer> indexs) {
+        HashMap<Integer, Integer> starSequeceCheck = new HashMap<>();
+        
+        for(int index : indexs) {
+            // 왼쪽 먼저 고려
+            if(index -1 >= 0 && a[index-1] != a[index] 
+               && !starSequeceCheck.containsKey(index-1) && !starSequeceCheck.containsKey(index)) {
+                starSequeceCheck.put(index, 0);
+                starSequeceCheck.put(index-1, 0);
+            } else if(index +1 < a.length && a[index+1] != a[index] 
+                     && !starSequeceCheck.containsKey(index+1) && !starSequeceCheck.containsKey(index)) {
+                starSequeceCheck.put(index, 0);
+                starSequeceCheck.put(index+1, 0);
+            }
+        }
+        return starSequeceCheck.size();
+    }
+    
+    public void setMap(HashMap<Integer, ArrayList<Integer>> numAndIndexsMap, int[] a) {
+        for(int i = 0; i < a.length; i++) {
+            if(numAndIndexsMap.containsKey(a[i])) {
+                numAndIndexsMap.get(a[i]).add(i);
+            } else {
+                numAndIndexsMap.put(a[i], new ArrayList<>());
+                numAndIndexsMap.get(a[i]).add(i);
+            }
+        }   
+    }
+}
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+import java.util.HashMap;
+import java.util.ArrayList;
+
 class Solution {
     public int solution(int[] a) {
         HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
