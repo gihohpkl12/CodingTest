@@ -1,3 +1,34 @@
+import java.util.Arrays;
+/*
+아래랑 같은 풀이임.
+근데 자료구조를 바꿈.
+이게 더 빠름
+*/
+class Solution {
+    public int solution(int[] A, int[] B) {
+        int answer = 0;        
+        int index = 0;
+        sort(A, B);
+        
+        for(int i = 0; i < A.length; i++) {
+            for(int j = index; j < B.length; j++) {
+                if(B[j] > A[i]) {
+                    answer++;
+                    index = j+1;
+                    break;
+                }
+                index = j+1;
+            }
+        }
+        return answer;
+    }
+    
+    public void sort (int[] A, int[] B) {
+        Arrays.sort(A);
+        Arrays.sort(B);
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.PriorityQueue;
 
 /*
