@@ -1,4 +1,69 @@
 /*
+전형적인 DP문제이면서, DP 연습하기 좋은 문제.
+
+우선 sticker의 길이가 2이하면 로직을 탈 필요가 없음.
+바로 리턴하면 됨.
+
+다음은
+DP로 만듦.
+근데 여기서 특수한 상황이 원형이라는 조건 때문임. 
+0번 인덱스에서 시작하냐, 1번 인덱스에서 시작하냐가 갈림.
+그래서 2가지 DP를 만들어야 함.
+(0번 부터 시작하면 맨 마지막 인덱스 고려X, 1번부터면 고려O)
+
+우선 0번, 1번 시작에 따라서 DP 배열을 초기화하고,
+[i][0]에는 현재 값을 안 뽑을 경우, [i][1]에는 현재 값을 뽑을 경우를 따질 것임.
+
+[i][1]은 당연히 [i-1][0]에 현재 값을 더해야 함.
+(이전에 안 뽑아야 뽑을 수 있음.)
+
+[i][0]에 아이디어가 중요함.
+얘는 이전에 뽑던 안 뽑던 상관이 없음. (이번에 안 뽑을 예정이기 때문에 제약이 없음)
+고로 [i-1][0], [i-1][1] 중에서 큰 값을 넣으면 됨.
+
+++ 아래랑 풀이는 같은 거 같은데 여기서는 O(n)이고 아래는 O(2n)
+*/
+class Solution {
+    public int solution(int sticker[]) {
+        // 길이 미달 체크
+        if(sticker.length <= 2) {
+            if(sticker.length == 1) {
+                return sticker[0];
+            } else {
+                return Math.max(sticker[0], sticker[1]);
+            }
+        }
+        
+        int answer = 0;
+        int[][] firstStartDp = new int[sticker.length][2];
+        int[][] secondStartDp = new int[sticker.length][2];
+        // 초기화
+        firstStartDp[0][1] = sticker[0];
+        secondStartDp[1][1] = sticker[1];
+        
+        for(int i = 1; i < sticker.length; i++) {
+            // 첫 번째를 뽑은 경우는 맨 마지막을 고려하지 않음
+            if(i < sticker.length-1) {
+                // 뽑을 경우는 이전에 안 뽑은 경우 + 현재
+                firstStartDp[i][1] = firstStartDp[i-1][0] + sticker[i];
+                // 안 뽑을 경우는 이전에 뽑, 안 뽑 중에서 최대값
+                firstStartDp[i][0] = Math.max(firstStartDp[i-1][1], firstStartDp[i-1][0]);
+            }
+            secondStartDp[i][1] = secondStartDp[i-1][0] + sticker[i];
+            secondStartDp[i][0] = Math.max(secondStartDp[i-1][1], secondStartDp[i-1][0]);
+        }
+
+        // 첫 번째에서 맨 마지막에 뽑, 안뽑 중에 최대 vs 두 번째에서 맨 마지막에 뽑, 안 뽑 중에 최대
+        answer = Math.max(Math.max(secondStartDp[secondStartDp.length-1][1], secondStartDp[secondStartDp.length-1][0]), Math.max(firstStartDp[firstStartDp.length-2][1], firstStartDp[firstStartDp.length-2][0]));
+        
+        
+        return answer;
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/*
 Dp문제.
 지금 값을 포함시킬 경우
 이전의 값에서 안 더함 + 지금 값 vs 이전 값에서 더함
