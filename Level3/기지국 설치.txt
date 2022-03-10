@@ -1,3 +1,42 @@
+/*
+시간 초과 때문에 다시 풀게되는 문제.
+구현은 쉬움.
+O(n)으로 끝내야 함.
+
+stations를 돌면서 설치된 위치를 확인하고 빈 곳을 카운트해서
+width로 나누면 됨.(% != 0 이면 +1)
+*/
+class Solution {
+    public int solution(int n, int[] stations, int w) {
+        int answer = 0;
+        int lastChecked = 0, width = (w*2)+1;
+        
+        for(int i = 0; i < stations.length; i++) {
+            // 시작지점
+            int start = stations[i] - w >= 1 ? stations[i] - w : 1;
+            // 끝 지점
+            int end = stations[i] + w <= n ? stations[i] + w : n;
+            // 빈 역 공간
+            int countOfStataions = start - lastChecked -1 >= 0 ? start - lastChecked -1 : 0;
+            
+            // 숫자 카운팅 + 마지막 체크지점 갱신
+            answer += countOfStataions/width;
+            answer = countOfStataions%width != 0 ? answer+1 : answer;
+            lastChecked = end;
+            
+            // 마지막 역인데 n까지 체크가 되었는지 확인하고 값을 추가
+            if(i == stations.length-1) {
+                answer += (n - lastChecked)/width;
+                answer = (n - lastChecked)%width != 0 ? answer+1 : answer;
+            }
+        }
+        
+        return answer;
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 class Solution {
     public int solution(int n, int[] stations, int w) {
         int answer = 0, start = 0, end = 0, index = 0;
