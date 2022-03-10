@@ -1,3 +1,39 @@
+import java.util.PriorityQueue;
+
+/*
+간단함. 그냥 그리디하게 생각하면 됨.
+작은 순서대로 정렬하고, A에서 뽑고, B에서 A보다 높은 수가 나올 때까지 계속 뽑아서 승점 쌓으면 됨.
+*/
+class Solution {
+    public int solution(int[] A, int[] B) {
+        int answer = 0;
+        PriorityQueue<Integer> minOrderOfA = new PriorityQueue<>();
+        PriorityQueue<Integer> minOrderOfB = new PriorityQueue<>();
+        setQ(minOrderOfA, minOrderOfB, A, B);
+        
+        while(minOrderOfA.size() != 0 && minOrderOfB.size() != 0) {
+            int numOfA = minOrderOfA.poll();
+            while(minOrderOfB.size() > 0) {
+                int numOfB = minOrderOfB.poll();
+                if(numOfB > numOfA) {
+                    answer++;
+                    break;
+                } 
+            }
+        }
+        return answer;
+    }
+    
+    public void setQ (PriorityQueue<Integer> minOrderOfA, PriorityQueue<Integer> minOrderOfB, int[] A, int[] B) {
+        for(int i = 0; i < A.length; i++) {
+            minOrderOfA.add(A[i]);
+            minOrderOfB.add(B[i]);
+        }
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 import java.util.ArrayList;
 import java.util.Arrays;
 class Solution {
