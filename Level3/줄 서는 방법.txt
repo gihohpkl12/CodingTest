@@ -1,4 +1,95 @@
 import java.util.ArrayList;
+/*
+전체 케이스를 만들어서 풀면 시간초과임.
+순서를 계산하는 방식으로 구해야 함.
+근데 보면 구할 수 있음.
+일단 경우의 수는 팩토리얼임.
+사람이 3명이면 3!로 6임.
+
+전체 6을 사람수 n으로 나눠보면 2임.
+이걸 보면 2마다 맨 앞의 숫자가 변함을 알 수 있음.(이건 옆에 전체 경우의 수를 참고하면 나옴)
+
+이걸로 사람 1,2,3에서 인덱스를 구할 수 있음.
+k가 5니까 이걸 사람이 변하는 기준 2로 나누면
+몫 2, 나머지 1이 나옴.
+몫이 2니까 인덱스 0+2 해서 2임.
+(근데 이때, 예를들어 k가 4인 경우면 똑같이 인덱스가 2로 나오지만 아님. 나머지가 0이면 -- 해야 됨)
+
+나머지로는 맨 앞을 구한 다음 나머지 경우의 수에서 순서를 구하는데 쓸 수 있음.
+예를들면 위의 과정을 한 번 거치면
+k = 1이 됨. (위에서 구한 나머지)
+n = 2가 됨. (3명 중에서 1명의 자리는 구했으니까 남은 2명)
+이제 위의 과정을 반복하면 됨.
+
+단, 나머지가 0인 경우에는 사람이 변한 다음의 맨 마지막의 경우임.
+(1인 경우에는 사람이 변한 다음의 맨 처음 경우)
+1인 경우는 그냥 돌려도 어차피 맨 앞을 구하니까 상관이 없는데
+0인 경우에는 맨 마지막 숫자를 꺼내야 하지만 계속 인덱스가 0이 되는 문제가 발생함.
+고로 나머지==k가 0인 경우에는 그냥 남은 사람들 중에서 제일 맨 마지막을 꺼내게 하면 됨.
+
+위에 해설 
+맨 앞을 2라고 하자. 3명 중에서 맨 앞이 2인 경우에 나머지가 0이면 남은 숫자를 큰대로 적으면 됨.
+맨 앞을 2라고 하자. 3명 중에서 맨 앞이 2인 경우에 나머지가 1이면 남은 숫자를 적은대로 적으면 됨.
+*/
+class Solution {
+    public int[] solution(int n, long k) {
+        ArrayList<Integer> people = new ArrayList<>();
+        // 사람 셋팅
+        setPeople(people, n);
+        int[] answer = new int[n];
+        int answerIndex = 0;
+        
+        while(n > 0) {
+            // 나머지가 0이 나온 경우는 맨 마지막 애들 넣고 끝.
+            if(k == 0) {
+                answer[answerIndex++] = people.get(people.size()-1);
+                people.remove(people.size()-1);
+                n--;
+                continue;
+            }
+            int index = 0;
+            // 전체 경우의 수
+            long allCaseNum = Factorial(n);
+            // 전체 경우의 수를 n으로 나눈 수. 즉 몇 번째마다 맨 앞의 숫자가 변하냐임.
+            long divideOfAllCaseNumByN = allCaseNum/n;
+            // 나머지
+            long remainder= k%divideOfAllCaseNumByN;
+            // 몫
+            long divide = k/divideOfAllCaseNumByN;
+            // 위치
+            index = (int)divide;
+            // 나머지가 0이면 하나 빼야 함.
+            index = remainder == 0 ? index-1 : index;
+            // 혹시 -1이 됐으면 0으로 셋팅
+            index = index < 0 ? 0 : index;
+            answer[answerIndex++] = people.get(index);
+            // 해당 사람을 위치시킨 다음에 리스트에서 제거
+            people.remove(index);
+            n--;
+            // 나머지 갱신
+            k = remainder;            
+        }
+        return answer;
+    }
+    
+    public void setPeople(ArrayList<Integer> people, int n) {
+        for(int i = 1; i <= n; i++) {
+            people.add(i);
+        }
+    }
+    
+    public long Factorial(int n) {
+        long result = 1;
+        for(int i = 1; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+import java.util.ArrayList;
 class Solution {
    public int[] solution(int n, long k) {
         int[] answer = new int[n];
