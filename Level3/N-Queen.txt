@@ -1,3 +1,89 @@
+/*
+생각이랑 아이디어가 중요한 문제.
+굳이 이중배열로 만들 필요가 없음.
+
+우선 직선을 생각하면 해당 칸에는 더이상 배치하면 안 됨.
+ex. x가 0, y가 1번인덱스에 배치했다면 x가 몇으로 바뀌던 y의 1번 인덱스에 배치하면 안 됨.
+
+다음은 대각선임
+위에서 부터 차례대로 배치하는데, 이때 순서를 넣음.(그래서 int[]임)
+예를 들어서, x가 3이고 y가 3이라고 한다면 이걸 대각선으로 생각하면
+x가 2일 때 y가 1,4에 있으면 안 됨.
+x가 0일 때까지 y값을 바꿔가면서 적용함.
+
+그리고 모든 경우의 수이므로 x가 0일 때, y 0에서 시작부터 끝가지 전부 계산해야 함.
+*/
+
+class Solution {
+    public int solution(int n) {
+        int answer = 0;
+        
+        // 모든 시작지점을 점검
+        for(int i = 0; i < n; i++) {
+            int[] checkingVertical = new int[n];
+            checkingVertical[i] = 1;
+            answer += setChessByDFS(checkingVertical, 2);
+        }
+        
+        return answer;
+    }
+    
+    public int setChessByDFS(int[] checkingVertical, int level) {
+        int result = 0;
+        
+        // 통과지점
+        if(level > checkingVertical.length) {
+            return 1;
+        }
+        
+        for(int i = 0; i < checkingVertical.length; i++) {
+            // 직선 && 대각선 점검
+            if(checkingVertical[i] == 0 && checkDiagonal(checkingVertical, level, i)) {
+                checkingVertical[i] = level;
+                result += setChessByDFS(checkingVertical, level+1);
+                checkingVertical[i] = 0;
+            }
+        }
+        
+        return result;
+    }
+    
+    // 대각선 점검
+    public boolean checkDiagonal(int[] checkingVertical, int level, int index) {
+        int rightIndex = index, leftIndex = index;
+        
+        // 계속 위로 이동하면서 점검
+        while(level > 1) {
+            level -= 1;
+            // 오른쪽 점검
+            if(checkRange(checkingVertical.length, rightIndex + 1)) {
+                if(checkingVertical[rightIndex + 1] == level) {
+                    return false;
+                }
+                rightIndex++;
+            }
+            // 왼쪽 점검
+            if(checkRange(checkingVertical.length, leftIndex - 1)) {
+                if(checkingVertical[leftIndex - 1] == level) {
+                    return false;
+                }
+                leftIndex--;
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean checkRange(int range, int index) {
+        if(index >= 0 && index < range) {
+            return true;
+        }
+        return false;
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 class Solution {
     static int answer=0;
 	public int solution(int n) 
