@@ -1,0 +1,102 @@
+/*
+누적합이라는 개념을 아는지 물어보는 문제.
+여기서는 누적합을 2중배열로 구현해야 됨.
+단순하게 배열에 1단 누적합을 적용해서 반복문으로 처리해도 되는데 여기서는 문제 특성상 skill의 범위가 굉장히 넓어서 
+이 방법으로는 시간초과가 남. (이 방법을 적용한 풀이는 주석처리함. 참고)
+
+우선 범위의 시작 지점에 값을 넣음.[startX][startY]
+startY가 끝나는 지점 다음에 해당 값을 없앨 수 있는 값을 넣음 [startX][endY+1]
+다음 endX가 끝나는 지점에 해당 값을 없앨 수 있는 값을 넣음 [endX][startY+1]
+즉, 시작 지점을 기준으로 가로 세로 직선에 끝낼 수 있는 값을 넣는 것임. (범위 지정)
+그리고 끝나는 지점의 대각선으로 한칸 뒤에 다시 값을 넣음. (위에서 셋팅한 해당 값을 없앨 수 있는 값과 상응하기 위함) [endX+1][endY+1]
+
+그리고 반복문을 돌면서 누적값을 계산함.
+이때 위에서 처럼 4개의 지점을 설정했기 때문에 상하 방향으로 한 번, 좌우 방향으로 한 번씩 총 2번을 돌아야 함.
+그러면 범위 지정이 끝남.
+*/
+class Solution {
+    public int solution(int[][] board, int[][] skill) {
+        int answer = board.length*board[0].length;
+        int n = board.length, m = board[0].length;
+         int[][] skillHistory = new int[n+1][m+1]; // 한칸 뒤에 값을 넣기 때문에 범위 +1
+        setSkillRange(skillHistory, skill);
+        calculateSkill(skillHistory);
+        
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                if(board[i][j] + skillHistory[i][j] <= 0) {
+                    answer--;
+                }
+            }
+        }
+        
+        return answer;
+    }
+    
+    public void setSkillRange(int[][] skillHistory, int[][] skill) {
+        for(int i = 0; i < skill.length; i++) {
+            int type = skill[i][0], startX = skill[i][1], startY = skill[i][2], endX = skill[i][3], endY = skill[i][4], deal = type == 1 ? skill[i][5] *-1 : skill[i][5];
+            skillHistory[startX][startY] += deal; // 시작지점
+            skillHistory[startX][endY+1] += (deal*-1); // 시작지점의 가로 끝 지점
+            skillHistory[endX+1][startY] += (deal*-1); // 시작 지점의 세로 끝 지점
+            skillHistory[endX+1][endY+1] += deal; // 끝나는 지점 셋팅
+        }
+    }
+    
+    public void calculateSkill(int[][] skillHistory) {
+        int n = skillHistory.length, m = skillHistory[0].length;
+        // 우선 세로로 누적합 계산
+        for(int i = 1; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                skillHistory[i][j] += skillHistory[i-1][j];
+            }
+        }
+        
+        // 가로로 누적합 계산
+        for(int i = 0; i < n; i++) {
+            for(int j = 1; j < m; j++) {
+                skillHistory[i][j] += skillHistory[i][j-1];
+            }
+        }
+        
+    }
+}
+
+/*
+이건 그냥 1단 누적합을 반복해서 넣은 개념.
+위에서 처럼 상하, 좌우 2번씩 돌 필요가 없이 한 번만 돌면 됨.
+근데 문제 특성상 이게 그냥 문제에서는 더 빠른데, 효율성에서는 훨씬 느림.
+
+class Solution {
+    public int solution(int[][] board, int[][] skill) {
+        int answer = board.length*board[0].length;
+        int n = board.length, m = board[0].length;
+         int[][] skillHistory = new int[n][m+1];
+        recordSkillHistory(skillHistory, skill);
+        
+        for(int i = 0; i < n; i++) {
+            int sum = 0;
+            for(int j = 0; j < m; j++) {
+                sum += skillHistory[i][j];
+                if(board[i][j] + sum <= 0) {
+                    answer--;
+                }
+            }
+        }
+        
+        return answer;
+    }
+    
+    public void recordSkillHistory(int[][] skillHistory, int[][] skill) {
+        for(int i = 0; i < skill.length; i++) {
+            int type = skill[i][0], startX = skill[i][1], start = skill[i][2], endX = skill[i][3], end = skill[i][4], deal = type == 1 ? skill[i][5] *-1 : skill[i][5];
+            while(startX <= endX) {
+                skillHistory[startX][start] += deal;
+                skillHistory[startX][end+1] += (deal*-1);
+                startX++;
+            }
+        }
+        
+    }
+}
+*/
