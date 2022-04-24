@@ -1,0 +1,53 @@
+import java.util.HashMap;
+
+/*
+간단함.
+신고를 받은 사람 기준으로 map을 만들고, 신고한 사람을 넣음.
+반복문을 돌면서 값을 셋팅함
+마지막에 신고받은 사람들 size를 체크해서 k 이상이면 answer에 ++
+*/
+class Solution {
+    public int[] solution(String[] id_list, String[] report, int k) {
+        int[] answer = new int[id_list.length];
+        // 아이디별 인덱스
+        HashMap<String, Integer> idIndexs = new HashMap<>();
+        // 신고 받은 사람, 신고한 사람들
+        HashMap<String, HashMap<String, Integer>> reportManagement = new HashMap<>();
+        idIndexs(idIndexs, id_list);
+        reportUser(reportManagement, report);
+        alert(reportManagement, k, idIndexs, answer);
+        
+        return answer;
+    }
+    
+    public void reportUser(HashMap<String, HashMap<String, Integer>> reportManagement, String[] report) {
+        for(int i = 0; i < report.length; i++) {
+            String[] get = report[i].split(" ");
+            String reporter = get[0], target = get[1];
+            
+            if(!reportManagement.containsKey(target)) {
+                reportManagement.put(target, new HashMap<String, Integer>());
+                reportManagement.get(target).put(reporter, 0);
+            } else {
+                reportManagement.get(target).put(reporter, 0);
+            }
+        }
+    }
+    
+    public void alert(HashMap<String, HashMap<String, Integer>> reportManagement, int k, HashMap<String, Integer> idIndexs, int[] answer) {
+        for(String id : reportManagement.keySet()) {
+            if(reportManagement.get(id).size() >= k) {
+                for(String reporter : reportManagement.get(id).keySet()) {
+                    int index = idIndexs.get(reporter);
+                    answer[index]++;
+                }
+            }
+        }
+    }
+    
+    public void idIndexs(HashMap<String, Integer> idIndexs, String[] id_list) {
+        for(int i = 0; i < id_list.length; i++) {
+            idIndexs.put(id_list[i],i);
+        }
+    }
+}
