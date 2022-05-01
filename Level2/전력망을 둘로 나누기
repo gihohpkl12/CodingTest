@@ -1,0 +1,157 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+/*
+그래프를 트리로 보면 쉽게 풀림
+우선 트리로 만듦.
+그리고 각각의 노드마다 해당 노드의 하단에 몇 개의 노드가 있는지 구함.
+
+트리라서 전체가 연결되어 있기 때문에 한 지점을 자르면 바로 그룹이 2개가 됨.
+특정 노드에서 해당 노드 개수 1 + 해당 노드 아래의 노드를 더한 값을 전체 노드 개수에서 빼면
+다른 그룹의 숫자가 나옴.
+
+예제1 기준으로
+4번 노드는 1 + 하단 5개임.
+전체 9 - 6 하면 나머지 그룹은 3.
+그룹의 차이는 3.
+
+주의해야할 점이 모든 경로를 우선 구한 다음에 트리 구조로 만들어야 트리가 이상하게 안 만들어짐.
+*/
+class Solution {
+    public int solution(int n, int[][] wires) {
+        // 경로 생성
+        HashMap<Integer, ArrayList<Integer>> route = new HashMap<>();
+        setRoute(wires, route);
+        
+        // 트리 생성
+        Node root = new Node(wires[0][0]);
+        setTree(route, root);
+        
+        // 하단의 노드 count 및 잘랐을 때, 갭차이 구함.
+        countNode(root, n);
+        return getResult(root);
+    }
+    
+    public int getResult(Node curNode) {
+        int result = curNode.gap;
+        for(Node child : curNode.childs) {
+            // 자식 노드에서 갭을 구해옴.
+            int get = getResult(child);
+            // 현재 노드의 갭 vs 자식 노드에서 구해온 갭을 비교함.
+            // dfs 방식이기 때문에 최하단까지 내려갔다가 맨 처음 호출된 곳으로 돌아오면
+            // 전체 숫자를 카운팅할 수 있음.
+            result = Math.min(get, result);
+        }
+        return result;
+    }
+    
+    public void setRoute(int[][] wires, HashMap<Integer, ArrayList<Integer>> route) {
+        for(int[] arr : wires) {
+            int start = arr[0];
+            int end = arr[1];
+            
+            if(route.containsKey(start)) {
+                route.get(start).add(end);
+            } else {
+                route.put(start, new ArrayList<Integer>());
+                route.get(start).add(end);
+            }
+            
+            if(route.containsKey(end)) {
+                route.get(end).add(start);
+            } else {
+                route.put(end, new ArrayList<Integer>());
+                route.get(end).add(start);
+            }
+        }
+    }
+    
+    public int countNode(Node curNode, int n) {
+        // 현재 노드 값으로 1.
+        int result = 1;
+        // leaf 노드인 경우에는 하단이 없고, 갭은 전체에서 본인을 뺀 숫자임.
+        // 1을 리턴해서 result에 더해져야 하단에 몇 개의 노드가 있는지 카운팅됨.
+        if(curNode.isLeaf) {
+            curNode.underNodeCount = 0;
+            curNode.gap = n-1;
+            return 1;
+        }
+        
+        for(Node child : curNode.childs) {
+            // 하단에서 온 값들을 더함.
+            result += countNode(child, n);
+        }
+        // 현재 노드 기준 하단의 값(본인은 뺌. 이거 괜히 처음에 1로 셋팅한 듯?)
+        curNode.underNodeCount = result-1;
+        
+        // 갭 구하기.
+        int groupOne = n - (curNode.underNodeCount + 1);
+        int groupTwo = n - groupOne;
+        curNode.gap = Math.abs(groupOne - groupTwo);
+        
+        return result;
+    }
+    
+    public void setTree(HashMap<Integer, ArrayList<Integer>> route, Node curNode) {
+        int parentNumOfCurNode = -1;
+        if(curNode.parent != null) {
+            parentNumOfCurNode = curNode.parent.nodeNum;
+        }
+        
+        for(int key : route.get(curNode.nodeNum)) {
+            // 본인의 부모는 패스
+            if(key == parentNumOfCurNode) {
+                continue;
+            }
+            // 자식 설정
+            Node child = new Node(key);
+            child.setParent(curNode);
+            curNode.setChild(child);
+            setTree(route, child);
+        }
+    }
+    
+    class Node {
+        int nodeNum;
+        int underNodeCount;
+        int gap;
+        Node parent;
+        ArrayList<Node> childs;
+        boolean isLeaf;
+        
+        public Node(int nodeNum) {
+            this.nodeNum = nodeNum;
+            this.childs = new ArrayList<>();
+            this.isLeaf = true;
+            this.underNodeCount = 0;
+        }
+        
+        public void setChild(Node child) {
+            this.childs.add(child);
+            this.isLeaf = false;
+        }
+        
+        public void setParent(Node parent) {
+            this.parent = parent;
+        }
+    }
+    
+    public void printInfo(Node cur) {
+        System.out.println("nodeNum: " + cur.nodeNum);
+        System.out.println("under Count "+cur.underNodeCount);
+        System.out.println("gap "+cur.gap);
+        if(cur.parent == null) {
+            System.out.println("Parent : -1");
+        } else {
+            System.out.println("Parent "+cur.parent.nodeNum);
+        }
+        for(Node ch : cur.childs) {
+            System.out.print(ch.nodeNum +" ");
+        }
+        System.out.println();
+        System.out.println("--------------------------------");
+        for(Node ch : cur.childs) {
+            printInfo(ch);
+        }
+    }
+}
