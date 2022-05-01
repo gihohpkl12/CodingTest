@@ -1,0 +1,90 @@
+import java.util.HashMap;
+import java.util.PriorityQueue;
+
+/*
+교점의 개수를 구하는 방법은 맨 하단의 참조를 참고하면 됨.
+간단함.
+교점의 개수를 구하고, map에 저장함.
+y값은 큰 값 ~ 작은 값 순서로 진행하고,
+x값은 작은 값 ~ 큰 값 순서로 진행하면 됨.
+*/
+
+class Solution {
+    public String[] solution(int[][] line) {
+        // x값을 자동으로 작은 값부터 구하기 위해서 pq 사용.
+        HashMap<Long, PriorityQueue<Long>> allCase = new HashMap<>();
+        // x, y의 최대 최소 범위
+        long[] range = makingAllCase(allCase, line);
+        // 공백은 미리 생성해둠.
+        String blank = makingBlank(range[0], range[1]);
+        String[] answer = new String[(int)range[3] - (int)range[2] + 1];
+        
+        int index = 0;
+        for(long i = range[3]; i >= range[2]; i--) {
+            // 있는 y값이면 별을 생성, 없으면 미리 생성해둔 공백 저장.
+            if(allCase.containsKey(i)) {
+                PriorityQueue<Long> cur = allCase.get(i);
+                StringBuilder curLine = new StringBuilder();
+                
+                for(long j = range[0]; j <= range[1]; j++) {
+                    if(cur.size() > 0 && cur.peek() == j) {
+                        curLine.append("*");
+                        // 혹시라도 중복된 x값이 있을까봐.
+                        while(cur.size() > 0 && cur.peek() == j) {
+                            cur.poll();    
+                        }
+                    } else {
+                        curLine.append(".");
+                    }
+                }
+                // result.add(curLine.toString());
+                answer[index++] = curLine.toString();
+            } else {
+                // result.add(blank);
+                answer[index++] = blank;
+            }
+        }
+        
+        return answer;
+    }
+    
+    public String makingBlank(long start, long end) {
+        StringBuilder sb = new StringBuilder();
+        
+        for(long i = start; i <= end; i++) {
+            sb.append(".");
+        }
+        return sb.toString();
+    }
+    
+    public long[] makingAllCase(HashMap<Long, PriorityQueue<Long>> allCase, int[][] line) {
+        long[] range = new long[] {Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE};
+        
+        for(int i = 0; i < line.length-1; i++) {
+            for(int j = i+1; j < line.length; j++) {
+                long adbc = ((long)line[i][0] * (long)line[j][1]) - ((long)line[i][1] * (long)line[j][0]);
+                if(adbc == 0) {
+                    continue;
+                }
+                long bfed = ((long)line[i][1] * (long)line[j][2]) - ((long)line[i][2] * (long)line[j][1]);
+                long ecaf = ((long)line[i][2] * (long)line[j][0]) - ((long)line[i][0] * (long)line[j][2]);
+                if(bfed % adbc == 0 && ecaf % adbc == 0) {
+                    long x = bfed/adbc;
+                    long y = ecaf/adbc;
+                    
+                    if(allCase.containsKey(y)) {
+                        allCase.get(y).add(x);
+                    } else {
+                        allCase.put(y, new PriorityQueue<Long>());
+                        allCase.get(y).add(x);
+                    }
+                    range[0] = Math.min(range[0], x);
+                    range[1] = Math.max(range[1], x);
+                    range[2] = Math.min(range[2], y);
+                    range[3] = Math.max(range[3], y);
+                }
+            }
+        }
+        return range;
+    }
+}
