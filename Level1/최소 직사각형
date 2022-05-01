@@ -1,0 +1,21 @@
+/*
+겁나 간단함.
+가로나 세로 한 쪽에 그냥 큰 값을 몰아넣으면 됨.
+그리고 가로, 세로에서 각각 최대값을 찾아서 곱하면 끝
+*/
+class Solution {
+    public int solution(int[][] sizes) {
+        int width = Integer.MIN_VALUE, height = Integer.MIN_VALUE;
+        for(int i = 0; i < sizes.length; i++) {
+            if(sizes[i][0] < sizes[i][1]) {
+                int temp = sizes[i][0];
+                sizes[i][0] = sizes[i][1];
+                sizes[i][1] = temp;
+            }
+            width = Math.max(width, sizes[i][0]);
+            height = Math.max(height, sizes[i][1]);
+        }
+        
+        return width*height;
+    }
+}
