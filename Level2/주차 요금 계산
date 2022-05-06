@@ -1,0 +1,75 @@
+import java.util.TreeMap;
+import java.util.HashMap;
+
+/*
+그냥 자동차 입출차 기록대로 시간 계산 저장했다가 마지막에 계산해서 하면 됨.
+주의할 점
+1. 자동차 번호 순서대로 입력해야 하니까 key를 기준으로 정렬하는 TreeMap을 씀
+2. 반올림할 때, float형으로 계산해야 소수점에서 반올림이 됨.
+*/
+
+class Solution {
+    public int[] solution(int[] fees, String[] records) {
+        int[] answer;
+        HashMap<String, Integer> cars = new HashMap<>();
+        TreeMap<String, Integer> feeManage = new TreeMap<>();
+        int endTime = convertTime("23:59");
+        
+        for(String record : records) {
+            String[] recordArr = record.split(" ");
+
+            if(recordArr[2].equals("IN")) {
+                int inTime = convertTime(recordArr[0]);
+                cars.put(recordArr[1], inTime);
+            } else {
+                addTime(feeManage, recordArr[1], cars.get(recordArr[1]), convertTime(recordArr[0]));
+                cars.remove(recordArr[1]);
+            }
+        }
+        
+        for(String remainsCar : cars.keySet()) {
+            addTime(feeManage, remainsCar, cars.get(remainsCar), endTime);
+        }
+        
+        calFee(feeManage, fees);
+        
+        int index = 0;
+        answer = new int[feeManage.size()];
+        for(String key : feeManage.keySet()) {
+            answer[index++] = feeManage.get(key);
+        }
+        return answer;
+    }
+    
+    public int convertTime(String time) {
+        String[] temp = time.split(":");
+        return Integer.parseInt(temp[0]) * 60 + Integer.parseInt(temp[1]);
+    }
+    
+    public void addTime(TreeMap<String, Integer> feeManage, String carNum, int inTime, int outTime) {
+        if(feeManage.containsKey(carNum)) {
+            feeManage.replace(carNum, feeManage.get(carNum) + (outTime - inTime));
+        } else {
+            feeManage.put(carNum, outTime - inTime);
+        }
+    }
+    
+    public void calFee(TreeMap<String, Integer> feeManage, int[] fees) {
+        int defaultTime = fees[0];
+        int defaultFee = fees[1];
+        int perMinute = fees[2];
+        int FeePerMinute = fees[3];
+        
+        for(String car : feeManage.keySet()) {
+            int totalFee = defaultFee;
+            int useTime = feeManage.get(car);
+            if(useTime > defaultTime) {
+                useTime -= defaultTime;
+                totalFee += Math.ceil((float)useTime/(float)perMinute) * FeePerMinute;
+                feeManage.replace(car, totalFee);
+            } else {
+                feeManage.replace(car, totalFee);
+            }
+        }
+    }
+}
