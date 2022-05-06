@@ -1,0 +1,96 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+
+/*
+1번 케이스 때문에 별로 좋은 문제 같지는 않음.
+문제를 잘라서 소수 인지 판별 가능한지 문제임.
+직접 하나씩 나눠서 구하면 시간 초과남.
+*/
+class Solution {
+    public int solution(int n, int k) {
+        int answer = 0;
+        ArrayList<Integer> indexs = new ArrayList<>();
+        ArrayList<Long> nums = new ArrayList<>();
+        String num = Integer.toString(n, k);
+        long maxNum = Long.MIN_VALUE;
+        
+        // "0"인 곳의 인덱스를 모두 저장
+        int index = num.indexOf("0");
+        while(index != -1) {
+            indexs.add(index);
+            index = num.indexOf("0", index+1);
+        }
+        
+        // 저장된 인덱스가 없으면 전체가 하나임.
+        if(indexs.size() == 0) {
+            maxNum = convertLong(num);
+            
+            // 이게 1번 케이스 때문에 추가한 로직임.
+            // 이 숫자가 너무 커서 에라토스테네스의 체를 쓸 때 문제가 됨.
+            // boolean[]든, HashSet이든 메모리 초과함
+            // 제곱근 만큼 돌아서 소수가 아니면 0 리턴.
+            for(long i = 2; i <= (long)Math.sqrt(maxNum); i++) {
+                if(maxNum % i == 0) {
+                    return 0;
+                }
+            }
+            return 1;
+        }
+        
+        
+        // 저장한 인덱스를 가지고 0p, 0p0, p0 케이스를 모두 저장함.
+        // 저장할 때, 범위 판별해야 함.
+        for(int i = 0; i < indexs.size(); i++) {
+            long save = Long.MIN_VALUE;
+            if(i == 0) {
+                if(indexs.get(i) >= 1) {
+                    save = convertLong(num.substring(0, indexs.get(i)));
+                    nums.add(save);
+                    maxNum = Math.max(maxNum, save);    
+                }
+            } else {
+                if(i == indexs.size() -1) {
+                    if((num.length()-1) - indexs.get(i) >= 1) {
+                        save = convertLong(num.substring(indexs.get(i)+1, num.length()));
+                        nums.add(save);
+                        maxNum = Math.max(maxNum, save);    
+                    }
+                }
+                
+                if(indexs.get(i) - indexs.get(i-1) >= 2) {
+                    save = convertLong(num.substring(indexs.get(i-1)+1, indexs.get(i)));
+                    nums.add(save);
+                    maxNum = Math.max(maxNum, save);
+                }
+            } 
+        }
+        
+        
+        // 에라토스테네스의 체
+        // 소수 하나를 찾았을 때, 해당 수의 배수들은 무조건 소수가 아님.
+        // 현재 소수 * 2부터 범위까지 모든 배수들을 추가해놓으면 반복문이 끝났을 때는 소수들만 남음.
+        long end = (long)Math.sqrt(maxNum);
+        HashSet<Long> primeCheck = new HashSet<>();
+        primeCheck.add((long)1);
+        for(long i = 2; i <= end; i++) {
+            long mul = 2;
+            long sum = mul * i;
+            while(sum <= maxNum) {
+                primeCheck.add(sum);
+                mul++;
+                sum = mul * i;
+            }
+        }
+        
+        for(int i = 0; i < nums.size(); i++) {
+            if(!primeCheck.contains(nums.get(i))) {
+                answer++;
+            }
+        }
+        
+        return answer;
+    }
+    
+    public long convertLong(String num) {
+        return Long.parseLong(num);
+    }
