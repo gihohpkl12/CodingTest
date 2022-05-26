@@ -1,0 +1,32 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+/*
+단순하게 그냥 직접 사전 만들어서 돌림..
+*/
+class Solution {
+    static int index = 0;
+    public int solution(String word) {
+        String[] words = new String[] {"A", "E", "I", "O", "U"};
+        HashMap<String, Integer> dictionary = new HashMap<>();
+        
+        makingAllCase(words, dictionary, new StringBuilder());
+        return dictionary.get(word);
+    }
+    
+    public void makingAllCase(String[] words, HashMap<String, Integer> dictionary, StringBuilder curWord) {
+        if(curWord.length() <= 5 && curWord.length() >= 1) {
+            index++;
+            dictionary.put(curWord.toString(), index);
+        } else if(curWord.length() >= 6) {
+            return;
+        }
+        
+        for(int i = 0; i < words.length; i++) {
+            curWord.append(words[i]);
+            makingAllCase(words, dictionary, curWord);
+            curWord.delete(curWord.length()-1, curWord.length());
+        }
+        
+    }
+}
