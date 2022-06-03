@@ -1,0 +1,42 @@
+/*
+개떡같은 문제.
+우선 end까지 전체 소수를 구하려고 하면 시간초과로 실패함.
+그냥 그때그때 숫자 마다 소수 여부를 판단해야 함.
+(루트로 소수 구하는 거 모르면 못 품)
+
+그리고 블럭의 조건에 최대 블럭이 정해져있음.
+(근데 제한 사항에 안 적어놓음 문제에만 있음.)
+
+*/
+class Solution {
+    public int[] solution(long begin, long end) {
+        int[] answer = new int[(int)(end - begin +1)];
+        
+        int index = 0;
+        for(long i = begin; i <= end; i++) {
+            if(i == 1) {
+                answer[index++] = 0;
+            } else {
+                long result = checkBlockNum(i);
+                
+                if(result == -1) {
+                    answer[index++] = 1;
+                } else {
+                    result = i/result;
+                    answer[index++] = (int)result;
+                }
+            }
+        }
+      
+        return answer;
+    }
+    
+    public long checkBlockNum(long num) {    
+        for(long i = 2; i <= Math.sqrt(num); i++) {
+            if(num%i == 0 && num/i <= 10000000) {
+                return i;
+            }
+        }
+        return -1;
+    }
+}
