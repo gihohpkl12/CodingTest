@@ -1,0 +1,91 @@
+/*
+문제 해석이 어려웠던 문제.
+
+1. 플레이어는 항상 이기는 플레이만 함.
+2. A와 B 중에 누가 이기던 상관이 없음. 그냥 DFS로 차례를 번갈아가면서 따지면 됨.
+
+현재를 기준으로 다음 호출에서 다음 사용자가 이겼다면, 현재 사용자는 패배함.
+(패배하므로 이동거리를 최대로 고름)
+
+현재를 기준으로 다음 호출에서 다음 사용자가 졌다면, 현재 사용자는 승리함.
+(승리했으므로 이동거리를 최소로 고름)
+
+현재를 기준으로 승리, 패배 모든 경우의 수가 있을 땐
+문제 조건 상 이기는 플레이어는 항상 이기는 플레이만 하기 때문에 진 경우는 무시해도 됨.
+*/
+class Solution {
+    public int solution(int[][] board, int[] aloc, int[] bloc) {
+        Result answer = move(board, aloc[0], aloc[1], bloc[0], bloc[1], 0);
+        return answer.count;
+    }
+    
+     public Result move(int[][] board, int curPlayerX, int curPlayerY, int nextPlayerX, int nextPlayerY, int movingCount) {
+         int[][] movingDir = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+         // 이겼을 때 값 == 최소
+         int winCount = Integer.MAX_VALUE;
+         // 졌을 때 값 == 최대
+         int loseCount = Integer.MIN_VALUE;
+         // 승리한 적이 있는지 여부 체크
+         boolean curWin = false;
+         
+         // 사용자의 턴이 되었는데, 본인 발판이 없으면 패배
+         if(board[curPlayerX][curPlayerY] == 0) {
+             return new Result(false, movingCount);
+         }
+         
+         // 4방향 모두를 돌았을 때, 이동할 곳이 없는지 체크하기 위함.
+         boolean check = false;
+         for(int[] next : movingDir) {
+             int nextX = curPlayerX + next[0];
+             int nextY = curPlayerY + next[1];
+             // 갈 곳이 있는지 확인
+             if(rangeCheck(nextX, nextY, board.length-1, board[0].length-1) && board[nextX][nextY] != 0) {
+                 // 한 번이라도 이동했기 때문에 true
+                 check = true;
+                 board[curPlayerX][curPlayerY] = 0;
+                 // 다음 차례 결과 리턴
+                 Result result = move(board, nextPlayerX, nextPlayerY, nextX, nextY, movingCount+1);
+                 board[curPlayerX][curPlayerY] = 1;
+                 
+                 // 다음 사용자가 이겼다면, 현재 사용자는 패배함.
+                 if(result.isWin) {
+                     loseCount = Math.max(loseCount, result.count);
+                // 다음 사용자가 졌다면, 현재 사용자는 승리함.
+                 } else {
+                     // 한 번이라도 이긴 적이 있기 때문에 true로 변경
+                     curWin = true;
+                     winCount = Math.min(winCount, result.count);
+                 }
+             }
+         }
+         // 4방향 중에 한 곳이라도 이동을 못 했으면 패배.
+         if(!check) {
+             return new Result(false, movingCount);
+         }
+        
+        // 현재 사용자가 이긴 적이 있으면, 플레이어는 항상 이기는 플레이만 하기 때문에 최소값을 리턴.
+         if(curWin) {
+            return new Result(true, winCount);    
+        // 현재 사용자가 한 번이라도 이긴 적이 없으면, 최대로 이동하기 때문에 최대값을 리턴.
+         } else {
+             return new Result(false, loseCount);
+         }
+     }
+    
+    public boolean rangeCheck(int x, int y, int rangeX, int rangeY) {
+        if(x >= 0 && y >= 0 && x <= rangeX && y <= rangeY) {
+            return true;
+        }
+        return false;
+    }
+    
+    class Result {
+        boolean isWin;
+        int count;
+        
+        public Result(boolean isWin, int count) {
+            this.isWin = isWin;
+            this.count = count;
+        }
+    }
+}
