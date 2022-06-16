@@ -19,7 +19,10 @@ class Solution {
     public long solution(int a, int b, int[] g, int[] s, int[] w, int[] t) {
         long answer = Long.MAX_VALUE;
         long min = 0;
-        long max = (long)10e5 * (long)4 * (long)10e9;
+        // 도시에 최대 금과 은의 양 10e9. 금과 은 모두 따져서 *2.
+        // 최대로 걸릴 수 있는 시간 10e5. 왕복 고려해서 *2.
+        // 한 번에 나를 수 있는 최소한의 양 1.
+        long max = (long)10e9 * (long)2 * (long)10e5 * 2 * (long)1;
 
         while(min <= max) {
             long avr =  (max + min)/2;
