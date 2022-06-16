@@ -1,0 +1,47 @@
+/*
+1. 우선 최대값을 계산하는 게 중요함.
+그냥 Long.MAX_VALUE 등으로 하면 실패함.
+
+2. 패스되는 경우를 아는 것도 중요함.
+
+3가지를 구해야 함.
+최대로 나를 수 있는 금의 양
+최대로 나를 수 있는 은의 양
+최대로 나를 수 있는 자원의 양
+
+최대로 나를 수 있는 자원의 양이 a+b보다 커야 함.
+최대로 나를 수 있는 금의 양이 a 보다 커야 함.
+최대로 나를 수 있는 은의 양이 b 보다 커야 함.
+
+4. 당연히 시간 때문에 이분탐색임.
+*/
+class Solution {
+    public long solution(int a, int b, int[] g, int[] s, int[] w, int[] t) {
+        long answer = Long.MAX_VALUE;
+        long min = 0;
+        long max = (long)10e5 * (long)4 * (long)10e9;
+
+        while(min <= max) {
+            long avr =  (max + min)/2;
+            long goldMax = 0;
+            long silverMax = 0;
+            long totalMax = 0;
+            
+            for(int i = 0; i < t.length; i++) {
+                long count = avr/((long)t[i]*2);
+                count = avr % (t[i]*2) >= t[i] ? count +1 : count;                
+                goldMax += Math.min((long)g[i], (long)w[i]*count);
+                silverMax += Math.min((long)s[i], (long)w[i]*count);
+                totalMax += Math.min((long)g[i]+(long)s[i], (long)w[i]*count);
+            }
+            
+            if(totalMax >= (long)a+(long)b && goldMax >= (long)a && silverMax >= (long)b) {
+                max = avr -1;
+                answer = Math.min(avr, answer);
+            } else {
+                min = avr +1;
+            }
+        }
+        return answer;
+    }
+}
