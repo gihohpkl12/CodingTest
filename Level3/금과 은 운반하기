@@ -14,6 +14,10 @@
 최대로 나를 수 있는 은의 양이 b 보다 커야 함.
 
 4. 당연히 시간 때문에 이분탐색임.
+
+5. 이동하는 시간
+맨 처음에는 도시에서 목적지로 출발하기 때문에 t[i]만큼 걸림.
+이후에는 다시 도시로 돌아갔다가 목적지로 출발하기 때문에 t[i]*2만큼 
 */
 class Solution {
     public long solution(int a, int b, int[] g, int[] s, int[] w, int[] t) {
