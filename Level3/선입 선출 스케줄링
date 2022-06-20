@@ -1,0 +1,129 @@
+/*
+하나씩 돌리면 시간초과가 남.
+이 경우에는 이분탐색으로 최소 시간을 구하고,
+해당 시간에 처리한 작업수를 구하고, 마지막으로 작업한 core를 구해야 함.
+
+시간이 0일 때, cores 사이즈만큼 작업이 시작함.
+그리고 예시를 보면
+시간 % cores[i] == 0일 때, 해당 core가 작업을 배정받게 됨.
+
+반복문을 돌면서
+int work = cores.length;
+work += time/cores[i] 한 값이 n보다 크면 작업이 완료된 것임.
+
+예를 보면
+n = 6인데 cores의 사이즈 만큼 빼면 3임
+(문제에서 최소 시간은 2초임)
+
+2/1 -> 3+2 (나머지가 0)
+2/2 -> 3+2+1 (나머지가 0)
+2/3 -> 3+2+1+0
+
+0,1번 인덱스 core가 나머지가 0이므로 이 시간에 들어간 애들임.
+정답이 되려면 이런 애들 중에 하나이며, 동시에 2개 이상인 경우 앞에서 먼저 들어감으로
+뒤에서부터 돌면서 workCount랑 n이 같이지는 타이밍을 구하면 정답.
+*/
+
+class Solution {
+    public int solution(int n, int[] cores) {
+        int answer = 0;
+        // 최소 작업 시간
+        int minTime = Integer.MAX_VALUE;
+        // 최소 작업시간에 작업한 양
+        int workCount = 0;
+        // 이분 탐색용 최소, 최대
+        int min = 0;
+        int max = cores[0]*n;
+        
+        while(min <= max) {
+            int avr = (min+max)/2;
+            int workSum = cores.length;
+            
+            for(int i = 0; i < cores.length; i++) {
+                workSum += avr/cores[i];
+            }
+            
+            if(workSum >= n) {
+                max = avr -1;
+                if(minTime > avr) {
+                    minTime = avr;
+                    workCount = workSum;
+                }
+            } else {
+                min = avr+1;
+            }
+        }
+
+        // 전체 작업한 양에 n만큼 뺌.
+        workCount -= n;
+        for(int i = cores.length-1; i >= 0; i--) {
+            // 이번 시간에 작업을 받은 core
+            if(minTime % cores[i] == 0) {
+                // 전체 작업양과 n이 동일하게 되는 지점
+                if(workCount == 0) {
+                    answer = i;
+                    break;
+                }
+                workCount--;
+            }
+        }
+        return answer+1;
+    }
+}
+
+/*
+이건 효율성 실패하는 코드
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.PriorityQueue;
+import java.util.LinkedList;
+import java.util.ArrayList;
+
+class Solution {
+    public int solution(int n, int[] cores) {
+        int answer = 0;
+        Queue<Integer> restCore = new LinkedList<>();
+        PriorityQueue<Integer> endCore = new PriorityQueue<>();
+        HashMap<Integer, ArrayList<Integer>> workRecord = new HashMap<>();
+        int totalTime = 0;
+        
+        for(int i = 0; i < cores.length; i++) {
+            restCore.add(i);
+        }
+        
+        while(n > 0) {
+            if(workRecord.containsKey(totalTime)) {
+                for(int coreIndex : workRecord.get(totalTime)) {
+                    endCore.add(coreIndex);
+                }
+                workRecord.remove(totalTime);
+            }
+            
+            while(endCore.size() > 0) {
+                restCore.add(endCore.poll());
+            }
+            
+            while(restCore.size() > 0) {
+                int coreIndex = restCore.poll();
+                int workTime = cores[coreIndex] + totalTime;
+
+                if(workRecord.containsKey(workTime)) {
+                    workRecord.get(workTime).add(coreIndex);
+                } else {
+                    workRecord.put(workTime, new ArrayList<Integer>());
+                    workRecord.get(workTime).add(coreIndex);
+                }
+                
+                n--;
+                if(n == 0) {
+                    answer = coreIndex+1;
+                    break;
+                }
+            }
+            totalTime++;
+        }
+        
+        return answer;
+    }
+}
+*/
