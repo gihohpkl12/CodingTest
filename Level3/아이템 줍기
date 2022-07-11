@@ -1,0 +1,81 @@
+/*
+풀이는 간단한데, 풀이까지 가는데 오래 걸린 문제.
+좌측 하단 좌표와 우측 상단의 좌표만 있으면 꼭지점의 모든 좌표를 구할 수 있음.
+반복문을 돌면서 바깥에 해당되는 좌표에는 1을 넣고, 내부에 해당하는 곳에는 무조건 -1을 넣음.
+다른 도형을 그릴 때, 해당 도형에서는 바깥에 해당되는 곳인데 다른 도형에 의해 이미 -1이 된 곳이면 패스함.
+그렇게 하면 바깥쪽 선은 1로 남고, 내부를 지나친 선은 -1로 덮힘.
+
+도형을 처리하는데 문제가 있음.
+예1 번에 3,5 -> 3.6을 가면 안 되는데 이걸 처리하는데 좀 애를 먹음.
+단순하게 처리하려면 그냥 좌표를 전부 *2해서 늘려주면 됨.
+그럼 도형상 문제가 없어짐.
+*/
+class Solution {
+    static int answer = Integer.MAX_VALUE;
+    public int solution(int[][] rectangle, int characterX, int characterY, int itemX, int itemY) {
+        int[] target = new int[] {itemY*2, itemX*2};
+        int[][] moving = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        
+        int[][] board = new int[101][101];
+        setRectangle(rectangle, board);
+        
+        boolean[][] visit = new boolean[101][101];
+        visit[characterY*2][characterX*2] = true;
+        move(visit, board, characterY*2, characterX*2, moving, target, 0);    
+        
+        return answer/2;
+    }
+    
+    public void move(boolean[][] visit, int[][] board, int curI, int curJ, int[][] moving, int[] target, int count) {
+        if(curI == target[0] && curJ == target[1]) {
+            answer = Math.min(count, answer);
+            return;
+        }
+        
+        for(int[] next : moving) {
+            int nextI = curI + next[0];
+            int nextJ = curJ + next[1];
+            
+            if(!checkRange(nextI, nextJ, board.length-1)) {
+                continue;
+            }
+            
+            if(!visit[nextI][nextJ]) {
+                if(board[nextI][nextJ] == 1) {
+                    visit[nextI][nextJ] = true;
+                    move(visit, board, nextI, nextJ, moving, target, count+1);
+                    visit[nextI][nextJ] = false;
+                }
+            }
+        }
+    }
+    
+    public void setRectangle(int[][] rectangle, int[][] board) {
+        for(int[] info : rectangle) {
+            int startX = info[0]*2;
+            int endX = info[2]*2;
+            int startY = info[1]*2;
+            int endY = info[3]*2;
+            
+            for(int i = startY; i <= endY; i++) {
+                for(int j = startX; j <= endX; j++) {
+                    // 바깥쪽 선에 해당되는 지점들.
+                    if(i == startY || i == endY || j == startX || j == endX) {
+                        // 1이면 선, -1이면 내부.
+                        // 이미 내부로 판명난 곳은 지나침.
+                        board[i][j] = board[i][j] != -1 ? 1 : -1;
+                    } else {
+                        board[i][j] = -1;
+                    }
+                }
+            }
+        }
+    }
+    
+    public boolean checkRange(int x, int y, int length) {
+        if(x >= 0 && x <= length && y >= 0 && y <= length) {
+            return true;
+        }
+        return false;
+    }
+}
