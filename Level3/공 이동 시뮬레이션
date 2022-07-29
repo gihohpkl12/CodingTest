@@ -1,0 +1,82 @@
+/*
+생각하기 어려운 문제.
+
+1. 공이 이동하는 방식은 되게 쉬운데 그게 함정임. 정말 모든 좌표를 다 돌려보면 시간초과임.
+따라서, 목적지부터 쿼리를 거꾸로 돌리면서 범위를 따져야 함.
+ex. 예제2번
+startX = 0, endX = 0, startY = 1, endY = 1
+맨 마지막 쿼리 x값이 감소하는 쿼리임으로 +1 만큼 증가.
+저 쿼리를 돌렸을 때, 현재 범위 내에 들어올 수 있는 범위를 구해야 함.
+원래는 보통 startX +1, endX+1 하면 됨.
+근데 저 경우는 startX의 범위가 0임.
+문제 규칙상 더이상 움직일 수 없을 때는 멈추는 규칙이 있기 때문에 0에서 가만히 있으면 
+현재 범위 0~0에 도달할 수 있음.
+즉, 이 경우에 startX == 0이면 startX에는 +1을 하지 않음.
+이건 모든 방향마다 다 적용되는 개념임.
+
+2. 모든 좌표에서 실패하는 경우가 있음.
+만약에 n = 4, m = 4, startX = 1, endX = 2인 경우에서 쿼리의 type이 2, move가 5라고 가정함.
+이렇게 되면 +5를 해야 하고 startX가 0이 아니기 때문에 똑같이 +5를 해야 함.
+이렇게 하면 6, 7이 나옴.
+사실 endX도 범위를 초과할 때, 범위가 0이라는 조건이 있을 때만 봐줘야 맞긴 함.
+(왜냐면 기존 범위에 0도 포함이라면 어차피 이동하다가 멈추기 때문임)
+근데 그냥 endX는 n-1보다 클 경우 n-1로 설정해줘도 됨.
+왜냐면 startX 때문임.
+startX는 endX와 같은 조건이 없고, startX가 n을 초과하면 도착할 수가 없음.
+(위로 5칸을 올라가서 1에 도착하려면 위에서처럼 6임. 근데 판의 크기가 4임)
+
+이 조건을 모든 방향에 적용해야 함.
+*/
+class Solution {
+    public long solution(int n, int m, int x, int y, int[][] queries) {
+        return run(queries, new int[] {n-1, m-1}, new int[] {x, y});
+    }
+    
+    public long run(int[][] queries, int[] limit, int[] start) {
+        long startX = start[0], endX = start[0], startY = start[1], endY = start[1];
+        
+        for(int i = queries.length-1; i >= 0; i--) {
+            int type = queries[i][0];
+            int move = queries[i][1];
+            
+            // 원래 좌로 이동
+            if(type == 0) {
+                // 원래 좌로 이동이니까 우에서 왔을 것임.
+                // 만약에 범위(start)에 0도 포함이었다면 오른쪽에서 초과로 이동해도 상관이 없기 때문에 건드리지 않음.
+                if(startY != 0) {
+                    startY += move;    
+                }
+                endY += move;
+                endY = endY > limit[1] ? limit[1] : endY;
+            // 원래 우로 이동
+            } else if(type == 1) {
+                if(endY != limit[1]) {
+                    endY -= move;    
+                }
+                startY -= move;
+                startY = startY < 0 ? 0 : startY;
+            // 원래 위로 이동
+            } else if(type == 2) {
+                if(startX != 0) {
+                    startX += move;
+                }
+                endX += move;
+                endX = endX > limit[0] ? limit[0] : endX;
+            // 원래 아래로 이동
+            } else {
+                if(endX != limit[0]) {
+                    endX -= move;
+                }
+                startX -= move;
+                startX = startX < 0 ? 0 : startX;
+            }
+            
+            // 도달할 수 없는 경우들.
+            if(startX > limit[0] || endX < 0 || startY > limit[1] || endY < 0) {
+                return 0;
+            }
+        }
+        
+        return (endX - startX + 1) * (endY - startY + 1);
+    }
+}
