@@ -1,0 +1,164 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+완전 탐색으로 풀음.
+우선 BFS로 노드를 돌면서
+각 노드에 도착할 수 있는 경로를 저장함.
+ex. 예제 1)에 4번 노드 경우 -> 0,1,4
+
+다음은 동물이 양인 모든 노드들을 구하고, 그걸 모든 방문 순서로 저장함.
+돌면서 확인하면 끝임.
+근데 여기서
+못가는 순서가 나온다거나, 못가는 케이스가 나올 수 있음.
+이건 걸러야 함.
+
+ex. 예제 2)에서
+10번을 간다거나, 0 -> 7 이 순서로 진행하는 케이스 등등
+
+*/
+class Solution {
+    static int answer = 0;
+    public int solution(int[] info, int[][] edges) {
+        ArrayList<Integer> sheeps = new ArrayList<>();
+        ArrayList<int[]> allCases = new ArrayList<>();
+        ArrayList<Integer>[] allRoute = new ArrayList[info.length];
+        HashMap<Integer, Node> tree = new HashMap<>();
+        
+        // 양들 저장.
+        for(int i = 0; i < info.length; i++) {
+            if(info[i] == 0) {
+                sheeps.add(i);
+            }
+        }
+        makeAllCase(allCases, sheeps, new ArrayList<>(), sheeps.size()-1);
+        
+        // 경로 준비
+        for(int i = 0; i < info.length; i++) {
+            allRoute[i] = new ArrayList<>();
+        }
+        
+        // 노드 준비
+        for(int i = 0; i < info.length; i++) {
+            tree.put(i, new Node());
+        }
+        
+        // 경로 셋팅
+        for(int[] route : edges) {
+            int start = route[0];
+            int end = route[1];
+            allRoute[start].add(end);
+        }
+        setRoute(allRoute, tree, info);
+        
+        calDis(allCases, tree, info);
+        return answer;
+    }
+    
+    class Node {
+        ArrayList<Integer> routes;
+        
+        public Node() {
+            this.routes = new ArrayList<>();
+        }
+    }
+    
+    public void calDis(ArrayList<int[]> allCases, HashMap<Integer, Node> tree, int[] info) {
+        for(int i = 0; i < allCases.size(); i++) {
+            boolean[] check = new boolean[info.length];
+            check[0] = true;
+            int sheep = 1;
+            int wolf = 0;
+            int[] curCase = allCases.get(i);
+            
+            for(int order : curCase) {
+                Node targetNode = tree.get(order);
+                ArrayList<Integer> forCancle = new ArrayList<>();
+                int curSheep = 0;
+                int curWolf = 0;
+                
+                for(int moving : targetNode.routes) {
+                    // 기존에 왔던 곳이면 양이나 늑대의 숫자를 변경하면 안 됨.
+                    if(!check[moving]) {
+                        check[moving] = true;
+                        // 리셋을 대비해서, 변경했던 인덱스 저장.
+                        forCancle.add(moving);
+                        if(info[moving] == 0) {
+                            curSheep++;
+                            sheep++;
+                        } else {
+                            curWolf++;
+                            wolf++;
+                        }
+                    }
+                    
+                    // 위에서는 늑대랑 양 값을 조건에 맞게 추가하는 것이고,
+                    // 여기는 만약에 이동이 불가능한 곳인 경우에 리셋하는 부분.
+                    if(sheep <= wolf) {
+                        // 늑대, 양을 해당 노드에 오기 전으로 되돌림.
+                        sheep -= curSheep;
+                        wolf -= curWolf;
+                        // 이동 했던 곳을 다시 false로 변경함.
+                        for(int cancleIndex : forCancle) {
+                            check[cancleIndex] = false;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // 양이 늑대보다 많아야 함.
+            if(sheep > wolf) {
+                answer = Math.max(answer, sheep);
+            }
+        }
+    }
+    
+    public void setRoute(ArrayList<Integer>[] allRoute, HashMap<Integer, Node> tree, int[] info) {
+        Queue<Integer> bfsQ = new LinkedList<>();
+        bfsQ.add(0);
+        
+        // 0부터 BFS로 이동 가능한 곳을 전부 탐색.
+        while(bfsQ.size() != 0) {
+            int num = bfsQ.poll();
+            // 현재 노드의 경로의 끝에 본인을 추가.
+            // (앞에서는 이 노드 이전까지의 경로가 추가됨. ex. 예제2의 4번 노드라면 0,1이 추가되어 있는 상태)
+            tree.get(num).routes.add(num);
+            // 현재 노드가 가지고 있는 전체 경로.
+            ArrayList<Integer> addList = tree.get(num).routes;
+            
+            for(int next : allRoute[num]) {
+                // 다음 이동할 노드에 현재 노드의 전체 경로를 추가해줌.
+                for(int route : addList) {
+                    tree.get(next).routes.add(route);
+                }
+                tree.get(next).routes.add(num);
+                
+                bfsQ.add(next);
+            }
+        }
+    }
+    
+    public void makeAllCase(ArrayList<int[]> allCases, ArrayList<Integer> sheeps, ArrayList<Integer> curCase, int end) {
+        if(curCase.size() == end) {
+            int[] save = new int[end];
+            int index = 0;
+            for(int num : curCase) {
+                save[index++] = num;
+            }
+            allCases.add(save);
+            return;
+        }
+        
+        for(int i = 1; i < sheeps.size(); i++) {
+            int sheepNum = sheeps.get(i);
+            curCase.add(sheepNum);
+            sheeps.remove(i);
+            makeAllCase(allCases, sheeps, curCase, end);
+            sheeps.add(i, sheepNum);
+            curCase.remove(curCase.size()-1);
+        }
+    }
+}
