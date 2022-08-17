@@ -1,0 +1,105 @@
+import java.util.ArrayList;
+
+/*
+DP로 풀어야 하는 문제.
+
+행렬이 4개가 있다고 가정하면(ABCD)
+최종적으로 모습은 
+A(BCD)
+AB(CD)
+ABC(D)
+이렇게 합치는 모양이(행렬의 개수 -1개) 나옴.
+(곱의 순서에 따라서 값이 다르기 때문에 경우의 수는 이것보다 훨씬 많음.
+예를 들면 A(BCD)에서 BC 순서냐 CD 순서냐에 따라서도 값이 다름)
+
+ABCD를 A부터 B까지, A부터 C까지, B부터 C까지 이런 식으로 모든 경우를 부분적으로 돌면서 최소가 되는 값을 찾음.
+그리고 그걸 마지막 3번(행렬의 개수 -1)돌면서 A부터 시작이냐, B부터 시작이냐 C부터 시작이냐 이렇게 따지면 답이 나옴.
+
+DP로 돌 때, DP[i][j]는 i에서 j까지 가는 최소값을 의미함.
+이거를 최소거리를 구할 때처럼 중간에 특정 지점을 들리는 개념을 넣어서
+i->j를 바로 가는 게 빠르냐, i -> k -> j가 빠르냐를 계산하다고 보면 됨.
+
+자세하게 보면
+0 ~ 4 사이를 볼 때,
+0 ~ 4의 의미는 A->B->C->D 이 순서를 의미함.
+여기서 중간에 k(1)을 넣어서 보면
+0~1까지 계산하고,  2~3사까지를 먼저 진행한다고 보면됨.
+즉,
+A->B 하고, C->D 하고, (AB) -> (CD) 이렇게 진행하는 것임.
+즉, A -> B -> C-> D가 빠르냐 (AB) -> (CD) 이게 빠르냐임.
+이 계산이 끝나면 0~4가 항상 ABCD는 아님. 
+왜냐면
+이 계산이 끝난 다음에는 ABCD 보다 (AB)(CD)가 적게 나오면 (AB)(CD)로 갱신되기 때문에
+A->D까지 갈 때, 가장 작은 값이 (AB)(CD)이게 되는 것임.
+
+여기서 (AB) (CD)를 계산할 수 있는 건 행렬의 규칙때문임.
+문제에서 나온 예시 [[5,3],[3,10],[10,6]]를 보면
+
+5,3 3,10 을 계산하면
+5 * 3 * 10 이고, 이건 5,10이 됨.
+그리고 이걸 뒤에 10, 6 하고 계산해보면
+5 * 10 * 6이 되고, 5,6이 됨.
+
+규칙이 바로 보임.
+[5,3] 과 [3,10]을 직접 먼저 계산하지 않고
+[10,6]과 계산하려고 해도 가능함.
+
+왜냐면 [i][0] * [i+1][0] * [i+1][1] 이렇게 되고 값은
+[i][0], [i+1][1] 이 행렬로 합쳐짐.
+
+즉, 3,10이랑 계산하지 않아도
+어차피 앞은 [i][0]으로 5가 될거고,
+뒤는 [i+1][1]인 10인데 이건 어차피 [i+2][0]인 10, 6의 10과 동일함. 
+고로 [3,10]을 건너뛰고
+
+5,3에서 5랑 10,6에서 10과 6을 계산하면 됨.
+이 개념은 위에서 말한 k가 들어갔기 때문에 중간에 [5,3] 과 [3,10]을 계산한 값을 더해주면 되는 것임.
+*/
+class Solution {
+    public int solution(int[][] matrix_sizes) {
+        int[][] dpArr = new int[matrix_sizes.length][matrix_sizes.length];
+        
+        // 우선 불가능한 값을 셋팅함.
+        for(int i = 0; i < dpArr.length; i++) {
+            for(int j = 0; j < dpArr.length; j++) {
+                dpArr[i][j] = 100000000;
+                
+                // 같은 지점에서 같은 곳으로 가는 건 0.
+                if(i == j) {
+                    dpArr[i][j] = 0;
+                }
+            }
+        }
+        
+        // 맨 위에 i는 행렬-1번 돌기 위함.
+        for(int i = 1; i < matrix_sizes.length; i++) {
+            // 어느 지점 ~ 어느 지점까지의 최소를 구하기 위함으로, 0부터 시작해야 함.
+            for(int start = 0; start < matrix_sizes.length; start++) {
+                int end = start + i;
+            
+                // end가 행렬 사이즈를 넘어가면 패스.
+                if(end >= matrix_sizes.length) {
+                    continue;
+                }
+                
+                // checkPoint가 중간에 들리는 지점.
+                for(int checkPoint = 0; checkPoint < end; checkPoint++) {
+                    /*
+                    이 부분은 만약에 start가 0, end가 3, checkPoint = 1이라고 하면
+                    0~3까지 가는 거리 vs 0~1까지 가는 최소거리 + 2~3까지 가는 최소거리 
+                    + (01) (23) 계산한 값.
+                    */
+                    int checkPointValue = dpArr[start][checkPoint] // 0 ~ 1 예시에 해당하는 부분
+                        + dpArr[checkPoint+1][end] // 2~3 예시에 해당하는 부번
+                        + (matrix_sizes[start][0] * matrix_sizes[checkPoint][1] * matrix_sizes[end][1]); // (01)(23)에 해당하는 부분
+                    // 여기서 matrix_sizes[checkPoint][1]는 matrix_sizes[checkPoint+1][0]이랑 같기 때문에 바꿔도 됨.
+                    // 왜냐면 (0,checkPoint) (checkPoint+1, end)의 계산이기 때문에 [checkPoint+1][0]과 [checkPoint][1]이 같아야 행렬의 곱이 가능하므로 같음.
+
+                    dpArr[start][end] = Math.min(dpArr[start][end], checkPointValue);
+                }
+            }
+        }
+        
+        return dpArr[0][matrix_sizes.length-1];
+    }
+}
