@@ -1,0 +1,89 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+/*
+4가지 유형("RT", "CF", "JM", "AN") 중에서 설문조사 결과에 따라 유형을 선택하는 문제임.
+2가지 중에 하나를 선택해서 하나를 리턴하면 됨. 따라서 answer의 길이는 항상 4가 될 것.
+유형이 rt, tr 이런 식으로 2가지가 올 수 있는데 이건 나중에 정렬하지 않으려고 알파벳 순서로 셋팅해놓음.
+
+처음에는 값에 따라서 r, c, j ,a 이런 애들 순서도 바뀌는 줄 알았는데 이건 고정임.
+*/
+class Solution {
+    public String solution(String[] survey, int[] choices) {
+        String answer = "";
+        HashMap<String, Integer> map = new HashMap<>();
+        // 미리 알파벳 순서로 고정.
+        String[] typeCheck = new String[] {"RT", "CF", "JM", "AN"};
+        
+        // 해당 설문지의 문항이 나오지 않을 때를 대비해서 미리 map에 저장함.
+        for(String type : typeCheck) {
+            String[] temp = type.split("");
+            String first = temp[0], second = temp[1];
+            
+            map.put(first, 0);
+            map.put(second, 0);
+        }
+        
+        for(int i = 0; i < survey.length; i++) {
+            String[] temp = survey[i].split("");
+            int first = 0, second = 0;
+            
+            // 유형 번호대로 하면 -4를 했을 때 나온 값이 점수임. (비동의 경우는 절대값으로 해야 함.)
+            if(choices[i] - 4 > 0) {
+                second = choices[i] - 4;
+            } else if(choices[i] - 4 < 0){
+                first = Math.abs(choices[i] - 4);
+            }
+            
+            // 사실 위에서 셋팅해서 containsKey로 확인할 필요는 없음.
+            if(first != 0) {
+                if(map.containsKey(temp[0])) {
+                    first += map.get(temp[0]);
+                    map.replace(temp[0], first);
+                } else {
+                    map.put(temp[0], first);
+                }
+            } else if(second != 0) {
+                if(map.containsKey(temp[1])) {
+                    second += map.get(temp[1]);
+                    map.replace(temp[1], second);
+                } else {
+                    map.put(temp[1], second);
+                }
+            }
+        }
+        
+        ArrayList<String> answerList = new ArrayList<>();
+        for(String check : typeCheck) {
+            String[] temp = check.split("");
+            String first = temp[0], second = temp[1];
+            
+            if(map.get(first) > map.get(second)) {
+                answerList.add(first);
+            } else if(map.get(first) < map.get(second)) {
+                answerList.add(second);
+            // 동점이면 알파벳 순서인데, 미리 작은 애를 앞에 놓음.
+            } else {
+                answerList.add(first);
+            }
+        }
+        
+        // Collections.sort(answerList, new Comparator<String>(){
+        //     public int compare(String o1, String o2) {
+        //         if(map.get(o2) - map.get(o1) == 0) {
+        //             System.out.println(o1+", "+o2+" "+(o1.charAt(0) - o2.charAt(0)));
+        //             return o1.charAt(0) - o2.charAt(0);
+        //         } 
+        //         return map.get(o2) - map.get(o1);
+        //     }
+        // });
+        
+        for(String temp : answerList) {
+            answer += temp;
+        }
+        
+        return answer;
+    }
+}
