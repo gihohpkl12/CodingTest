@@ -1,0 +1,83 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+/*
+모든 경우를 다 따져보려고 했던 문제인데, 그렇게 하면 시간 초과임.
+그냥 단순하게 q1, q2에 값을 넣고 동시에 q1과 q2의 합을 각각 계산함.
+
+q1합이 q2합보다 크면 q1에서 빼서 q2로 보내는 식으로 반복문을 돌면 됨.
+
+근데 이게 무한 반복할 수 있기 때문에 종료지점을 정해야 함.
+종료지점은 q1의 길이 + q2의 길이 + q1,q2 중에 큰 값의 길이임.
+(사실 q1+q2보다는 길고 3번 보다는 작아서 그냥 둘 중에 큰 값 더한 것임.)
+예를 들면
+
+2, 3
+3, 2, 2, 15, 3
+이렇게 있으면 15 혼자 남아야 함.
+
+3, 2, 2 를 위로 옮김
+2, 3, 3, 2, 2
+15, 3
+(3회 이동)
+
+2, 3, 3, 2, 2를 다시 아래로 이동.
+없음
+15, 3, 2, 3, 3, 2, 2
+(5회 이동. 총 8)
+
+15를 위로 이동
+(1회 이동. 총 9)
+총합이 2배를 넘기 때문임.
+
+*/
+
+class Solution {
+    public int solution(int[] queue1, int[] queue2) {
+        int answer = -1;
+        Queue<Integer> q1 = new LinkedList<>();
+        Queue<Integer> q2 = new LinkedList<>();
+        long q1Sum = 0, q2Sum = 0;
+        long target = 0;
+        int count = 0;
+        
+        int end = Math.max(queue1.length, queue2.length);
+        for(int i = 0; i < end; i++) {
+            if(queue1.length-1 >= i) {
+                q1.add(queue1[i]);
+                q1Sum += (long)queue1[i];
+            } 
+            
+            if(queue2.length-1 >= i) {
+                q2.add(queue2[i]);
+                q2Sum += (long)queue2[i];
+            } 
+        }
+        
+        target = (q1Sum + q2Sum)/2;
+        
+        end = queue1.length + queue2.length + Math.max(queue1.length, queue2.length);
+        while(count < end) {
+            if(q1Sum == q2Sum && q1Sum == target) {
+                answer = count;
+                break;
+            }
+            
+            if(q1Sum > q2Sum) {
+                int num = q1.poll();
+                q1Sum -= (long)num;
+                q2Sum += (long)num;
+                q2.add(num);
+                count++;
+            } else if(q1Sum < q2Sum) {
+                int num = q2.poll();
+                q2Sum -= (long)num;
+                q1Sum += (long)num;
+                q1.add(num);
+                count++;
+            }
+        }
+        
+        return answer;
+    }
+}
