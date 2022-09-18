@@ -1,3 +1,82 @@
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+그냥 모든 케이스를 만들고,
+해당 케이스가 조건에 맞는지 검색함.
+*/
+
+class Solution {
+    public int solution(int n, String[] data) {
+        int answer = 0;
+        Queue<String> caseQ = new LinkedList<>();
+        String[] init = {"A", "C", "F", "J", "M", "N", "R", "T"};
+        LinkedList<String> friends = new LinkedList<>();
+        
+        for(String friend : init) {
+            friends.add(friend);
+        }
+        
+        makingAllCase(new LinkedList<>(), caseQ, friends);
+        
+        while(caseQ.size() > 0) {
+            String curCase = caseQ.poll();
+            boolean check = true;
+            
+            for(String info : data) {
+                String first = info.substring(0,1);
+                String second = info.substring(2,3);
+                int num = Integer.parseInt(info.substring(4, info.length()))+1;
+                
+                if(info.charAt(3) == '=') {
+                    if(Math.abs(curCase.indexOf(first) - curCase.indexOf(second)) != num) {
+                        check = false;
+                        break;
+                    }
+                } else if(info.charAt(3) == '>') {
+                    if(Math.abs(curCase.indexOf(first) - curCase.indexOf(second)) <= num) {
+                        check = false;
+                        break;
+                    }
+                } else if(info.charAt(3) == '<') {
+                    if(Math.abs(curCase.indexOf(first) - curCase.indexOf(second)) >= num) {
+                        check = false;
+                        break;
+                    }
+                }
+            }
+            
+            if(check) {
+                answer++;
+            }
+        }
+        return answer;
+    }
+    
+    public void makingAllCase(LinkedList<String> cur, Queue<String> caseQ, LinkedList<String> friends) {
+        if(cur.size() == 8) {
+            StringBuilder sb = new StringBuilder();
+            
+            for(String friend : cur) {
+                sb.append(friend);
+            }
+            
+            caseQ.add(sb.toString());
+            return;
+        }
+        
+        for(int i = 0; i < friends.size(); i++) {
+            cur.add(friends.get(i));
+            String backup = friends.get(i);
+            friends.remove(i);
+            makingAllCase(cur, caseQ, friends);
+            cur.remove(cur.size()-1);
+            friends.add(i, backup);
+        }
+    }
+}
+
+=========================================================================================================================================
 import java.util.ArrayList;
 class Solution {
   static ArrayList<String> total;
