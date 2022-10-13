@@ -1,0 +1,36 @@
+/*
+그냥 문제 요구사항대로 구현하면 됨.
+*/
+
+import java.util.Stack;
+
+class Solution {
+    public int solution(int[] order) {
+        int answer = 0;
+        Stack<Integer> subContainer = new Stack<>();
+        
+        int index = 0;
+        for(int boxNum = 1; boxNum <= order.length; boxNum++) {
+            int curBoxNum = order[index];
+            
+            if(curBoxNum == boxNum) {
+                answer++;
+                index++;
+                
+                while(subContainer.size() > 0 && index < order.length) {    
+                    if(subContainer.peek() == order[index]) {
+                        answer++;
+                        subContainer.pop();
+                        index++;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                subContainer.add(boxNum);
+            }
+        }
+        
+        return answer;
+    }
+}
