@@ -1,0 +1,78 @@
+import java.util.ArrayList;
+
+/*
+그냥 2가지를 뽑는 모든 경우의 수를 만들고,
+그거대로 뽑으면 됨.
+*/
+
+class Solution {
+    public int solution(int[] cards) {
+        int answer = Integer.MIN_VALUE;
+        ArrayList<int[]> allCase = new ArrayList<>();
+        
+        int[] total = new int[cards.length];
+        for(int i = 0; i < total.length; i++) {
+            total[i] = i;
+        }
+        
+        makeAllCase(total, allCase, new ArrayList<>(), 0);   
+        for(int i = 0; i < allCase.size(); i++) {
+            boolean[] cardCheck = new boolean[cards.length];
+            int first = allCase.get(i)[0];
+            int second = allCase.get(i)[1];
+            
+            int firstResult = open(first, cardCheck, cards);
+            if(cardCheck[second]) {
+                if(firstResult == cards.length) {
+                    answer = Math.max(0, answer);        
+                }
+                continue;
+            }
+            
+            int secondResult = open(second, cardCheck, cards);
+            // System.out.println("check open Index "+ first+ ", "+second);
+            // System.out.println("check open value "+ firstResult+ ", "+secondResult+" answer "+answer);
+            System.out.println();
+            answer = Math.max(firstResult * secondResult, answer);
+        }
+        
+        return answer;
+    }
+    
+    public void makeAllCase(int[] total, ArrayList<int[]> saved, ArrayList<Integer> cur, int startIndex) {
+        if(cur.size() == 2) {
+            int[] save = new int[] {cur.get(0), cur.get(1)};
+            // System.out.println("saved "+save[0] +" "+save[1]);
+            saved.add(save);
+            return;
+        }
+        
+        for(int i = startIndex; i < total.length; i++) {
+            if(total[i] == -1) {
+                continue;
+            }
+            int temp = total[i];
+            cur.add(temp);
+            total[i] = -1;
+            startIndex++;
+            makeAllCase(total, saved, cur, startIndex);
+            cur.remove(cur.size()-1);
+            total[i] = temp;
+        }
+    }
+    
+    public int open(int index, boolean[] cardCheck, int[] cards) {
+        int result = 0;
+        
+        if(cardCheck[index]) {
+            return 0;
+        } else {
+            cardCheck[index] = true;
+            int nextIndex = cards[index] -1;
+            result++;
+            result += open(nextIndex, cardCheck, cards);
+        }
+        
+        return result;
+    }
+}
