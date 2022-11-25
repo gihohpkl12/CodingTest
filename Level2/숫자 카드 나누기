@@ -7,6 +7,12 @@ A,B에 대해 최대 공약수를 구함.
 A,B의 최대 공약수를 구함.
 A,B의 최대 공약수 D와 C의 최대 공약수는 A,B,C의 최대 공약수임.)
 
+공약수를 구하는 공식은 유클리드 공식.
+A,B가 있을 때,
+R = A % B. (단, A > B)
+R이 0일 때까지 반복하는데, 0이 아니면
+A = B, B = R을 넣음.
+
 */
 class Solution {
     public int solution(int[] arrayA, int[] arrayB) {
