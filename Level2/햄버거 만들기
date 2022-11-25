@@ -1,0 +1,38 @@
+import java.util.Stack;
+
+/*
+그냥 스택으로 순서대로 넣다가
+빵이 들어오면 사이즈를 먼저 체크하고, 다음 순서 체크하면 됨.
+
+그 ()이 괄호 양쪽 맞는지 체크하는 문제랑 같은 듯
+*/
+class Solution {
+    public int solution(int[] ingredient) {
+        int answer = 0;
+        Stack<Integer> orders = new Stack<>();
+        
+        for(int cur : ingredient) {
+            if(cur == 1) {
+                if(orders.size() >= 3) {
+                    int third = orders.pop();
+                    int second = orders.pop();
+                    int first = orders.pop();
+                    
+                    if(third == 3 && second == 2 && first == 1) {
+                        answer ++;
+                        continue;
+                    }
+                    
+                    orders.add(first);
+                    orders.add(second);
+                    orders.add(third);
+                }
+            } 
+            
+            orders.add(cur);
+        }
+        
+        return answer;
+    }
+}
+
