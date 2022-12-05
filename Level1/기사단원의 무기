@@ -1,0 +1,32 @@
+import java.util.HashSet;
+
+class Solution {
+    public int solution(int number, int limit, int power) {
+        int answer = 0;
+        
+        for(int num = 1; num <= number; num++) {
+            int count = countDivision(num);
+            
+            answer += count > limit ? power : count;
+        }
+        return answer;
+    }
+    
+    public int countDivision(int num) {
+        HashSet<Integer> divisions = new HashSet<>();
+        
+        if(num <= 2) {
+            return num == 1 ? 1 : 2;
+        }
+        
+        int end = (int)Math.sqrt(num);
+        for(int i = 1; i <= end; i++) {
+            if(num % i == 0) {
+                divisions.add(i);
+                divisions.add(num/i);
+            }
+        }
+        
+        return divisions.size();
+    }
+}
