@@ -1,0 +1,36 @@
+import java.util.PriorityQueue;
+import java.util.Collections;
+
+/*
+롤백 개념을 추가한 풀이
+
+개념은 우선 무조건 n으로 적을 막는 것.
+막고나서 만약에 n이 0보다 밑으로 떨어지면 롤백함.
+
+근데 롤백의 조건은 지금까지 n으로 막은 것 중에서 제일 큰 값.
+따라서 n으로 막을 때마다 pq에다가 막은 값을 저장하고,
+n이 낮아지면 무적권을 소모하고, 가장 컸던 값을 복귀시킴.
+*/
+class Solution {
+    public int solution(int n, int k, int[] enemy) {
+        int answer = 0;
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
+        
+        for(int i = 0; i < enemy.length; i++) {
+            n -= enemy[i];
+            pq.add(enemy[i]);
+            
+            if(n < 0) {
+                if(k > 0) {
+                    n += pq.poll();
+                    k--;
+                } else {
+                    break;
+                }
+            }
+            answer++;
+        }
+        
+        return answer;
+    }
+}
