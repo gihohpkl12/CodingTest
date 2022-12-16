@@ -1,0 +1,80 @@
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+각 sources에서 destination으로 찾아가는 대표적인 유형 문제.
+sources -> destination 말고 destination에서 sources로 풀면 되는 문제임.
+
+destination에서 시작해서 BFS로 돌면서 sources에 도착하는지 확인함.
+도착하면 멈추면 됨.
+*/
+class Solution {
+    public int[] solution(int n, int[][] roads, int[] sources, int destination) {
+        int[] answer = new int[sources.length];
+        HashMap<Integer, Integer>[] roadMap = new HashMap[n+1];
+        HashMap<Integer, Integer> targetMap = new HashMap<>();
+        
+        // 목표들 셋팅
+        for(int target : sources) {
+            targetMap.put(target, -1);
+        }
+        
+        // roadMap 셋팅1
+        for(int i = 1; i <= n; i++) {
+            roadMap[i] = new HashMap<Integer, Integer>();
+        }
+        
+        // roadMap 셋팅2
+        for(int[] arr : roads) {
+            int start = arr[0], end = arr[1];
+            roadMap[start].put(end, 1);
+            roadMap[end].put(start, 1);
+        }
+        
+        // 탐색
+        bfs(destination, roadMap, targetMap);
+        
+        for(int i = 0; i < sources.length; i++) {
+            answer[i] = targetMap.get(sources[i]);
+        }
+        
+        return answer;
+    }
+    
+    public void bfs(int start, HashMap<Integer, Integer>[] roadMap, HashMap<Integer, Integer> targetMap) {
+        Queue<Integer> q = new LinkedList<>(); // bfs용 Q
+        HashSet<Integer> checkedPoint = new HashSet<>(); // 방문 여부
+        roadMap[start].put(start, 0); // 시작지점 셋팅
+        checkedPoint.add(start); // 시작지점 방문 체크
+        q.add(start); // 시작 케이스
+        
+        int count = 0; // 체크한 정답 개수 확인용
+        while(!q.isEmpty()) {
+            int point = q.poll();
+            int move = roadMap[start].get(point);
+            
+            if(targetMap.containsKey(point)) {
+                targetMap.replace(point, move);
+                count++;
+            }
+            
+            // 체크한 정답 개수랑 같으면 break;
+            if(count == targetMap.size()) {
+                break;
+            }
+            
+            move++;
+            for(int next : roadMap[point].keySet()) {
+                // 방문한 곳이면 break;
+                if(checkedPoint.contains(next)) {
+                    continue;
+                }
+                q.add(next); // 다음 지점
+                checkedPoint.add(next); // 방문할 곳 저장
+                roadMap[start].put(next, move); // move 갱신
+            }
+        }
+    }
+}
