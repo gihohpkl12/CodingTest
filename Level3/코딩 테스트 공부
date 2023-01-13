@@ -1,0 +1,82 @@
+/*
+DP로 풀어야 되는 문제.
+근데 DP 값을 설정하는 게 어려움.
+
+우션 
+dp의 i,j는 alp, cop로 함.
+dp의 max i, j는 max alp, cop로 함.
+(alp ~ maxAlp, cop ~ maxCop로 반복함)
+
+i와 j를 1씩 증가 시키면서 현재에 도달할 수 있는 최소 시간을 구하면 됨.
+*/
+class Solution {
+    public int solution(int alp, int cop, int[][] problems) {
+        // 최대 alp, cop 
+        int maxAlp = 0;
+        int maxCop = 0;
+        for(int[] problem : problems) {
+            maxAlp = Math.max(problem[0], maxAlp);
+            maxCop = Math.max(problem[1], maxCop);
+        }
+        
+        // 이미 최대치를 넘었으면 return
+        if(maxAlp <= alp && maxCop <= cop) {
+            return 0;
+        }
+        
+        // 둘 중에 하나만 넘긴 경우에는 alp를 max로 수정함.
+        // (alp ~ maxAlp, cop ~ maxCop로 반복하기 때문에 배열을 넘어갈 수 있음.)
+        alp = maxAlp > alp ? alp : maxAlp;
+        cop = maxCop > cop ? cop : maxCop;
+        
+        // 불가능한 값 설정.
+        int[][] dp = new int[maxAlp+1][maxCop+1];
+        for(int i = 0; i < dp.length; i++) {
+            for(int j = 0; j < dp[0].length; j++) {
+                dp[i][j] = Integer.MAX_VALUE;
+            }
+        }
+        
+        dp[alp][cop] = 0;
+        for(int i = alp; i <= maxAlp; i++) {
+            for(int j = cop; j <= maxCop; j++) {
+                // alp를 1증가 시켰을 때 필요한 값(dp[i][j]+1) vs 해당 시점에(dp[i+1][j]) 시간
+                if(i + 1 <= maxAlp) {
+                    dp[i+1][j] = Math.min(dp[i+1][j], dp[i][j]+1);    
+                }
+                // 위와 동일 (cop임)
+                if(j+1 <= maxCop) {
+                    dp[i][j+1] = Math.min(dp[i][j+1], dp[i][j]+1);    
+                }
+                
+                // 여기는 문제를 풀었을 때 도달하는 경우 체크
+                for(int k = 0; k < problems.length; k++) {
+                    int needAlp = problems[k][0];
+                    int needCop = problems[k][1];
+                    int studyAlp = problems[k][2];
+                    int studyCop = problems[k][3];
+                    int time = problems[k][4];
+                    
+                    // 문제를 풀 수 있을 때
+                    // 문제를 풀었을 때 시간 vs 문제를 안 풀고 alp나 cop를 시간 1 소모해서 증가시키는 양
+                    if(i >= needAlp && j >= needCop) {
+                        // alp, cop 둘다 max보다 작을 때
+                        if(studyAlp + i <= maxAlp && studyCop + j <= maxCop) {
+                            dp[i+studyAlp][j+studyCop] = Math.min(dp[i+ studyAlp][j+studyCop], dp[i][j]+time);
+                        //  둘 다 max를 초과해서 범위를 maxAlp, maxCop로 지정
+                        } else if(studyAlp + i > maxAlp && studyCop + j > maxCop) {
+                            dp[maxAlp][maxCop] = Math.min(dp[maxAlp][maxCop], dp[i][j]+time);
+                        // 여기 아래는 alp, cop 중에 하나만 범위를 넘은 경우. (넘은 값을 max로 바꿈)
+                        } else if(studyAlp + i > maxAlp && studyCop + j <= maxCop) {
+                            dp[maxAlp][studyCop+j] = Math.min(dp[maxAlp][studyCop+j], dp[i][j] + time);
+                        } else if(studyAlp + i <= maxAlp && studyCop + j > maxCop) {
+                            dp[studyAlp + i][maxCop] = Math.min(dp[studyAlp + i][maxCop], dp[i][j] + time);
+                        } 
+                    }
+                }
+            }
+        }
+        
+        return dp[maxAlp][maxCop];
+    }
+}
