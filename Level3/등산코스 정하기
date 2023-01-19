@@ -1,0 +1,147 @@
+import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+어려웠던 문제.
+
+1. 우선 왕복은 생각할 필요가 없음.
+입구 -> 산봉우리로 가는 경로 중에서 제일 최소값을 구함.
+산봉우리 -> 입구는 그냥 왔던 길을 그대로 따라가면 됨.
+
+고로 입구 -> 산봉우리 중에 제일 적은 경우만 찾으면 됨.
+
+2. 경우의 수 생각하기
+각 게이트에서 각 산봉우리로 이동하는 전체 케이스를 생각하기 쉬움.
+근데 그렇게 하면 시간 초과임.
+
+큐에 각 게이트를 시작 지점으로 한 번에 모두 넣고 돌림.
+
+이렇게 하면 왔던 경로를 체크한다고 각각의 객체에 이동 경로를 저장하려고 생각할 수 있는데 이렇게 하면 메모리 초과임.
+
+그냥 각 경우의 수 객체가 공유하는 intensity 저장 배열을 만듦.
+그리고 그 값을 기준으로 파악하면 됨.
+
+ex. 예제 3번
+
+3번과 7번 모두를 넣음.
+3번이 2로 이동하면 
+[1: *, 2: 1, 3: *, 4: *, 5: *, 6: *, 7: *] 이렇게 됨.
+
+7번이 6으로 이동하면
+[1: *, 2: 1, 3: *, 4: *, 5: *, 6: 1, 7: *] 이렇게 됨.
+
+그럼 이제 3 -> 2 인 애가 5나 6으로 갈 수 있음.
+이때 6은 값이 1임.
+아무런 조건이 없으면 3 -> 2 -> 6인 경우에 6은 7이 되어야 하는데 여기서는 그냥 1로 쳐서 틀림.
+
+그래서 3 -> 2로 간 케이스에서 2 -> 6으로 가는 원래 intensity를 구함.
+그리고 3 -> 2로 간 케이스의 curMaxIntenstiy와 비교해서 curMaxIntensity를 갱신함.
+
+intensity배열에서 특정 값이 *이 아닐 때, 해당 지점으로 이동하려면 갱신된 curMAxIntensity가 특정 배열의 intensity보다 작아야만 큐에 저장함.
+
+즉, 3 -> 2로 간 애는 6으로 가기 전에 intensity가 7로 갱신되고, 현재 6번은 intensity가 1이므로 애초에 저장이 안 됨.
+
+3. 다음 이동 위치가 출입구라면 경우의 수에서 제외함.
+
+4. 이동한 위치가 산봉우리면 값을 갱신하고 큐에 넣지 않음.(경우의 수에서 제외함)
+
+5. 다음 위치가 산봉우리냐, 게이트냐 이거를 따지는 게 귀찮으면 애초에 경로를 설정할 때,
+start나 end가 산봉우리거나 게이트면 조건문으로 저장하지 않는 방법도 있음.
+(시간 차이는 안 큰 거 같아서 그냥 함.)
+
+ex. start: 산봉우리, end: 휴식처
+start -> end 는 저장 안 하고, end -> start는 저장함.
+*/
+
+class Solution {
+    public int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
+        TreeMap<Integer, Integer> peeksMap = new TreeMap<>();
+        HashMap<Integer, Integer> gatesMap = new HashMap<>();
+        HashMap<Integer, Integer>[] routesMap = new HashMap[n+1];
+        
+        for(int peek : summits) {
+            peeksMap.put(peek, Integer.MAX_VALUE);
+        }
+        
+        for(int gate : gates) {
+            gatesMap.put(gate, gate);
+        }
+        
+        for(int i = 0; i < routesMap.length; i++) {
+            routesMap[i] = new HashMap<Integer, Integer>();
+        }
+        
+        for(int[] path : paths) {
+            int start = path[0];
+            int end = path[1];
+            int time = path[2];
+
+            routesMap[start].put(end, time);
+            routesMap[end].put(start, time);
+        }
+        
+        findMinIntensity(peeksMap, gatesMap, routesMap, n);
+        
+        int minIntensity = Integer.MAX_VALUE;
+        int minPeek = Integer.MAX_VALUE;
+        for(int peek : peeksMap.keySet()) {
+            
+            if(peeksMap.get(peek) < minIntensity) {
+                minIntensity = peeksMap.get(peek);
+                minPeek = peek;
+            } 
+        }
+       
+        return new int[] {minPeek, minIntensity};
+    }
+    
+    public void findMinIntensity(TreeMap<Integer, Integer> peeksMap, HashMap<Integer, Integer> gatesMap, HashMap<Integer, Integer>[] routesMap, int n) {
+        
+        Queue<Point> q = new LinkedList<>();
+        
+        int[] intensitys = new int[n+1];
+        for(int i = 1; i < n+1; i++) {
+            intensitys[i] = Integer.MAX_VALUE;
+        }
+        
+        for(int gate : gatesMap.keySet()) {
+            q.add(new Point(gate, Integer.MIN_VALUE));
+        }
+            
+        while(q.size() != 0) {
+            Point getPoint = q.poll();
+            int curGate = getPoint.num;
+            int curMaxIntensity = getPoint.intensity;
+
+            for(int next : routesMap[curGate].keySet()) {
+                if(!gatesMap.containsKey(next)) {
+                    int nextIntensity = routesMap[curGate].get(next);
+                    Point save = new Point(next, curMaxIntensity);
+                    save.intensity = Math.max(nextIntensity, save.intensity);
+                    if(intensitys[next] == Integer.MAX_VALUE || intensitys[next] > save.intensity) {
+                        intensitys[next] = save.intensity;
+                        
+                        if(!peeksMap.containsKey(next)) {
+                            q.add(save);
+                        } else {
+                            peeksMap.replace(next, Math.min(intensitys[next], peeksMap.get(next)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    class Point {
+        int num;
+        int intensity;
+        
+        public Point(int num, int intensity) {
+            this.num = num;
+            this.intensity = intensity;
+        }
+    }
+}
