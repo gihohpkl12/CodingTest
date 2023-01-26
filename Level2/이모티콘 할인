@@ -1,0 +1,70 @@
+import java.util.ArrayList;
+
+/*
+경우의 수가 적어서 그냥 완전탐색으로 풀면 됨.
+
+각각의 이모티콘마다 10, 20, 30, 40으로 전체 경우의 수를 만들고
+그때 그때 값을 체크함.
+*/
+class Solution {
+    public int[] solution(int[][] users, int[] emoticons) {
+        ArrayList<int[]> totalCase = new ArrayList<>();
+        makeAllCase(new int[] {10, 20, 30, 40}, totalCase, new int[emoticons.length], 0);
+        int maxPurChaseCount = 0;
+        int maxPurchaseSum = 0;
+        
+        for(int i = 0; i < totalCase.size(); i++) {
+            int[] curCase = totalCase.get(i);
+            int purcaseCount = 0;
+            int sum = 0;
+            
+            for(int j = 0; j < users.length; j++) {
+                int purchaseRate = users[j][0];
+                int target = users[j][1];
+                int curUserSum = 0;
+                
+                for(int k = 0; k < emoticons.length; k++) {
+                    if(curCase[k] >= purchaseRate) {
+                        curUserSum += (emoticons[k]/100) * (100 - curCase[k]);
+                        
+                        if(curUserSum >= target) {
+                            purcaseCount++;
+                            curUserSum = 0;
+                            break;
+                        }
+                    }
+                }
+                
+                sum += curUserSum;
+                
+                if(j == users.length-1) {
+                    if(purcaseCount > maxPurChaseCount) {
+                        maxPurChaseCount = purcaseCount;
+                        maxPurchaseSum = sum;
+                    } else if(purcaseCount == maxPurChaseCount) {
+                        maxPurchaseSum = Math.max(maxPurchaseSum, sum);
+                    }
+                }
+            }
+        }
+        
+        return new int[] {maxPurChaseCount, maxPurchaseSum};
+    }
+    
+    public void makeAllCase(int[] discountRate, ArrayList<int[]> totalCase, int[] curCase, int index) {
+        if(index == curCase.length) {
+            int[] tempForSave = new int[curCase.length];
+            
+            for(int i = 0; i < curCase.length; i++) {
+                tempForSave[i] = curCase[i];
+            }
+            totalCase.add(tempForSave);
+            return;
+        }
+        
+        for(int i = 0; i < discountRate.length; i++) {
+                curCase[index] = discountRate[i];
+                makeAllCase(discountRate, totalCase, curCase, index+1);
+        }
+    }
+}
