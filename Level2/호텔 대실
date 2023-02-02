@@ -1,0 +1,55 @@
+import java.util.Comparator;;
+import java.util.PriorityQueue;
+
+/*
+그냥 시간별로 Q에 넣고 정렬해서 뽑으면 됨.
+근데 정렬 기준이 2가지임.
+
+1. 시간 순서 (입출입 시간에 따라서 정렬)
+2. 시간이 같은 경우에는 퇴실이 먼저(동시에 들어오고, 나갈 때 카운터 기준이 이렇게 됨.)
+*/
+
+class Solution {
+    public int solution(String[][] book_time) {
+        int maxBook = 0;
+        int curBook = 0;
+        
+        PriorityQueue<int[]> timeQ = new PriorityQueue<>(new Comparator<int[]>(){
+            public int compare(int[] o1, int[] o2) {
+                // 시간 순서로 정렬
+                if(o1[0] - o2[0] != 0) {
+                    return o1[0] - o2[0];    
+                }
+                
+                // 시간이 같으면 퇴실이 먼저.
+                return o2[1] - o1[1];
+            }
+        });
+        
+        for(String[] time : book_time) {
+            String start = time[0];
+            String end = time[1];
+            timeQ.add(new int[] {convertTime(start), 0});
+            timeQ.add(new int[] {convertTime(end)+10, 1});
+        }
+        
+        while(timeQ.size() > 0) {
+            int[] get = timeQ.poll();
+            
+            if(get[1] == 0) {
+                curBook++;
+            } else {
+                curBook--;
+            }
+            
+            maxBook = Math.max(curBook, maxBook);
+        }
+        
+        return maxBook;
+    }
+    
+    public int convertTime(String time) {
+        String[] temp = time.split(":");
+        return Integer.parseInt(temp[0]) * 60 + Integer.parseInt(temp[1]);
+    }
+}
