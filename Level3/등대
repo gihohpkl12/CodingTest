@@ -1,0 +1,138 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+/*
+트리로 생각해야 하는 문제.
+한쪽 라인에 반드시 하나는 불이 켜져야 함.
+( 코드를 지워서 시도는 안 해봤는데 그냥 그리디하게 풀어도 될 것 같음
+가장 많은 선을 가진 노드를 우선순위로 자르기. )
+
+우선 트리를 만듦.
+( 나는 1이 무조건 루트가 되게 만들었음. )
+( 트리로 안 만들고 그냥 map에 저장한 다음에 방문 여부 boolean[]로 트리 형식으로 dfs를 할 수 있기는 함.)
+( 시간초를 봤는데 후자가 더 빠르긴 함. )
+
+트리를 만들고 루트부터 순회함.
+
+여기서 경우의 수가 2가지임.
+현재 노드가 on이냐 off냐.
+현재 노드는 루트 아니면 리프노드가 되는데 어쨌든 리프노드라도 해당 노드 기준으로는 혼자 있어서 루트로 생각해도 됨.
+
+내가 on이면, 자식은 off여도 되고, on도 됨.
+반대로 내가 off면, 자식은 무조건 on을 해야 함.
+
+root부터 dfs로 재귀 호출을 하는데
+turn은 1, off는 0으로 시작함. 
+( 턴은 이미 내가 켰다는 의미이고, 켰으므로 1부터 시작 )
+
+리프 노드는 당연히 1, 0을 리턴함.
+
+위에 자식들을 쭉 돌고 리턴 해서왔을 때
+on에는 자식들의 on, off 경우 중에 적은 수를 더하면 됨. Math.min(child_on, child_off)
+off에는 내가 off니까 자식들은 무조건 on해야 함으로 child_on을 더해야 함.
+*/
+class Solution {
+    public int solution(int n, int[][] lighthouse) {
+        Node root = new Node(1);
+        HashMap<Integer, Integer>[] lines = new HashMap[n+1];
+        
+        for(int i = 1; i <= n; i++) {
+            lines[i] = new HashMap<Integer,Integer>();
+        }
+        
+        for(int[] line : lighthouse) {
+            int start = line[0];
+            int end = line[1];
+            lines[start].put(end, end);
+            lines[end].put(start, start);
+        }
+        
+        // 이게 boolean[] 방식인데 조금 더 빠르긴 빠름.
+        // int[] result = dfs(lines, 1, new boolean[n+1]);
+        
+        makingTree(root, lines);
+        int[] result = dfs(root);
+        return Math.min(result[0], result[1]);
+    }
+    
+    // 트리 생성.
+    public void makingTree(Node curNode, HashMap<Integer, Integer>[] lines) {
+        for(int node : lines[curNode.num].keySet()) {
+            Node child = new Node(node);
+            child.parent = curNode;
+            curNode.childs.add(child);
+            lines[node].remove(curNode.num);
+        }
+        
+        for(Node child : curNode.childs) {
+            makingTree(child, lines);
+        }
+    }
+    
+    // boolean[] 방식 dfs 탐색.
+//     public int[] dfs(HashMap<Integer, Integer>[] lines, int curNodeNum, boolean[] check) {
+//         int turn = 1;
+//         int off = 0;
+        
+//         check[curNodeNum] = true;
+//         for(int child : lines[curNodeNum].keySet()) {
+//             if(!check[child]) {
+//                 check[child] = true;
+//                 int[] temp = dfs(lines, child, check);
+//                 off += temp[0];
+//                 turn += Math.min(temp[0], temp[1]);
+//             }
+//         }
+        
+//         return new int[] {turn, off};
+//     }
+    
+    // dfs
+    public int[] dfs(Node curNode) {
+        int turn = 1;
+        int off = 0;
+        
+        for(Node child : curNode.childs) {
+            int[] temp = dfs(child);    
+            // 내가 off임으로 자식은 무조건 on
+            off += temp[0];
+            // 내가 on임으로 자식은 on이던 off던 상관이 없음. 둘 중에 작은 것.
+            turn += Math.min(temp[0], temp[1]);
+        }
+        
+        return new int[] {turn, off};
+    }
+    
+    class Node {
+        int num;
+        ArrayList<Node> childs;
+        Node parent;
+        
+        public Node(int num) {
+            this.num = num;
+            this.childs = new ArrayList<>();
+            this.parent = null;
+        }
+    }
+}
+/*
+public void print(Node node) {
+        System.out.println("cur Node "+node.num);
+        if(node.parent != null) {
+            System.out.println("cur Node`s parent "+node.parent.num);
+        } else {
+            System.out.println("root");
+        }
+        
+        System.out.print("child : ");
+        for(Node child : node.childs) {
+            System.out.print(child.num+", ");
+        }
+        System.out.println();
+        System.out.println();
+        
+        for(Node child : node.childs) {
+            print(child);
+        }
+    }
+*/
