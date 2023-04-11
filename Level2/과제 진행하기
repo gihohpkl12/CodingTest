@@ -1,0 +1,121 @@
+import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+/*
+개념 자체는 쉬움.
+그냥 순서대로 정렬하고
+일 끝나면 answer 저장
+안 끝나면 stack에 저장
+미리 끝나면 stack에서 꺼내옴
+
+코드가 더러워서 다시 풀어봐야 함
+깔끔하게
+*/
+
+class Solution {
+    public String[] solution(String[][] plans) {
+        String[] answer = new String[plans.length];
+        ArrayList<Work> works = new ArrayList<>();
+        Stack<Work> stop = new Stack<>();
+        
+        for(int i = 0; i < plans.length; i++) {
+            String sub = plans[i][0];
+            int startTime = convertTimeToInt(plans[i][1]);
+            int time = Integer.parseInt(plans[i][2]);
+            works.add(new Work(sub, startTime, time));
+        }
+        
+        Collections.sort(works, new Comparator<Work>(){
+           public int compare(Work o1, Work o2) {
+               return o1.startTime - o2.startTime;
+           } 
+        });
+        
+         
+        int index = 1; // work 인덱스
+        int answerIndex = 0; // 정답 인덱스
+        int endCount = 0; // 처리한 work 개수
+        Work preWork = works.get(0); // 0번은 pre
+        while(endCount < plans.length) {
+            // 일정대로 끝나고, 맨 마지막 work(==preWork)와 stack에 저장된 work처리
+            if(index >= works.size()) {
+                // 일정상 맨 마지막 work 처리
+                answer[answerIndex++] = preWork.subject; 
+                endCount++;
+                // saved 된 애들 처리
+                while(stop.size() > 0) {
+                    Work saved = stop.pop();
+                    answer[answerIndex++] = saved.subject;
+                    endCount++;
+                }
+                continue;
+            } 
+            
+            Work curWork = works.get(index);
+            
+            // 이전 일이 끝나는 시간과 현재 일이 끝나는 시간이 동일함
+            // 정답에 저장하고 인덱스 증가하고 endCount 증가시키면 끝
+            if(preWork.getEndTime() == curWork.startTime) {
+                answer[answerIndex++] = preWork.subject;
+                preWork = curWork;
+                index++;
+                endCount++;
+            } else if(preWork.getEndTime() < curWork.startTime) {
+                // 여긴 시간이 남는 경우
+                // 일단 answer에 저장
+                answer[answerIndex++] = preWork.subject;
+                endCount++; // 정답 카운터 증가
+                
+                // 저장해놓은 게 있으면 꺼냄
+                if(stop.size() > 0) {
+                    Work savedWork = stop.pop();
+                    // 시작 시간을 변경해줘야 함.
+                    // 시작 시간은 기존의 preWork가 끝나는 시간임
+                    savedWork.startTime = preWork.getEndTime();
+                    preWork = savedWork; // 가져온 걸 prework로 변경
+                } else {
+                    // 시간이 남았는데 저장한 게 없음.
+                    // 여기선 그냥 curWork를 pre로 바꾸고 index++
+                    index++;
+                    preWork = curWork;
+                }
+            } else if(preWork.getEndTime() > curWork.startTime) {
+                // 여긴 일을 못 끝내는 경우
+                int worked = curWork.startTime - preWork.startTime; // 일을 한 시간
+                // 과제의 진행 시간만 변경해서 저장함
+                Work save = new Work(preWork.subject, preWork.startTime, preWork.time - worked); 
+                stop.add(save);
+                // 못 끝낸 일은 그냥 저장하고, prework를 curwork로 대체해야 함
+                preWork = curWork;
+                index++;
+            }
+        }
+
+        return answer;
+    }
+    
+    public int convertTimeToInt(String time) {
+        String hour = time.split(":")[0];
+        String minute = time.split(":")[1];
+        
+        return Integer.parseInt(hour)*60 + Integer.parseInt(minute);
+    }
+    
+    class Work {
+        String subject;
+        int startTime;
+        int time;
+        
+        public Work(String subject, int startTime, int time) {
+            this.subject = subject;
+            this.startTime = startTime;
+            this.time = time;
+        }
+        
+        public int getEndTime() {
+            return this.startTime + this.time;
+        }
+    }
+}
