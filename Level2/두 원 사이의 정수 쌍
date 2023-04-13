@@ -1,0 +1,113 @@
+/*
+개떡같은 문제.
+처음에는 점 사이 거리 구한 다음에 r2, r1만큼 사각형 그리고, 각 점마다 반복문으로 체크했는데
+O(N^2)이면 무조건 시간초과임.
+
+이게 이해가 되려면 아래 사진을 봐야 함.
+근데 일단 글로 쓰면
+일단 영역이 4개임.
+그리고 한 영역을 따질 때, x, y가 2개기 때문에 값을 따로 세면 좋음.
+즉, 영역 하나 구하고 * 4
+선 위에 점을 구하고 * 2
+
+다음은 점을 카운트 해야 되는데
+x 좌표를 기준으로 0 ~ r2까지 하면 됨.
+
+두 점사이에 거리는 x증가량 제곱 + y증가량 제곱 한 값의 루트임.
+그걸 기준으로 보면
+반지름 때문에 무조건 선 길이는 r1, r2를 고정으로 알 수 있음.
+그리고 x를 내가 지정하기 때문에 0, 1, 2 ... r2까지 알 수 있음.
+그럼 공식대로 남은 선 하나를 구할 수 있는데 그걸로 x좌표 위에 작은 원과 큰 원 경계선 사이에 차이를 구할 수 있음.
+
+자 만약에 거리가 1.xxx라고 하자.
+그럼 숫자를 어떻게 하든 무조건 정수가 하나는 낌.
+
+여기서 또 중요한 게
+만약에
+x좌표 위에 작은 원의 거리를 구했는데 그게 마침 정수로 딱 떨어지는 숫자다? 그럼 +1을 해줘야 함.
+왜냐?
+1.xxx에서 1.xxx만큼 떨어져서 2.xxx에 있다고 하자 그럼 정수는 2만 지날거임.
+근데 1에서 1.xxx만큼 떨어져서 2.xxx에 있다고 하면 1, 2를 지날거임.
+그래서 +1 해주는 거
+*/
+
+class Solution {
+    public long solution(int r1, int r2) {
+        long answer = 0;
+        long onLineCount = 0;
+        
+        // r1, r2의 제곱.
+        long powOfR1 = (long)Math.pow(r1, 2);
+        long powOfR2 = (long)Math.pow(r2, 2);
+        
+        for(int i = 0; i <= r2; i++) {
+            // x좌표 위에 y를 구하려고 계산한 것.
+            long r1Y = (long)Math.sqrt(powOfR1 - Math.pow(i, 2));
+            long r2Y = (long)Math.sqrt(powOfR2 - Math.pow(i, 2));
+            // 차이
+            long gap = r2Y - r1Y;
+            
+            // x좌표 위에 y를 구했는데 그게 정수라면 +1을 해줘야 함.
+            // 근데 값이 0일 때는 빼야 함.
+            // 왜냐면 x, y축 위에 값은 따로 빼서 계산할거임.
+            if(Math.sqrt(powOfR1 - Math.pow(i, 2)) % 1 == 0 && Math.sqrt(powOfR1 - Math.pow(i, 2)) != 0) {
+                gap++;
+            }
+            
+            // 값이 0이라는 얘기는 축에 있다는 의미.
+            if(r1Y == 0 || r2Y == 0) {
+                onLineCount++;
+            }
+            
+            // i가 0일 때는 무조건 축 위임.
+            if(i == 0) {
+                onLineCount += gap;    
+            } else {
+               answer += gap;
+            }
+        }
+        
+        answer *= 4;
+        answer += onLineCount * 2;
+        
+        return answer;
+    }
+}
+
+// 설명용 그림
+
+
+/*
+
+class Solution {
+    public long solution(int r1, int r2) {
+        long answer = 0;
+        long onLineCount = 0;
+        
+        long powOfR1 = Math.pow(r1, 2);
+        long powOfR2 = Math.pow(r2, 2);
+        
+        for(int i = r2; i >= 0; i--) {
+            for(int j = 0; j <= r2; j++) {
+                if(Math.sqrt((i*i) + (j*j)) <= r2) {
+                    if(Math.sqrt((i*i) + (j*j)) >= r1) {
+                        if(i == 0 || j == 0) {
+                            onLineCount++;
+                        } else {
+                            answer++;    
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        answer *= 4;
+        answer += onLineCount * 2;
+        
+        return answer;
+    }
+}
+*/
+
