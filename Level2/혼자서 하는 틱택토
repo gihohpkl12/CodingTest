@@ -1,0 +1,93 @@
+/*
+조건 1. 개수 차이가 2개 이상 나면 안됨.
+조건 2. 개수 차이가 1개가 날 때는 O가 하나 더 많아야 함.
+조건 3. 한 쪽이 승리하는 것은 됨. 근데 다른 한쪽도 승리하면 안 됨.
+조건 4. 한 쪽이 승리(O) 했을 때는 개수가 1차이가 나야 함.
+조건 5. 승리한 쪽이 없으면, o와 x의 차이는 0 or 1이 되어야 함
+*/
+
+class Solution {
+    public int solution(String[] board) {
+        int answer = -1;
+        boolean[][] check = new boolean[board.length][board[0].length()];
+        int o = 0;
+        int x = 0;
+        boolean oWin = false;
+        boolean xWin = false;
+        
+        int lineIndex = 0;
+        for(String line : board) {
+            for(int i = 0; i < line.length(); i++) {
+                check[lineIndex][i] = true;
+                
+                if(line.charAt(i) == 'O') {
+                    if(!oWin) {
+                        oWin = winnerCheck(i, lineIndex, board, check);    
+                    }
+                    o++;
+                } else if(line.charAt(i) == 'X') {
+                    if(!xWin) {
+                        xWin = winnerCheck(i, lineIndex, board, check);    
+                    }
+                    x++;
+                }   
+            }
+            lineIndex++;
+        }
+        
+        if(o - x >= 2 || x > o) {
+            return 0;
+        }
+        
+        if(oWin && xWin) {
+            return 0;
+        }
+        
+        if(oWin) {
+            return o - x == 1 ? 1 : 0;
+        }
+        
+        if(xWin) {
+            return o - x == 0 ? 1 : 0;
+        }
+        
+        if(!oWin && !xWin) {
+            if(o - x == 0 || o- x == 1) {
+                return 1;
+            }
+            return 0;
+        }
+        
+        
+        return answer;
+    }
+    
+    public boolean winnerCheck(int x, int y, String[] board,  boolean[][] check) {
+        int[][] move = new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+        
+        for(int i = 0; i < move.length; i++) {
+            int firstY = y + move[i][0];
+            int firstX = x + move[i][1];
+            int secondY = y + (move[i][0]*2);
+            int secondX = x + (move[i][1]*2);
+            
+            if(rangeCheck(firstY, firstX, secondY, secondX)) {
+                check[firstY][firstX] = true;
+                check[secondY][secondX] = true;
+                if(board[y].charAt(x) == board[firstY].charAt(firstX) && board[y].charAt(x) == board[secondY].charAt(secondX)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean rangeCheck(int firstY, int firstX, int secondY, int secondX) {
+        if(firstY >= 0 && firstY <= 2 && firstX >= 0 && firstX <= 2 &&
+              secondY >= 0 && secondY <= 2 && secondX >= 0 && secondX <= 2) {
+            return true;
+        }
+        return false;
+    }
+}
