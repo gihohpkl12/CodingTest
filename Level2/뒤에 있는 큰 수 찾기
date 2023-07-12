@@ -1,0 +1,72 @@
+/*
+1. 우선 -1이 되는 기준은 마지막 인덱스거나, 현재 값이 현재 최대값 보다 크거나 같을 경우.
+
+2. 기억해야 할 점이 확실히 stack이 List 보다 훨씬 빠름.
+
+3. answer에 저장한 history를 저장해야 함.
+(여기서 2번이 나온 것.)
+
+현재 i를 기준으로 i+1이 i보다 크다면 바로 저장하면 됨.
+그게 아니라면
+history에서 값을 pop해서 현재 i의 값보다 크면 answer에 저장하고 반복 종료.
+
+반복을 종료하고 방금 answer에 저장한 값을 다시 history에 넣어줘야 함.
+(history에 해당하는 값이고 && pop 때문에 history에서는 없는 값임.)
+
+여기서 반복문 횟수를 줄이기 위해서 history에 저장할 때
+peek과 값이 같을 경우에는 pass
+*/
+
+import java.util.ArrayList;
+import java.util.Stack;
+
+class Solution {
+    public int[] solution(int[] numbers) {
+        int[] answer = new int[numbers.length];
+        Stack<Integer> history = new Stack<>();
+        
+        int max = Integer.MIN_VALUE;
+        int index = numbers.length-1;
+        for(int i = index; i >= 0; i--) {
+            max = Math.max(numbers[i], max);
+            if(i == index) {
+                history.push(max);
+                answer[i] = -1;
+                continue;
+            }
+            
+            if(numbers[i] >= max) {
+                answer[i] = -1;
+                max = Math.max(max, numbers[i]);
+            } else {
+                int preNum = numbers[i+1];
+                int curNum = numbers[i];
+                
+                if(curNum < preNum) {
+                    answer[i] = preNum;
+                    historySave(answer[i], history);
+                } else {
+                    while(!history.isEmpty()) {
+                        int getNum = history.pop();
+                        if(curNum < getNum) {
+                            answer[i] = getNum;
+                            break;
+                        }
+                    }
+                    
+                    historySave(answer[i], history);
+                }
+            }
+            
+        }
+        return answer;
+    }
+    
+    public void historySave(int num, Stack<Integer> history) {
+        if(history.isEmpty()) {
+            history.push(num);
+        } else if(history.peek() != num) {
+            history.push(num);
+        }
+    }
+}
