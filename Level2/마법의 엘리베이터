@@ -1,0 +1,63 @@
+/*
+조건은 간단한 문제.
+
+1. 현재 자리의 숫자가 6이상이면 10-현재자리 하고, 다음 자리 숫자에 +1 해주는 게 좋음.
+(19 -> 9에서 그냥 +1해서 20으로 만들고, 2만큼 -해줘서 3이면 끝남)
+
+2. 현재 자리의 숫자가 4이하면 그냥 그만큼 빼주는 게 이득임.
+
+3. 5일 경우가 중요함
+다음 자리 숫자가 5이상이면 1번처럼 처리하는 게 이득임.
+다음 자리 숫자가 4이하면 2번처럼 처리하는 게 이득
+
+덤으로
+나머지 계산을 한 다음에 해당 숫자를 storey에 빼줘야 깔끔함
+*/
+import java.util.ArrayList;
+
+class Solution {
+    public int solution(int storey) {
+        int answer = 0;
+        int divideNum = 10;
+        
+        while(storey > 0) {
+            int calNum = storey % divideNum;
+            char frontNum = getFrontNum(calNum);
+            
+            // 맨 앞자리가 4이하면 그냥 빼는 게 이득.
+            if(frontNum <= '4') {
+                answer += Character.getNumericValue(frontNum);
+                
+            // 맨 앞자리가 5일 경우에는 따져야 함.
+            } else if(frontNum == '5') {
+                // 다음자리 숫자
+                char nextNum = getFrontNum(storey % (divideNum*10));
+                int nextCalNum = storey % (divideNum*10);
+                
+                // 다음자리 숫자가 5 이상이고,
+                // nextCalNum이 calNum과 달라야 함.
+                // 현재자리가 맨 앞자리거나 다음 자리가 맨 앞자리인 경우, 해당 경우의 숫자들보다 앞자리를 구할 수가 없음.
+                // 그런 경우에는 그냥 빼버려야 함.
+                if(calNum != nextCalNum && nextNum >= '5') {
+                    storey += divideNum;
+                }
+                answer += 5;
+                
+                // 현재 자리가 6이상이면 그냥 +해서 다음 자리가 +1 되게 하는 게 이득임.
+            } else {
+                answer += 10 - Character.getNumericValue(frontNum);
+                storey += divideNum;
+            }
+            
+            // calNum을 깔끔하게 만들기랑 반복 끝내기 위해서 이렇게 함
+            storey -= calNum;
+            divideNum *= 10;
+        }
+        
+        return answer;
+    }
+    
+    public char getFrontNum(int num) {
+        return Integer.toString(num).charAt(0);
+    }
+}
