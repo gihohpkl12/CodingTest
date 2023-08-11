@@ -1,0 +1,58 @@
+/*
+이것도 간단한 문제.
+그냥 귤 종류마다 카운트를 함.
+
+그리고 정렬함.
+
+종류가 많은 것부터 넣으면 됨.
+*/
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+
+class Solution {
+    public int solution(int k, int[] tangerine) {
+        HashMap<Integer, Tangerine> tangerineMap = new HashMap<>();
+        ArrayList<Tangerine> tangerineList = new ArrayList<>();
+        
+        for(int num : tangerine) {
+            if(tangerineMap.containsKey(num)) {
+                tangerineMap.get(num).count += 1;
+            } else {
+                Tangerine newTangerine = new Tangerine(num, 1);
+                tangerineMap.put(num, newTangerine);
+                tangerineList.add(newTangerine);
+            }
+        }
+        
+        Collections.sort(tangerineList, new Comparator<Tangerine>() {
+            public int compare(Tangerine o1, Tangerine o2) {
+                return o2.count - o1.count;
+            }
+        });
+        
+        int answer = 0;
+        int rest = k;
+        for(Tangerine getTangerine : tangerineList) {
+            rest -= getTangerine.count;
+            answer++;
+            
+            if(rest <= 0) {
+                break;
+            }
+        }
+        
+        return answer;
+    }
+    
+    class Tangerine {
+        int num;
+        int count;
+        
+        public Tangerine(int num, int count) {
+            this.num = num;
+            this.count = count;
+        }
+    }
+}
