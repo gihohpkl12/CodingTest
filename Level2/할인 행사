@@ -1,0 +1,105 @@
+/*
+일종의 슬라이싱 윈도우 방식.
+
+간단함.
+우선 먼저 할인 요구항목을 needItems에 넣음.
+
+그리고 1일차부터 계속 할인하는 항목을 map에 넣음.
+근데 여기서 중요한 게 total을 계산해야 함.
+이걸 계산해야 그때그때 조건 충족 여부를 계산 안 해도 됨.
+
+total 계산법은
+방금 넣은 항목이 요구항목인지 체크함.
+요구항목이면 일단 값을 확인함.
+예를 들어서 요구값이 3이고 현재 값이 3이라고 하면
+방금 +1이 된 것이기 때문에
+전에는 2였고, 여기까지는 total에 반영된 값임.
+그래서 total에 +1을 해야 함.
+
+만약 현재 값이 4였다면
+이전엔 3이었고, 이미 요구값 3을 충족시켰었던 항목이기 때문에 total에 더하지 않음.
+
+10일 이후에는 항목을 빼야 함.
+빼는 것도 그냥 빼면 되는데 여기서도 total을 계산해야 함.
+원리는 넣는 것과 같음.
+
+예를 들어서 요구값이 3이고 현재 값이 3이라고 하면
+이미 -1을 했기 때문에 전에는 4였던 것임.
+뺀 상태에서도 이미 요구값을 충족함.
+따라서 total에서 -1을 하지 않음.
+
+만약 현재값이 2라면
+전에는 3이었고, 충족했었다가 이제 부족해진 경우가 됨.
+고로 total에서 -1을 함.
+*/
+import java.util.HashMap;
+
+class Solution {
+    public int solution(String[] want, int[] number, String[] discount) {
+        int answer = 0;
+        HashMap<String, Integer> curItems = new HashMap<>();
+        HashMap<String, Integer> needItems = new HashMap<>();
+        
+        // 요구값을 토탈
+        int totalOfWant = 0;
+        for(int i = 0; i < want.length; i++) {
+            needItems.put(want[i], number[i]);
+            totalOfWant += number[i];
+        }
+        
+        int day = 0; // 날
+        int total = 0; // 요구항목에 부합하는 항목들의 총합
+        int index = 0; // 10일 이후부터 뺄 인덱스
+        for(int i = 0; i < discount.length; i++) {
+            String item = discount[i];
+            day++;
+            
+            // 일단 할인 목록에 저장
+            if(curItems.containsKey(item)) {
+                curItems.replace(item, curItems.get(item) +1);
+            } else {
+                curItems.put(item, 1);
+            }
+            
+            // 아이템 추가했을 때 토탈 카운터 증가(조건에 맞는 것만)
+            if(needItems.containsKey(item)) {
+                int num = curItems.get(item);
+                if(needItems.get(item) >= num) {
+                    total++;
+                }
+            }
+            
+            // 10일 이후부터 지난 항목 제거
+            if(day > 10) {
+                String removeItem = discount[index];
+                curItems.replace(removeItem, curItems.get(removeItem)-1);
+                
+                if(curItems.get(removeItem) <= 0) {
+                    curItems.remove(removeItem);
+                }
+                
+                // 요구항목에 들어가는 항목인가
+                if(needItems.containsKey(removeItem)) {
+                    if(curItems.containsKey(removeItem)) {
+                        // 현재 값을 기준으로 요구값보다 낮으면 total에서 빼야 함.
+                        if(curItems.get(removeItem) < needItems.get(removeItem)) {
+                            total -= 1;
+                        }
+                    // 이건 1이었다가 -1해서 0이되고, map에서 지워진 케이스임.
+                    // 마찬가지로 -1해줘야 함.
+                    } else {
+                        total -= 1;
+                    }
+                    
+                }
+                index++;
+            }
+            
+            if(total >= totalOfWant) {
+                answer++;
+            }
+            
+        }
+        return answer;
+    }
+}
