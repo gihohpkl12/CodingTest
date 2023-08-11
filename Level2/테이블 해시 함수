@@ -1,0 +1,36 @@
+/*
+그냥 정렬하고 xor 계산 (^) 하면 끝나는 문제
+*/
+
+import java.util.Arrays;
+import java.util.Comparator;
+
+class Solution {
+    public int solution(int[][] data, int col, int row_begin, int row_end) {
+        Arrays.sort(data, new Comparator<int[]>() {
+            public int compare(int[] o1, int[] o2) {
+                if(o1[col-1] == o2[col-1]) {
+                    return o2[0] - o1[0];
+                }
+                return o1[col-1] - o2[col-1];
+            }
+        });
+        
+        return calXOR(data, row_begin, row_end);
+    }
+    
+    public int calXOR(int[][] data, int start, int end) {
+        int result = 0;
+        
+        for(int i = start-1; i < end; i++) {
+            int curNum = 0;
+            for(int j = 0; j < data[i].length; j++) {
+                curNum += data[i][j] % (i+1);
+            }
+            
+            result = curNum ^ result;
+        }
+        
+        return result;
+    }
+}
