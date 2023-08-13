@@ -1,0 +1,45 @@
+/*
+DP로 불러야 할지, 그리디로 불러야 할지 모르겠지만,
+슬라이싱 윈도우처럼 풀면 무조건 시간 초과 나오는 문제.
+따라서 아이디어가 중요한 문제.
+
+일단 생각해보면
+만약에 누적합이 현재 값보다 낮아지면 그냥 누접합을 버리고 현재 값부터 시작하면 됨.
+값은 연속이고, 어차피 최대값을 가져가야 하기 때문에 0 ~ 3까지 수행한 값이 3 인덱스보다 낮으면 그냥 버리면 되는 것.
+
+중요한 개념은
+현재값까지 계산한 누적합이 현재값보다 낮으면
+앞으로 계속 현재값에서부터 다시 시작한 것보다 커질 수 없다는 점임.
+
+매번 계산할 때마다 answer를 갱신하고, plus와 minus start만 체크하면 끝임.
+*/
+
+class Solution {
+    public long solution(int[] sequence) {
+        long answer = Integer.MIN_VALUE;
+        long plusStart = 1;
+        long minusStart = -1;
+        long sumOne = 0;
+        long sumTwo = 0;
+        
+        for(int get : sequence) {
+            long num = (long)get;
+            sumOne += plusStart*num;
+            sumTwo += minusStart*num;
+            
+            // 현재까지 더한 값이 현재 값보다 적으면 갱신.
+            sumOne = Math.max(sumOne, plusStart*num);
+            sumTwo = Math.max(sumTwo, minusStart*num);
+            
+            // answer는 매번 갱신
+            answer = Math.max(sumOne, answer);
+            answer = Math.max(answer, sumTwo);
+            
+            // start 반전시킴.
+            plusStart = plusStart == 1 ? -1 : 1;
+            minusStart = minusStart == 1 ? -1 : 1;
+        }
+        
+        return answer;
+    }
+}
