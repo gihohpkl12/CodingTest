@@ -1,0 +1,172 @@
+/*
+리펙토링이 심각하게 필요한 문제.
+
+우선 접근법은 간단함.
+전체 횟수가 가장 낮거나,
+같으면 불+싱글이 가장 높은 것이 정답이기 때문에
+그냥 단순하게 우선 불을 최대한 던지고 나머지에서 싱글을 최대한 던지면 됨.
+
+이후에 거기서 불을 하나씩 트리플로 교체해서 비교하면 됨.
+
+근데 다른 사람은 dp로 풀었더라.
+코드는 좋아보이는데 이게 속도는 더 빠름.
+
+우선 그걸 보면
+1부터 100,000까지 하나씩 함.
+뭘 하냐?
+1을 처리할 때 최소횟수.
+2를 처리할 때 최소 횟수.
+3을 처리할 때 최소 횟수..
+이렇게.
+
+그래서 정답을 구함.
+*/
+class Solution {
+    public int[] solution(int target) {
+        int[] answer = new int[2];
+        
+        // 우선 불을 쏘는 케이스
+        Shoot boolShoot = new Shoot(target);
+        boolShoot.calBool();
+        // 불 이후에 싱글을 계산하는 메소드.
+        boolShoot.calRest();
+        
+        // 이건 트리플로 교체할 케이스
+        // 계산하기 편하게 하려고 일부러 불만 최대한 던지고, 나머지는 계산 안 한 상태로 둠.
+        Shoot tripleShoot = new Shoot(target);
+        tripleShoot.calBool();
+        
+        Shoot result = replaceBoolToTriple(boolShoot, tripleShoot);
+          
+        answer[0] = result.totalCount;
+        answer[1] = result.boolCount + result.singleCount;
+        return answer;
+    }
+    
+    public Shoot replaceBoolToTriple(Shoot boolShoot, Shoot tripleShoot) {
+        // 불 우선 + 싱글 계산한 케이스가 기준임.
+        Shoot result = new Shoot(boolShoot);
+            
+        // 불을 던진 횟수만큼 반복할 것.
+        int count = 1;
+        while(tripleShoot.boolCount >= count) {
+            // 불을 count씩 트리플로 교체할 것.
+            Shoot test = new Shoot(tripleShoot);
+            test.boolCount -= count;
+            test.totalCount -= count;
+            test.rest += count * 50;
+            
+            test.calRest();
+            
+            // 비교해서 교체
+            if(test.totalCount <= result.totalCount) {
+                if(test.totalCount == result.totalCount) {
+                    if(test.boolCount + test.singleCount > result.boolCount + result.singleCount) {
+                        result = test;
+                    }
+                } else {
+                    result = test;
+                }
+            }
+            count++;
+        }
+        
+        return result;
+    }
+    
+    class Shoot {
+        int tripleCount = 0;
+        int doubleCount = 0;
+        int singleCount = 0;
+        int boolCount = 0;
+        int totalCount = 0;
+        int rest = 0;
+        
+        public Shoot(int rest) {
+            this.rest = rest;
+        }
+        
+        public Shoot(Shoot shoot) {
+            this.tripleCount = shoot.tripleCount;
+            this.doubleCount = shoot.doubleCount;
+            this.singleCount = shoot.singleCount;
+            this.boolCount = shoot.boolCount;
+            this.totalCount = shoot.totalCount;
+            this.rest = shoot.rest;
+        }
+        
+        // 이건 불만 계산 하는 메소드
+        public void calBool() {
+            if(this.rest > 50) {
+                int num = this.rest / 50;
+                this.rest = rest - (50 * num);
+                this.totalCount += num;
+                this.boolCount += num;
+            }
+        }
+        
+        // 이건 이후 계산을 위한 메소드
+        public void calRest() {
+            if(this.rest == 0) {
+                return;
+            }
+            
+            // 우선 60보다 크면 무조건 트리플로 던져서 숫자를 최대한 줄임.
+            if(this.rest >= 60) {
+                int num = this.rest / 60;
+                this.rest -= num * 60;
+                
+                this.tripleCount += num;
+                this.totalCount += num;
+                
+                // 60으로 딱 떨어지면 종료
+                if(this.rest == 0) {    
+                    return;
+                } 
+            } 
+            
+            // 50이거나 20 이하는 불 혹은 싱글로 처리하는 게 베스트임. 그래서 따로 조건으로 빼서 계산.
+            if(this.rest <= 20 || this.rest == 50) {
+                if(this.rest == 50) {
+                    this.boolCount += 1;
+                } else {
+                    this.singleCount += 1;    
+                }
+                this.totalCount += 1;
+                return;
+            } else {
+                // 더블, 트리플로 던졌을 때 점수.
+                int firstCase = this.rest / 3;
+                int secondCase = this.rest / 2;
+                
+                // 20을 넘기면 20으로 셋팅.
+                firstCase = firstCase > 20 ? 20 : firstCase;
+                secondCase = secondCase > 20 ? 20 : secondCase;
+                
+                // 더블 혹은 트리플로 한 번에 처리가 가능하면 처리.
+                if(this.rest - (firstCase * 3) == 0 || this.rest - (secondCase * 2) == 0) {
+                    if(this.rest - (firstCase * 3) == 0) {
+                        this.tripleCount += 1;
+                    } else {
+                        this.doubleCount += 1;
+                    }
+                    this.totalCount += 1;
+                } else {
+                    // 여기서는 최대한 싱글로 변형이 가능한지 계산해야 함.
+                    // 만약에 23이라고 치면
+                    // 트리플 1회 싱글 1회 보다 싱글(20) 1회 싱글(3) 1회가 더 좋음.
+                    // 근데 43 처럼 20, 23으로 둘 다 싱글로 처리하지 못 하는 경우는 그냥 트리플 1회 싱글 1회로 처리.
+                    if(secondCase <= 20 && this.rest - (secondCase) <= 20) {
+                        this.singleCount += 2;
+                    } else if(firstCase <= 20 && this.rest - (firstCase) <= 20) {
+                        this.singleCount += 2;
+                    } else {
+                        this.tripleCount += 1;
+                        this.singleCount += 1;                
+                    }
+                    this.totalCount += 2;
+                }
+            }
+        }
+    }
+}
