@@ -1,0 +1,179 @@
+/*
+완전 탐색 같은데 생각보다 시간이 걸린 문제.
+
+조건이 중요함.
+뒤짚는 순서는 상관이 없음.
+그리고 2번 뒤짚으면 값은 같아짐.
+따라서 2번 이상 뒤짚는 건 의미가 없음.
+그리고 무엇보다 어차피 뒤짚을 때, 줄 단위로 뒤짚기 때문에 모든 경우를 볼 필요가 없음.
+그래서 맨 첫번 째 열과 행만 결과와 똑같이 맞추면 됨.
+맞춰보고 결과랑 전체가 같으면 count가 가장 작은 게 정답.
+
+우선 행을 기준으로 바꾼다고 할 때,
+첫 번째 행에서 결과와 다른 게 없으면 넘어감.
+
+그게 아니라면
+우선 첫 번째 행을 그냥 뒤짚고 저장하는 케이스 하나.
+
+그리고 첫 번째 행에서 결과와 다른 인덱스들의 열을 뒤짚고 저장하는 케이스 하나.
+
+첫번째 행을 뒤짚고, 첫번째 행에서 결과와 다른 인덱스들의 열을 뒤짚고 저장하는 케이스 하나.
+이렇게 3개를 저장함.
+이 경우들은 행에 대해서 바꿀 수 있는 건 전부 바꿨기 때문에 더이상 행에 대해서는 판단할 필요가 없음.
+
+열도 위와 같은 로직으로 돌림.
+
+*/
+
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+
+class Solution {
+    public int solution(int[][] beginning, int[][] target) {
+        int answer = Integer.MAX_VALUE;
+        Queue<Board> q = new LinkedList<>();
+        
+        q.add(new Board(beginning, 0, false, false));
+        while(q.size() > 0) {
+            Board cur = q.poll();
+            
+            // 정답 체크
+            if(cur.firstRow && cur.firstCol) {
+                if(check(cur.board, target)) {
+                    answer = Math.min(answer, cur.count);
+                }
+                continue;
+            }
+            
+            // 정답이 나왔는데, 정답보다 count가 높으면 끝.
+            if(answer != Integer.MAX_VALUE && answer < cur.count) {
+                continue;
+            }
+            
+            // 행에 대해서 체크
+            if(!cur.firstRow) {
+                ArrayList<Integer> differentColIndexs = new ArrayList<>(); // 행에서 다른 애들 인덱스
+                ArrayList<Integer> sameColIndexs = new ArrayList<>(); // 행에서 같은 애들 인덱스
+                for(int i = 0; i < cur.board[0].length; i++) {
+                    if(cur.board[0][i] != target[0][i]) {
+                        differentColIndexs.add(i);
+                    } else {
+                        sameColIndexs.add(i);
+                    }
+                }
+
+                if(differentColIndexs.size() > 0) {
+                    // 무조건 행을 뒤짚는 케이스
+                    Board save = new Board(cur.board, cur.count, true, cur.firstCol);
+                    changeRow(save.board, 0);
+                    save.count++;
+                    q.add(save);
+                    
+                    // 행에서 다른 애들의 열을 뒤짚는 인덱스
+                    Board save2 = new Board(cur.board, cur.count, true, cur.firstCol);
+                    for(int index : differentColIndexs) {
+                        changeCol(save2.board, index);
+                        save2.count++;
+                    }
+                    q.add(save2);
+                    
+                    // 행을 뒤짚으면, 원래 결과와 같았던 애들이 결과와 다르게 변함. 이 애들의 열을 뒤짚음.
+                    Board save3 = new Board(save.board, save.count, true, save.firstCol);
+                    for(int index : sameColIndexs) {
+                        changeCol(save3.board, index);
+                        save3.count++;
+                    }
+                    q.add(save3);
+                    
+                } else {
+                    Board save = new Board(cur.board, cur.count, true, cur.firstCol);
+                    q.add(save);
+                }
+            }
+            
+            // 여긴 열에 대해서 체크. 로직은 위와 동일함.
+            if(!cur.firstCol) {
+                ArrayList<Integer> differentRowIndexs = new ArrayList<>();
+                ArrayList<Integer> sameRowIndexs = new ArrayList<>();
+                for(int i = 0; i < cur.board.length; i++) {
+                    if(cur.board[i][0] != target[i][0]) {
+                        differentRowIndexs.add(i);
+                    } else {
+                        sameRowIndexs.add(i);
+                    }
+                }
+
+                if(differentRowIndexs.size() > 0) {
+                    Board save = new Board(cur.board, cur.count, cur.firstRow, true);
+                    changeCol(save.board, 0);
+                    save.count++;
+                    q.add(save);
+                    
+                    Board save2 = new Board(cur.board, cur.count, cur.firstRow, true);
+                    for(int index : differentRowIndexs) {
+                        changeRow(save2.board, index);
+                        save2.count++;
+                    }
+                    q.add(save2);
+                    
+                    Board save3 = new Board(save.board, save.count, save.firstRow, true);
+                    for(int index : sameRowIndexs) {
+                        changeRow(save3.board, index);
+                        save3.count++;
+                    }
+                    q.add(save3);
+                    
+                } else {
+                    Board save = new Board(cur.board, cur.count, cur.firstRow, true);
+                    q.add(save);
+                }   
+            }
+        }
+        
+        return answer == Integer.MAX_VALUE ? -1 : answer;
+    }
+    
+    public boolean check(int[][] board, int[][] target) {
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board[0].length; j++) {
+                if(board[i][j] != target[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    class Board {
+        int[][] board;
+        int count;
+        boolean firstRow;
+        boolean firstCol;
+        
+        public Board(int[][] board, int count, boolean firstRow, boolean firstCol) {
+            this.board = new int[board.length][board[0].length];
+            for(int i = 0; i < board.length; i++) {
+                for(int j = 0; j < board[0].length; j++) {
+                    this.board[i][j] = board[i][j];
+                }
+            }
+            
+            this.count = count;
+            this.firstRow = firstRow;
+            this.firstCol = firstCol;
+        }
+    }
+    
+    public void changeCol(int[][] beginning, int col) {
+        for(int i = 0; i < beginning.length; i++) {
+            beginning[i][col] = beginning[i][col] == 0 ? 1 : 0;
+        }
+    }
+    
+    public void changeRow(int[][] beginning, int row) {
+        for(int i = 0; i < beginning[0].length; i++) {
+            beginning[row][i] = beginning[row][i] == 0 ? 1 : 0;
+        }
+    }
+}
