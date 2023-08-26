@@ -1,0 +1,100 @@
+/*
+dfs나 bfs 둘 다 할 수 있을 거 같은데
+dfs가 더 직관적으로 맞음.
+
+움직이는 건 무조건 사전 순서대로 움직임.
+따라서 제일 먼저 도착한 애가 있으면 return하면 정답.
+
+여기서 중요한 건 이동을 멈추는 조건과 중복 이동이 가능하다는 점임.
+원래 이런 문제에서 시간 초과를 막는 가장 쉬운 방법은 중복 이동이 불가능하다는 조건이 붙었을 때임.
+근데 여기서는 가능하기 때문에 시간 초과가 나기 굉장히 좋음.
+그래서 못가는 조건을 설정해야 함.
+
+조건 1.
+이동 가능한 거리가 남은 거리보다 커야 함.
+(작으면 이동 불가)
+
+조건 2.
+이동 가능한 거리에서 남은 거리를 뺀 값이 짝수여야 함.
+이건 왜냐면
+만약에 남은 거리와 이동 가능한 거리가 같으면 0임. 이건 통과.
+
+남은 거리가 3일 때, 이동 가능한 거리가 4라면 뺀 값은 1.
+목적지에 도착했을 때 1이 남기 때문에 남은 거리를 소진해야 하고,
+소진하면 다시 목적지로 이동할 수가 없음.
+고로 짝수여야 함.
+*/
+
+class Solution {
+    public static String answer = "impossible";
+    public String solution(int n, int m, int x, int y, int r, int c, int k) {
+        dfs(k, x, y, r, c, n, m, new StringBuilder());
+        return answer;
+    }
+    
+    public void dfs(int count, 
+                    int curX, int curY, 
+                    int targetX, int targetY, 
+                    int endX, int endY,
+                    StringBuilder sb) {
+        // 사전식 순서 : d l r u
+        int[][] moving = new int[][] {{1, 0}, {0, -1}, {0, 1}, {-1, 0}};
+        
+        // 정답
+        if(curX == targetX && curY == targetY && count == 0) {
+            answer = sb.toString();
+            return;
+        }
+        
+        // 거리 계산
+        int distance = calDistance(curX, curY, targetX, targetY);
+        if(distance > count) {
+            return;
+        } else {
+            // 이동 가능 거리 - 목적지까지 남은 거리가 짝수가 아니면 끝
+            if((count - distance) % 2 != 0) {
+                return;
+            }
+        }
+        
+        int index = 0;
+        for(int[] move : moving) {
+            // 정답에 도착한 케이스가 있으면 리턴
+            if(!answer.equals("impossible")) {
+                return;
+            }
+            
+            int nextX = curX + move[0];
+            int nextY = curY + move[1];
+            // 범위 계산
+            if(rangeCheck(nextX, nextY, endX, endY)) {
+                String work = "";
+                if(index == 0) {
+                    work = "d";
+                } else if(index == 1) {
+                    work = "l";
+                } else if(index == 2) {
+                    work = "r";
+                } else {
+                    work = "u";
+                }
+                sb.append(work);
+                dfs(count-1, nextX, nextY, targetX, targetY, endX, endY, sb);
+                sb.delete(sb.length()-1, sb.length());
+            }
+            index++;
+        }
+    }
+    
+    public int calDistance(int curX, int curY, int targetX, int targetY) {
+        int dis = Math.abs(curX - targetX) + Math.abs(curY - targetY);
+        return dis;
+    } 
+    
+    public boolean rangeCheck(int nextX, int nextY, int endX, int endY) {
+        if(nextX >= 1 && nextY >= 1 && nextX <= endX && nextY <= endY) {
+            return true;
+        }
+        return false;
+    }
+}
