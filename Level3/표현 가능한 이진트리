@@ -1,0 +1,109 @@
+/*
+탐색 문제.
+
+일단 숫자를 바이너리로 바꿈.
+바이너리로 바꿨을 때 트리구조상 부족한 부분은 앞에 0을 추가해서 트리의 노드 숫자를 맞춤.
+
+다음은 루트 노드부터 왼쪽, 오른쪽 자식으로 탐색함.
+루트 노드의 인덱스는 tree의 길이를 /2로 나눈 값임.
+루트 노드의 숫자 값은 tree/2 인데, tree의 길이가 홀수면 +1을 해줘야 함.
+루트 노드의 숫자값이 중요한 이유는 루트 노드의 숫자/2로 자식 노드의 인덱스를 구할 수 있기 때문임.
+왼쪽 자식은 루트노드의 숫자 -2, 오른쪽 자식은 루트 노드의 숫자 +2임.
+
+탐색하면서 중요한 건 자식에서 1이 나오냐임.
+정확하게 말하면 위에서 0이었는데, 자식에서 1이 나오면 false임.
+
+트리의 전체 길이를 구하는 건 레벨 기준임.
+만약에 
+레벨이 1이라면 전체는 1.
+레벨이 2라면 전체는 3.
+레벨이 3이라면 전체는 7.
+레벨이 4라면 전체는 15.
+즉, 2^레벨 -1임.
+
+*/
+class Solution {
+    public int[] solution(long[] numbers) {
+        int[] answer = new int[numbers.length];
+        
+        int index = 0;
+        for(long number : numbers) {
+            String[] tree = toBinary(number).split("");
+            
+            boolean check = checkMakingTree(tree);
+            
+            answer[index++] = check ? 1 : 0;
+        }
+        
+        return answer;
+    }
+    
+    public boolean checkMakingTree(String[] tree) {
+        int rootNodeIndex = tree.length/2;
+        int rootNodeNum = tree.length % 2 == 0 ? tree.length/2 : tree.length/2 +1;
+        
+        boolean result = searchChildNode(tree, rootNodeNum/2, rootNodeIndex, tree[rootNodeIndex].equals("0") ? false : true);
+        
+        return result;
+    }
+    
+    public boolean searchChildNode(String[] tree, int moveNum, int nodeNum, boolean isParentExist) {
+        boolean result = true;
+        int leftChild = nodeNum - moveNum;
+        int rightChild = nodeNum + moveNum;
+        
+        // 현재 부모 노드가 0인데, 자식 중에 1이 있으면 false
+        if(tree[nodeNum].equals("0") && (tree[rightChild].equals("1") || tree[leftChild].equals("1"))) {
+            return false;
+        }
+        
+        // 위에 부모 노드에서 0이 있었는데 현재 부모, 자식 노드들에서 1이 나오면 false임.
+        if(!isParentExist && (tree[rightChild].equals("1") || tree[leftChild].equals("1") || tree[nodeNum].equals("1"))) {
+            return false;
+        }
+        
+        // 맨 처음 시작했을 때, 부모 노드가 1이었다면 그냥 그대로 true로 진행함.
+        // 맨 처음 시작했을 때, 부모 노드가 0이었는데, 지금 1이 나왔다면 나중에 아래 노드들을 체크하기 위해서 업데이트 해야 함.
+        isParentExist = isParentExist ? isParentExist : (tree[nodeNum].equals("0") ? true : isParentExist);
+        
+        if(moveNum > 1) {
+            boolean leftResult = searchChildNode(tree, moveNum/2, leftChild, isParentExist);
+            boolean rightResult = searchChildNode(tree, moveNum/2, rightChild, isParentExist);
+
+            if(!leftResult || !rightResult) {
+                result = false;
+            } else {
+                result = true;
+            }    
+        }
+        
+        return result;
+        
+    }
+    
+    public String toBinary(long num) {
+        String result = Long.toBinaryString(num);
+        long totalLength = calAddZeroCountOfFront(result.length());
+        result = addZeroOfFront(totalLength, (long)result.length(), result);
+        return result;
+    }
+    
+    public long calAddZeroCountOfFront(int length) {
+        long count = 0;
+        long sum = 0;
+        while(sum < length) {
+            sum = (sum + 1)*2;
+            count++;
+            sum -= 1;
+        }
+        return sum;
+    }
+    
+    public String addZeroOfFront(long sum, long length, String num) {
+        while(sum > length) {
+            num = "0"+num;
+            sum--;
+        }
+        return num;
+    }
+}
