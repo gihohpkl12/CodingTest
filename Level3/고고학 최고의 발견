@@ -1,0 +1,117 @@
+/*
+동전 뒤짚는 거랑 비슷한 문제.
+
+우선 중요한 건 동전 문제처럼 첫번째 줄임.
+첫 줄에 따라서 그 밑에 줄들은 할 수 있는 행위가 고정됨.
+첫 번째 줄에 대해서 모든 케이스를 다 생성함.
+(자리마다 1~3번 돌리는 경우)
+
+2번째 줄부터는 하는 행위가 고정됨.
+윗 줄을 0으로 바꿔야 함.
+윗 줄이 0이 되도록 돌리면 됨.
+*/
+import java.util.LinkedList;
+import java.util.Queue;
+
+class Solution {
+    public int solution(int[][] clockHands) {
+        int answer = Integer.MAX_VALUE;
+        Queue<Case> q = new LinkedList<>();
+        
+        // 모든 케이스 생성
+        makingCase(-1, new Case(clockHands, 0), q);
+        
+        while(q.size() > 0) {
+            Case curCase = q.poll();
+            process(curCase);
+            if(endCheck(curCase.clockHands)) {
+                answer = Math.min(answer, curCase.count);    
+            }
+        }
+        
+        return answer;
+    }
+    
+    // 첫번째 줄의 모든 케이스 생성.
+    // 첫번째 줄의 1번째 열 1회 조작, 첫번째줄 1, 2번재 열 1회 조작 이런 식.
+    public void makingCase(int lastIndex, Case curCase, Queue<Case> q) {
+        q.add(curCase);
+        
+        for(int i = lastIndex+1; i < curCase.clockHands.length; i++) {
+            for(int j = 1; j <= 3; j++) {
+                Case save = new Case(curCase.clockHands, curCase.count+j);
+                turn(save.clockHands, 0, i, curCase.clockHands.length, curCase.clockHands.length, j);
+                makingCase(i, save, q);
+            }
+        }
+    }
+    
+    // 2번째줄 이후부터 조작.
+    public void process(Case curCase) {
+        // 2번째 줄부터
+        for(int i = 1; i < curCase.clockHands.length; i++) {
+            for(int j = 0; j < curCase.clockHands.length; j++) {
+                int count = 0;
+                // 현재 위치에 위에 값이 0이 아니면 0이 되도록 돌려야 함.
+                if(curCase.clockHands[i-1][j] != 0) {
+                    count = 4 - curCase.clockHands[i-1][j];
+                } else {
+                    continue;
+                }
+
+                turn(curCase.clockHands, i, j, curCase.clockHands.length, curCase.clockHands.length, count);
+                curCase.count += count;
+            }
+        }
+    }
+    
+    // 뒤짚음.
+    public void turn(int[][] clockHands, int x, int y, int endX, int endY, int count) {
+        int[][] turnRange = new int[][] {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for(int[] range : turnRange) {
+            int nextX = x + range[0];
+            int nextY = y + range[1];
+            
+            if(rangeCheck(nextX, nextY, endX, endY)) {
+                clockHands[nextX][nextY] += count;
+                clockHands[nextX][nextY] = clockHands[nextX][nextY] >= 4 ? clockHands[nextX][nextY] - 4 : clockHands[nextX][nextY];
+            }
+        }
+    }
+    
+    public boolean rangeCheck(int x, int y, int endX, int endY) {
+        if(x >= 0 && y >= 0 && x < endX && y < endY) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 어차피 맨 마지막줄을 제외하고 나머지는 다 바꾸기 때문에 마지막 줄부터 체크하면 빠름.
+    public boolean endCheck(int[][] clockHands) {
+        for(int i = clockHands.length-1; i >= 0; i--) {
+            for(int j = 0; j < clockHands[0].length; j++) {
+                if(clockHands[i][j] != 0) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    class Case {
+        int count;
+        int[][] clockHands;
+        
+        public Case(int[][] clockHands, int count) {
+            this.count = count;
+            this.clockHands = new int[clockHands.length][clockHands[0].length];
+            for(int i = 0; i < clockHands.length; i++) {
+                for(int j = 0; j < clockHands[0].length; j++) {
+                    this.clockHands[i][j] = clockHands[i][j];
+                }
+            }
+        }
+    }
+}
