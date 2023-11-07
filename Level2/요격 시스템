@@ -155,3 +155,51 @@ class Solution {
         }
     }
 }
+
+=============================================================================================
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+
+class Solution {
+    public int solution(int[][] targets) {
+        int answer = 0;
+        Arrays.sort(targets, new Comparator<int[]>(){
+            public int compare(int[] o1, int[] o2) {
+                if(o1[0] - o2[0] != 0) {
+                    return o1[0] - o2[0];
+                }
+                return o1[1] - o2[1];
+            }
+         });
+        
+        ArrayList<Missile> cur = new ArrayList<>();
+        int lastTime = Integer.MAX_VALUE;
+        for(int[] target : targets) {
+            int start = target[0] * 10 +1;
+            int end = target[1] * 10 -1;
+            
+            lastTime = Math.min(end, lastTime);
+            if(start > lastTime) {
+                cur.clear();
+                answer++;
+                lastTime = end;
+            }
+            
+            cur.add(new Missile(start, end));
+        }
+        
+        answer = cur.size() != 0 ? answer +1 : answer;    
+        return answer;
+    }
+    
+    class Missile {
+        int start;
+        int end;
+
+        public Missile(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+    }
+}
