@@ -1,12 +1,20 @@
 /*
-점수를 못 받는 사원 때문에 오히려 오래걸린 문제.
-어렵게 생각하지 말고 간단하게 생각하면 됨.
 
+미리 요약하면
+앞자리를 기준으로 그룹을 나누고,
+각 그룹마다 두번째 점수가 가장 큰 애를 저장함.
+걔들이 탈락자 선별의 기준이 되는 것.
+
+설명: 
 우선 앞에 점수를 기준으로 정렬함.(내림차순)
 앞의 점수가 같으면 두번째 점수를 기준으로 정렬함(내림차순)
 
+그룹으로 생각해야 됨.
+앞자리를 기준으로 그룹을 나눔.
 예시를 기준으로 
 3,2 3,2 2,2 2,1 1,4가 될텐데
+그룹3, 그룹2, 그룹 1이 나옴
+
 여기서 맨 앞의 처음 점수(3)과 같은 애들은 탈락 걱정이 없음.
 왜냐면 하나라도 최대이기 때문에.
 
@@ -17,18 +25,18 @@
 왜냐?
 3이 아닌 순간 애들은 탈락 가능성이 생김. 
 (3보다 작으니까.)
-그래서 3인 애들 중에서 두번째 점수가 제일 높은 애를 ArrayList에 저장함.
 
+기준으로 쓰기 위해서 3인 애들 중에서 두번째 점수가 제일 높은 애를 ArrayList에 저장함.
 2인애들 부터는 첫번째 점수가 3인 애들 그룹 중에서 두번째 값이 제일 큰애를 기준으로 비교하면 되는 거임.
 그럼 탈락이니까.
 
 이거를 확장하면
 앞자리가 같은 애들을 그룹으로 묶고, 걔들 중 두번째 값이 최대인 값을 구해서 그걸 list에 저장함.
 
-또 하나 중요한 게
-원호임.
+또 하나 중요한 게 원호.
 원호보다 통합 점수가 낮은 애들은 신경을 쓸 필요가 없음.
 왜냐면 등수에 영향이 없음.
+
 원호보다 같거나, 큰 애들은 신경써야 함.
 정확하게 말하면 원호보다 큰 애들은 무조건 체크를 해야 함.
 얘네가 만약에 탈락 대상이면 원호의 등수가 바뀜.
@@ -60,22 +68,23 @@ class Solution {
         int maxTotal = 0;
         // 원호 앞에 있는 애들 숫자.
         int count = 1;
+        // 해당 리스트에 저장하는 값은 첫번째 값을 기준으로 그룹으로 생각했을 때,
+        // 해당 그룹에서 가장 높은 두번째 값을 저장하는 것임.
+        // ex/ 3,3  3,2  3,1 이 있으면 3인 그룹에서 제일 높은 3,3을 저장.
         ArrayList<int[]> maxScoreList = new ArrayList<>();
-
         for (int[] score : scores) {
             int curFirst = score[0];
             int curSecond = score[1];
             int curTotal = curFirst + curSecond;
             
-            // 앞자리 점수가 바뀌면 이제 list에 저장할 때가 된 것.
-            // 이 값은 앞자리, 앞자리 그룹중 최대 두번째 값.
+            // 앞자리 점수가 바뀌면 이제 list에 저장할 때가 된 것.(그룹이 바뀌는 것)
             if(firstScoreStandard != curFirst) {
                 maxScoreList.add(new int[] {firstScoreStandard, secondScoreStandard});
-                // 저장 후에 바뀐 앞자리로 셋팅.
+                // 저장 후에 다음 그룹을 저장하기 위해서 준비
                 firstScoreStandard = curFirst;
                 secondScoreStandard = curSecond;
             } else {
-                // 앞자리가 동일할 때는 해당 앞자리 그룹 중 두번째 값이 최대인 수를 구해야 함.
+                // 앞자리가 동일할 때는 해당 그룹에서 제일 큰 두번째 값을 구함.
                 secondScoreStandard = Math.max(secondScoreStandard, curSecond);
             }
             
@@ -100,6 +109,7 @@ class Solution {
         return total == maxTotal ? 1 : count;
     }
     
+    // 탈락 대상을 찾음
     public boolean check(ArrayList<int[]> maxScoreList, int first, int second) {
         for(int[] arr : maxScoreList) {
             if(arr[0] <= first) {
