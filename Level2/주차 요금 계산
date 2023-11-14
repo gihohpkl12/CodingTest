@@ -1,75 +1,112 @@
-import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Collections;
+import java.util.Comparator;
 
 /*
-그냥 자동차 입출차 기록대로 시간 계산 저장했다가 마지막에 계산해서 하면 됨.
-주의할 점
-1. 자동차 번호 순서대로 입력해야 하니까 key를 기준으로 정렬하는 TreeMap을 씀
-2. 반올림할 때, float형으로 계산해야 소수점에서 반올림이 됨.
+차량이 들어오고, 나갈 때 저장함.
+근데 차량이 하루에 두번 이상 들어올 때를 대비해서
+하루 동안 사용한 시간만 저장해놓고 요금 계산은 맨 마지막에 해야 함.
+(하루에 2번 사용할 때 기본 요금을 2번 내지 않음. 1번 내고 통합 사용 시간으로 요금을 계산함)
+
+여기서 해시맵과 리스트로 Car를 저장 및 정렬 하는 방식하고
+트리맵으로 애초에 정렬되는 방식으로 해봤는데
+속도 차이는 거의 없는데 오히려 처음이 조금 더 빠름.
 */
 
 class Solution {
     public int[] solution(int[] fees, String[] records) {
-        int[] answer;
-        HashMap<String, Integer> cars = new HashMap<>();
-        TreeMap<String, Integer> feeManage = new TreeMap<>();
-        int endTime = convertTime("23:59");
+        ArrayList<Car> answerList = new ArrayList<>();
+        HashMap<String, String> park = new HashMap<>();
+        TreeMap<String, Car> history = new TreeMap<>();
+        
+        int endTime = convertTimeToInt("23:59");
+        int defaultTime = fees[0];
+        int defaultFee = fees[1];
+        int timeForFee = fees[2];
+        int feeForMinute = fees[3];
         
         for(String record : records) {
-            String[] recordArr = record.split(" ");
-
-            if(recordArr[2].equals("IN")) {
-                int inTime = convertTime(recordArr[0]);
-                cars.put(recordArr[1], inTime);
+            String[] temp = record.split(" ");
+            String time = temp[0];
+            String num = temp[1];
+            String type = temp[2];
+            
+            if(type.equals("IN")) {
+                park.put(num, time);
             } else {
-                addTime(feeManage, recordArr[1], cars.get(recordArr[1]), convertTime(recordArr[0]));
-                cars.remove(recordArr[1]);
+                int usingTime = convertTimeToInt(time) - convertTimeToInt(park.get(num));
+                saveCarHistory(usingTime, num, history, answerList);
+                park.remove(num);
             }
         }
         
-        for(String remainsCar : cars.keySet()) {
-            addTime(feeManage, remainsCar, cars.get(remainsCar), endTime);
+        for(String num : park.keySet()) {
+            int usingTime = endTime - convertTimeToInt(park.get(num));
+            saveCarHistory(usingTime, num, history, answerList);
         }
         
-        calFee(feeManage, fees);
+        // Collections.sort(answerList, new Comparator<Car>(){
+        //     public int compare(Car o1, Car o2) {
+        //         return o1.num - o2.num;
+        //     }
+        // });
         
+        int[] answer = new int[history.size()];
         int index = 0;
-        answer = new int[feeManage.size()];
-        for(String key : feeManage.keySet()) {
-            answer[index++] = feeManage.get(key);
+        for(String key : history.keySet()) {
+            Car car = history.get(key);
+            int usingTime = car.usingTime;
+            
+            if(usingTime <= defaultTime) {
+                answer[index++] = defaultFee;
+            } else {
+                int curFee = defaultFee;
+                usingTime -= defaultTime;
+                curFee += (usingTime/timeForFee) * feeForMinute;
+                curFee = usingTime%timeForFee == 0 ? curFee : curFee + feeForMinute;
+                answer[index++] = curFee;
+            }
         }
+//         for(Car car : answerList) {
+//             int usingTime = car.usingTime;
+            
+//             if(usingTime <= defaultTime) {
+//                 answer[index++] = defaultFee;
+//             } else {
+//                 int curFee = defaultFee;
+//                 usingTime -= defaultTime;
+//                 curFee += (usingTime/timeForFee) * feeForMinute;
+//                 curFee = usingTime%timeForFee == 0 ? curFee : curFee + feeForMinute;
+//                 answer[index++] = curFee;
+//             }
+//         }
+        
         return answer;
     }
     
-    public int convertTime(String time) {
-        String[] temp = time.split(":");
-        return Integer.parseInt(temp[0]) * 60 + Integer.parseInt(temp[1]);
-    }
-    
-    public void addTime(TreeMap<String, Integer> feeManage, String carNum, int inTime, int outTime) {
-        if(feeManage.containsKey(carNum)) {
-            feeManage.replace(carNum, feeManage.get(carNum) + (outTime - inTime));
+    public void saveCarHistory(int time, String num, TreeMap<String, Car> history, ArrayList<Car> answerList) {
+        if(history.containsKey(num)) {
+            Car saved = history.get(num);
+            saved.usingTime += time;
         } else {
-            feeManage.put(carNum, outTime - inTime);
+            Car save = new Car();
+            save.num = Integer.parseInt(num);
+            save.usingTime = time;
+            answerList.add(save);
+            history.put(num, save);
         }
     }
     
-    public void calFee(TreeMap<String, Integer> feeManage, int[] fees) {
-        int defaultTime = fees[0];
-        int defaultFee = fees[1];
-        int perMinute = fees[2];
-        int FeePerMinute = fees[3];
-        
-        for(String car : feeManage.keySet()) {
-            int totalFee = defaultFee;
-            int useTime = feeManage.get(car);
-            if(useTime > defaultTime) {
-                useTime -= defaultTime;
-                totalFee += Math.ceil((float)useTime/(float)perMinute) * FeePerMinute;
-                feeManage.replace(car, totalFee);
-            } else {
-                feeManage.replace(car, totalFee);
-            }
-        }
+    public int convertTimeToInt(String time) {
+        String[] temp = time.split(":");
+        return Integer.parseInt(temp[0])*60 + Integer.parseInt(temp[1]);
+    } 
+    
+    class Car {
+        int fee;
+        int num;
+        int usingTime;
     }
 }
