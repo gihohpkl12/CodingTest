@@ -1,0 +1,318 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+class Solution {
+    static int totalGroupNum = 1;
+    
+    public String[] solution(String[] commands) {
+        ArrayList<String> answerList = new ArrayList<>();
+        HashMap<String, Integer> mergeInfo = new HashMap<>();
+        HashMap<Integer, ArrayList<String>> mergeGroupInfo = new HashMap<>();
+        HashMap<String, String> cell = new HashMap<>();
+        HashMap<String, ArrayList<String>> values = new HashMap<>();
+        
+        for(String command : commands) {
+            String[] temp = command.split(" ");
+            String work = temp[0];
+            String position = "";
+            String position2 = "";
+            String value = "";
+            String value2 = "";
+            
+            if(work.equals("UPDATE") && temp.length == 4) {
+                position = temp[1] + ","+temp[2];
+                value = temp[3];
+                updatePosition(position, value, mergeInfo, mergeGroupInfo, cell, values);
+            } else if(work.equals("UPDATE") && temp.length == 3) {
+                value = temp[1];
+                value2 = temp[2];
+                updateValue(value, value2, mergeInfo, mergeGroupInfo, cell, values);
+            } else if(work.equals("MERGE")) {
+                position = temp[1] + ","+temp[2];
+                position2 = temp[3] + ","+temp[4];
+                if(position.equals(position2)) {
+                    continue;
+                }
+                merge(position, position2, mergeInfo, mergeGroupInfo, cell, values);
+            } else if(work.equals("UNMERGE")) {
+                position = temp[1] + ","+temp[2];
+                unmerge(position, mergeInfo, mergeGroupInfo, cell, values);
+            } else if(work.equals("PRINT")) {
+                position = temp[1] + ","+temp[2];
+                print(position, answerList, cell);
+            }
+            
+//             System.out.println("=======================================");
+//             System.out.println("work: "+ work);
+//             System.out.println("position: "+ position);
+//             System.out.println("position2: "+ position2);
+//             System.out.println("value: "+ value);
+//             System.out.println("value2: "+ value2);
+//             System.out.println();
+//             System.out.println("cell ");
+//             for(String key : cell.keySet()) {
+//                 System.out.println(key + " and "+cell.get(key));
+//             }
+            
+//             System.out.println();
+//             System.out.println("merge ");
+//             for(String key : mergeInfo.keySet()) {
+//                 System.out.println(key);
+                
+//                 for(String tempp : mergeGroupInfo.get(mergeInfo.get(key))) {
+//                     System.out.print(tempp + " ");
+//                 }
+//                 System.out.println();
+//             }
+            
+            
+//             System.out.println();
+//             System.out.println("value ");
+//             for(String key : values.keySet()) {
+//                 System.out.println(key);
+                
+//                 for(String tempp : values.get(key)) {
+//                     System.out.print(tempp + " ");
+//                 }
+//                 System.out.println();
+//             }
+            
+            
+        }
+        
+        String[] answer = new String[answerList.size()];
+        int index = 0;
+        for(String temp : answerList) {
+            answer[index++] = temp;
+        }
+        
+        return answer;
+    }
+    
+    public void print(String position, ArrayList<String> answerList, HashMap<String, String> cell) {
+        if(cell.containsKey(position)) {
+            answerList.add(cell.get(position));
+        } else {
+            answerList.add("EMPTY");
+        }
+    }
+    
+    public void unmerge(String position,
+                        HashMap<String, Integer> mergeInfo, 
+                        HashMap<Integer, ArrayList<String>> mergeGroupInfo, 
+                        HashMap<String, String> cell, 
+                        HashMap<String, ArrayList<String>> values) {
+        String value = "";
+        if(cell.containsKey(position)) {
+            value = cell.get(position);
+        }
+        
+        // if(!mergeInfo.containsKey(position)) {
+        //     return;
+        // }
+        
+        int groupNum = mergeInfo.get(position);
+        // HashMap<String, String> temp = new HashMap<>();
+        for(String group : mergeGroupInfo.get(groupNum)) {
+            if(cell.containsKey(group)) {
+                // temp.put(group, "");
+                cell.remove(group);
+            }
+            mergeInfo.remove(group);
+        }
+
+        // if(temp.size() > 0) {
+        //     ArrayList<String> newValues = new ArrayList<>();
+        //     for(String pre : values.get(value)) {
+        //         if(!temp.containsKey(pre)) {
+        //             newValues.add(pre);
+        //         }
+        //     }
+        //     values.put(value, newValues);
+        // }
+        
+        if(!value.equals("")) {
+            cell.put(position, value);
+            // values.get(value).add(position);
+        }
+        
+        mergeGroupInfo.remove(groupNum);
+    }
+    
+    
+    public void merge(String position, String position2, 
+                      HashMap<String, Integer> mergeInfo, 
+                      HashMap<Integer, ArrayList<String>> mergeGroupInfo, 
+                      HashMap<String, String> cell, 
+                      HashMap<String, ArrayList<String>> values) {
+        
+        String value = "";
+        if(cell.containsKey(position2)) {
+            value = cell.get(position2);
+            
+            // for(int i = 0; i < values.get(value).size(); i++) {
+            //     if(values.get(value).get(i).equals(position2)) {
+            //         values.get(value).remove(i);
+            //         break;
+            //     }
+            // }
+        }
+        
+        if(cell.containsKey(position)) {
+            value = cell.get(position);
+            
+            // for(int i = 0; i < values.get(value).size(); i++) {
+            //     if(values.get(value).get(i).equals(position)) {
+            //         values.get(value).remove(i);
+            //         break;
+            //     }
+            // }
+        }
+        
+        
+        if(mergeInfo.containsKey(position) || mergeInfo.containsKey(position2)) {
+            int groupNum = 0;
+            int groupNum2 = 0;
+            int newGropNum = totalGroupNum;
+            ArrayList<String> newGroup = new ArrayList<>();
+            totalGroupNum++;
+            
+            if(mergeInfo.containsKey(position) && mergeInfo.containsKey(position2)) {
+                groupNum = mergeInfo.get(position);
+                groupNum2 = mergeInfo.get(position2);
+                
+                if(groupNum == groupNum2) {
+                    return;
+                }
+                
+                for(String group : mergeGroupInfo.get(groupNum)) {
+                    mergeInfo.put(group, newGropNum);
+                    newGroup.add(group);
+                }
+                
+                for(String group : mergeGroupInfo.get(groupNum2)) {
+                    mergeInfo.put(group, newGropNum);
+                    newGroup.add(group);
+                }
+                
+                mergeGroupInfo.remove(groupNum);
+                mergeGroupInfo.remove(groupNum2);
+                mergeGroupInfo.put(newGropNum, newGroup);
+            } else if(mergeInfo.containsKey(position)) {
+                groupNum = mergeInfo.get(position);
+                mergeInfo.put(position2, groupNum);
+                mergeGroupInfo.get(groupNum).add(position2);
+            } else if(mergeInfo.containsKey(position2)) {
+                groupNum = mergeInfo.get(position2);
+                mergeInfo.put(position, groupNum);
+                mergeGroupInfo.get(groupNum).add(position);
+            }
+        } else {
+            int newGropNum = totalGroupNum;
+            totalGroupNum++;
+            mergeInfo.put(position, newGropNum);
+            mergeInfo.put(position2, newGropNum);
+            mergeGroupInfo.put(newGropNum, new ArrayList<String>());
+            mergeGroupInfo.get(newGropNum).add(position);
+            mergeGroupInfo.get(newGropNum).add(position2);
+        }
+        
+        if(!value.equals("")) {
+            int groupNum = mergeInfo.get(position);
+            // ArrayList<String> groups = new ArrayList<>();
+            
+            for(String group : mergeGroupInfo.get(groupNum)) {
+                if(cell.containsKey(group)) {
+                    // String preValue = cell.get(group);
+                    // for(int i = 0; i < values.get(preValue).size(); i++) {
+                    //     if(values.get(preValue).get(i).equals(group)) {
+                    //         values.get(preValue).remove(i);
+                    //         break;
+                    //     }
+                    // }
+                }
+                cell.put(group, value);
+                // groups.add(group);
+            }
+            
+            // values.put(value, groups);
+        }
+        
+    }
+    
+    public void updatePosition(String position, String value, 
+                               HashMap<String, Integer> mergeInfo, 
+                               HashMap<Integer, ArrayList<String>> mergeGroupInfo, 
+                               HashMap<String, String> cell, 
+                               HashMap<String, ArrayList<String>> values) {
+        
+        String preValue = "";
+        if(cell.containsKey(position)) {
+            preValue = cell.get(position);
+        }
+        
+        if(!preValue.equals("")) {
+            // for(int i = 0; i < values.get(preValue).size(); i++) {
+            //     if(values.get(preValue).equals(position)) {
+            //         values.get(preValue).remove(i);
+            //         break;
+            //     }
+            // }   
+        }
+        
+        cell.put(position, value);
+        // if(values.containsKey(value)) {
+        //     values.get(value).add(position);    
+        // } else {
+        //     values.put(value, new ArrayList<String>());    
+        //     values.get(value).add(position); 
+        // }
+        
+        if(mergeInfo.containsKey(position)) {
+            int groupNum = mergeInfo.get(position);
+            
+            for(String group : mergeGroupInfo.get(groupNum)) {
+                cell.put(group, value);
+                if(group.equals(position)) {
+                    continue;
+                }
+                // values.get(value).add(group);
+                
+                if(!preValue.equals("")) {
+                    // for(int i = 0; i < values.get(preValue).size(); i++) {
+                    //     if(values.get(preValue).equals(group)) {
+                    //         values.get(preValue).remove(i);
+                    //         break;
+                    //     }
+                    // }
+                }   
+            }
+        }
+    }
+    
+    public void updateValue(String value, String value2, 
+                            HashMap<String, Integer> mergeInfo, 
+                            HashMap<Integer, ArrayList<String>> mergeGroupInfo, 
+                            HashMap<String, String> cell, 
+                            HashMap<String, ArrayList<String>> values) {
+        
+        if(value.equals(value2)) {
+            return;
+        }
+        
+        for(String key : cell.keySet()) {
+            if(cell.get(key).equals(value)) {
+                cell.put(key, value2);
+            }
+        }
+        
+        // if(values.containsKey(value)) {
+        //     ArrayList<String> positions = values.get(value);
+        //     for(String position : positions) {
+        //         cell.put(position, value2);
+        //     }
+        //     values.remove(values);
+        //     values.put(value2, positions);    
+        // }
+    }
+}
