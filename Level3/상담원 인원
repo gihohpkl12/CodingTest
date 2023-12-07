@@ -1,0 +1,97 @@
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
+/*
+그리디하게 푸는 문제.
+
+유형마다 인원을 1명씩 배치하고 기다리는 시간을 계산함.
+이후에 1명씩 늘렸을 때는 가정해서 계산한 뒤에 기다리는 시간을 가장 크게 줄일 수 있는 곳에 인원을 1 증가시키면 됨.
+*/
+class Solution {
+    public int solution(int k, int n, int[][] reqs) {
+        int answer = 0;
+        int rest = n - k;
+        int[] counselors = new int[k+1];
+        ArrayList[] participants = new ArrayList[k+1];
+        
+        // 1명으로 초기화
+        for(int i = 1; i <= k; i++) {
+            counselors[i] = 1;
+            participants[i] = new ArrayList<Integer>();
+        }
+        
+        // 유형별로 분류
+        for(int i = 0; i < reqs.length; i++) {
+            Participant participant = new Participant(reqs[i][0], reqs[i][1], reqs[i][2]);
+            participants[reqs[i][2]].add(participant);
+        }
+        
+        // 상담사가 없을 때까지 반복
+        int[] waitingTimes = check(k, participants, counselors, 0);
+        while(rest >= 1) {
+            int[] temp = check(k, participants, counselors, 1);
+            int max = 0;
+            int index = 0;
+            for(int i = 1; i < temp.length; i++) {
+                // 가장 크게 줄일 수 있는 경우
+                if(waitingTimes[i] - temp[i] > 0 && waitingTimes[i] - temp[i] > max) {
+                    index = i;
+                    max = waitingTimes[i] - temp[i];
+                }
+            }
+            waitingTimes[index] = temp[index];
+            counselors[index]++;
+            rest--;
+        }
+        
+        for(int time : waitingTimes) {
+            answer += time;
+        }
+        return answer;
+    }
+    
+    public int[] check(int k, ArrayList[] participants, int[] counselors, int add) {
+        int[] result = new int[k+1];
+        
+        for(int i = 1; i <= k; i++) {
+            ArrayList<Participant> work = participants[i];
+            int worker = counselors[i] + add;
+            PriorityQueue<Integer> pq = new PriorityQueue<>();
+            int waitingTime = 0;
+            
+            for(int j = 0; j < work.size(); j++) {
+                // 상담사가 여유가 있으면 저장.
+                if(worker > 0) {
+                    pq.add(work.get(j).time + work.get(j).start);
+                    worker--;
+                    continue;
+                } 
+                
+                // 상담사가 여유가 없으므로 가장 빠르게 끝나는 상담사를 뽑음.
+                int endTime = pq.poll();
+                int curParticipantStartTime = work.get(j).start;
+                if(endTime <= curParticipantStartTime) {
+                    pq.add(curParticipantStartTime + work.get(j).time);
+                } else {
+                    waitingTime += endTime - curParticipantStartTime;
+                    pq.add(endTime + work.get(j).time);
+                }
+            }
+            result[i] = waitingTime;
+        }
+        
+        return result;
+    }
+    
+    class Participant {
+        int time;
+        int type;
+        int start;
+        
+        public Participant(int start, int time, int type) {
+            this.time = time;
+            this.type = type;
+            this.start = start;
+        }
+    }
+}
