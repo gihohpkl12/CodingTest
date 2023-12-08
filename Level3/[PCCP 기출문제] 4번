@@ -1,0 +1,154 @@
+/*
+완전 탐색을 해야 하는 문제.
+DFS로 탐색함.
+
+우선 red로 시작하고, 다음 blue 차례로 넘어감.
+한 턴에 red 한 번, blue 한 번이기 때문에 start가 1 == red 라면
+현재 type이 start와 다르면 turn을 +1 함.
+
+이후에 blue에서 먼저 시작하고, 다음 red로 시작하는 케이스를 따지면 됨.
+
+근데 만약에 한 쪽이 목적지에 도착해서 고정이 된 경우라면
+start랑 상관없이 무조건 turn 을 +1 함.
+
+조건은 쉬움.
+blue와 red가 겹칠 수 없고,
+서로 자리 바꾸기 없고,
+이동했던 자리는 이동할 수 없음.
+
+근데 사실 코드를 다르게 짰다면
+red 먼저, blue 먼저 이걸 따질 필요는 없을 거 같음.
+
+[[4, 3, 0, 0], [5, 5, 5, 0], [1, 0, 0, 0], [2, 0, 0, 0]] , answer = 9
+이 케이스가 4, 7번에 해당하는 케이스이고, 이거 때문에 red, blue 시작을 다르게 하는 걸 찾아낸 건데
+중간에 시작 순서를 바꿔도 될 거 같음.
+
+설명하면
+red 시작인데, red가 움직일 수 없고, blue가 이동함으로써 red가 이동할 수 있으면
+일단 blue가 움직이고, red가 움직이는 방식으로? 
+근데 해보진 않음.
+*/
+class Solution {
+    static int answer = Integer.MAX_VALUE;
+    public int solution(int[][] maze) {
+        int[] blue = new int[4]; 
+        int[] red = new int[4];
+        
+        for(int i = 0; i < maze.length; i++) {
+            for(int j = 0; j < maze[i].length; j++) {
+                if(maze[i][j] == 1) {
+                    red[0] = i;
+                    red[1] = j;
+                } else if(maze[i][j] == 2) {
+                    blue[0] = i;
+                    blue[1] = j;
+                } else if(maze[i][j] == 3) {
+                    red[2] = i;
+                    red[3] = j;
+                } else if(maze[i][j] == 4) {
+                    blue[2] = i;
+                    blue[3] = j;
+                }
+            }
+        }
+        
+        boolean[][] blueCheck = new boolean[maze.length][maze[0].length];
+        boolean[][] redCheck = new boolean[maze.length][maze[0].length];
+        blueCheck[blue[0]][blue[1]] = true;
+        redCheck[red[0]][red[1]] = true;
+        
+        dfs(blueCheck, redCheck, blue, red, 1, 0, maze, 1);
+        
+        
+        // blueCheck = new boolean[maze.length][maze[0].length];
+        // redCheck = new boolean[maze.length][maze[0].length];
+        blueCheck[blue[0]][blue[1]] = true;
+        redCheck[red[0]][red[1]] = true;
+        dfs(blueCheck, redCheck, blue, red, 0, 0, maze, 0);
+        
+        return answer == Integer.MAX_VALUE ? 0 : answer;
+    }
+    
+    public void dfs(boolean[][] blueCheck, boolean[][] redCheck, int[] blue, int[] red, int type, int turn, int[][] maze, int start) {
+        if(blue[0] == blue[2] && blue[1] == blue[3] && red[0] == red[2] && red[1] == red[3]) {
+            answer = Math.min(turn, answer);
+            return;
+        } 
+        
+        if(answer != Integer.MAX_VALUE && turn >= answer) {
+            return;
+        }
+        
+        int[][] moving = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for(int[] dir : moving) {
+            if(type == 0 && rangeCheck(blue[0] + dir[0], blue[1] + dir[1], blueCheck.length, blueCheck[0].length)) {
+                if(blueCheck[blue[0] + dir[0]][blue[1] + dir[1]]) {
+                    continue;
+                }
+                
+                if(blue[0] + dir[0] == red[0] && blue[1] + dir[1] == red[1]) {
+                    continue;
+                }
+                
+                if(maze[blue[0] + dir[0]][blue[1] + dir[1]] == 5) {
+                    continue;
+                }
+                
+                int curX = blue[0];
+                int curY = blue[1];
+                
+                blueCheck[curX + dir[0]][curY + dir[1]] = true;
+                blue[0] = curX + dir[0];
+                blue[1] = curY + dir[1];
+                
+                if(red[0] == red[2] && red[1] == red[3]) {
+                    dfs(blueCheck, redCheck, blue, red, 0, turn+1, maze, start);
+                } else {
+                    dfs(blueCheck, redCheck, blue, red, 1, start != type ? turn+1 : turn, maze, start);
+                }
+                
+                blueCheck[curX + dir[0]][curY + dir[1]] = false;
+                blue[0] = curX;
+                blue[1] = curY;
+                
+            } else if(type == 1 && rangeCheck(red[0] + dir[0], red[1] + dir[1], blueCheck.length, blueCheck[0].length)) {
+                if(redCheck[red[0] + dir[0]][red[1] + dir[1]]) {
+                    continue;
+                }
+                
+                if(red[0] + dir[0] == blue[0] && red[1] + dir[1] == blue[1]) {
+                    continue;
+                }
+                
+                if(maze[red[0] + dir[0]][red[1] + dir[1]] == 5) {
+                    continue;
+                }
+                
+                int curX = red[0];
+                int curY = red[1];
+                
+                redCheck[curX + dir[0]][curY + dir[1]] = true;
+                red[0] = curX + dir[0];
+                red[1] = curY + dir[1];
+                
+                if(blue[0] == blue[2] && blue[1] == blue[3]) {
+                    dfs(blueCheck, redCheck, blue, red, 1, turn+1, maze, start);
+                } else {
+                    dfs(blueCheck, redCheck, blue, red, 0, type != start ? turn + 1 : turn, maze, start); 
+                }
+                
+                redCheck[curX + dir[0]][curY + dir[1]] = false;
+                red[0] = curX;
+                red[1] = curY;
+            }
+        }
+    }
+    
+    public boolean rangeCheck(int x, int y, int endX, int endY) {
+        if(x >= 0 && x < endX && y >= 0 && y < endY) {
+            return true;
+        }
+        
+        return false;
+    }
+}
