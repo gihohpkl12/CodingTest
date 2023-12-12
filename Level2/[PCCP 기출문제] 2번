@@ -1,0 +1,94 @@
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+
+/*
+기름을 찾을 때 dfs가 아니라 bfs로 찾아야 함.
+
+dfs로 하면 효율성 5번에서 런타임 에러가 뜨는데 아무래도 stack over flow 인 듯.
+*/
+class Solution {
+    public int solution(int[][] land) {
+        int answer = 0;
+        int num = 2;
+        int[][] oil = new int[land.length][land[0].length];
+        HashMap<Integer, Integer> oilMap = new HashMap<>();
+        
+        // 오일 탐색
+        for(int i = 0; i < land.length; i++) {
+            for(int j = 0; j < land[0].length; j++) {
+                if(oil[i][j] == 0 && land[i][j] == 1) {
+                    findOil(land, oil, i, j, oilMap, num);
+                    num++;
+                } else if(oil[i][j] == 0 && land[i][j] == 0) {
+                    oil[i][j] = -1;
+                }
+            }
+        }
+        
+        // 세로로 시추관 투입
+        for(int i = 0; i < land[0].length; i++) {
+            HashMap<Integer, Integer> oilNums = new HashMap<>();
+            
+            for(int j = 0; j < land.length; j++) {
+                if(land[j][i] == 1) {
+                    oilNums.put(oil[j][i], 0);
+                }
+            }
+            
+            int curOil = 0;
+            for(int oilNum : oilNums.keySet()) {
+                if(oilMap.containsKey(oilNum)) {
+                    curOil += oilMap.get(oilNum);    
+                }   
+            }
+            answer = Math.max(answer, curOil);
+        }
+        
+        return answer;
+    }
+    
+    // 오일 탐색
+    public void findOil(int[][] land, int[][] oil, int startX, int startY, HashMap<Integer, Integer> oilMap, int num) {
+        oilMap.put(num, 1);
+        oil[startX][startY] = num;   
+        
+        int[][] moving = new int[][] {{0, -1}, {0, 1}, {1, 0}, {-1, 0}};
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[] {startX, startY});
+        
+        while(q.size() > 0) {
+            int[] temp = q.poll();
+            int x = temp[0];
+            int y = temp[1];
+            
+            // 4방향 탐색
+            for(int[] dir : moving) {
+                int nextX = dir[0] + x;
+                int nextY = dir[1] + y;
+
+                if(rangeCheck(land, nextX, nextY)) {
+                    if(oil[nextX][nextY] == 0) {
+                        // 오일이면 저장
+                        if(land[nextX][nextY] == 1) {
+                            oil[nextX][nextY] = num;
+                            q.add(new int[] {nextX, nextY});
+                            oilMap.replace(num, oilMap.get(num) +1);
+                        // 오일이 아니면 -1로 처리.
+                        } else if(land[nextX][nextY] == 0) {
+                            oil[nextX][nextY] = -1;    
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public boolean rangeCheck(int[][] land, int x, int y) {
+        if(x >= 0 && y >= 0 && x < land.length && y < land[0].length) {
+            return true;
+        }
+        
+        return false;
+    }
+}
