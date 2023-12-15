@@ -105,3 +105,135 @@ class Solution {
         return output;
     }
 }
+
+=========================================================================================================================
+
+import java.util.ArrayList;
+
+/*
+사이클 체크를 간단하게 하는 게 중요함.
+특정 격자에서 아무 방향으로 쏴도 순서는 상관없음.
+
+사이클은 반복됨.
+즉, 특정 격자에 특정 방향으로 도착하면 이후 값은 사이클과 동일함.
+
+따라서 격자마다 상하좌우로 빛을 쏨.
+쏘는 방향을 기준으로 true로 저장함.
+
+반복하다가 해당 격자에서 특정 방향 쏘려고 하는데 이미 true라면 사이클이기 때문에 쏠 필요가 없음.
+*/
+
+class Solution {
+    public int[] solution(String[] grid) {
+        ArrayList<Integer> result = new ArrayList<>();
+        boolean[][][] check = new boolean[grid.length][grid[0].length()][4];
+        
+        for(int i = 0; i < grid.length; i++) {
+            for(int j = 0; j < grid[0].length(); j++) {
+                for(int dir = 0; dir < 4; dir++) {
+                    // 사이클이 아닌 경우.
+                    if(!check[i][j][dir]) {
+                        int count = findCycle(grid, i, j, dir, check);
+                        result.add(count);
+                    }
+                }
+            }
+        }
+        
+        return result.stream().mapToInt(Integer::intValue).sorted().toArray();
+    }
+    
+    // 사이클 탐색
+    public int findCycle(String[] grid, int x, int y, int dir, boolean[][][] check) {
+        int count = 0;
+        // true면 이미 지난 곳이므로 이번 사이클이 끝나는 지점.
+        while(!check[x][y][dir]) {
+            check[x][y][dir] = true;
+            count++;
+            
+            int[] nextInfo = next(grid, x, y, dir);
+            x = nextInfo[0];
+            y = nextInfo[1];
+            dir = nextInfo[2];
+        }
+        
+        return count;
+    }
+    
+    public boolean rangeCheck(int x, int y, int endX, int endY) {
+        if(x >= 0 && y >= 0 && endX > x && endY > y) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 다음 위치와 방향 리턴
+    public int[] next(String[] grid, int x, int y, int dir) {
+        int nextX = x;
+        int nextY = y;
+        
+        if(dir == 0) {
+            nextX = x-1;
+            if(!rangeCheck(nextX, nextY, grid.length, grid[0].length())) {
+                nextX = grid.length-1;
+            }
+            
+        } else if(dir == 1) {
+            nextX = x+1;
+            if(!rangeCheck(nextX, nextY, grid.length, grid[0].length())) {
+                nextX = 0;
+            }
+            
+        } else if(dir == 2) {
+            nextY = y -1;
+            if(!rangeCheck(nextX, nextY, grid.length, grid[0].length())) {
+                nextY = grid[0].length()-1;
+            }
+
+        } else if(dir == 3) {
+            nextY = y +1;
+            if(!rangeCheck(nextX, nextY, grid.length, grid[0].length())) {
+                nextY = 0;
+            }
+            
+        }
+        
+        int nextDir = calNextDir(grid[nextX].charAt(nextY), dir);
+        return new int[] {nextX, nextY, nextDir};
+    }
+    
+    // 다음 방향 검색
+    // R 격자를 대표로 설명하면
+    // 내가 아래(1) 방향으로 빛을 쐈는데, 도착한 격자가 R이면, R격자는 왼쪽(2) 방향으로 쏜다.
+    // 위와 같은 개념으로 치환하는 것.
+    // 참고 상 : 0, 하 : 1, 좌 : 2, 우 : 3
+    public int calNextDir(char word, int dir) {
+        int nextDir = -1;
+        if(word == 'R') {
+            if(dir == 0) {
+                nextDir = 3;
+            } else if(dir == 1) {
+                nextDir = 2;
+            } else if(dir == 2) {
+                nextDir = 0;
+            } else {
+                nextDir = 1;
+            }
+        } else if(word == 'S') {
+            nextDir = dir;
+        } else if(word == 'L') {
+            if(dir == 0) {
+                nextDir = 2;
+            } else if(dir == 1) {
+                nextDir = 3;
+            } else if(dir == 2) {
+                nextDir = 1;
+            } else {
+                nextDir = 0;
+            }
+        }
+        
+        return nextDir;
+    }
+}
