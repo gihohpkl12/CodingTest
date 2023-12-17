@@ -1,6 +1,7 @@
 /*
-DFS로 돌면서 영역을 체크하면 됨.
-0이나 이미 체크한 영역은 패스.
+배열을 돌면서 색이 칠해진 부분을 만나면
+구역을 1 증가시키고, dfs로 탐색함.
+탐색한 곳은 visited로 체크해서 이후에 같은 색을 중복으로 체크하지 않도록 방지.
 
 사실 boolean[][] 안 만들고 그냥 picture로만 해도 됨.
 근데 이 문제가 이상하게 picture를 수정하면 무조건 틀리게 채점함.
@@ -8,117 +9,44 @@ DFS로 돌면서 영역을 체크하면 됨.
 */
 class Solution {
     public int[] solution(int m, int n, int[][] picture) {
-        int[] answer = new int[2];
-        boolean[][] check = new boolean[m][n];
-        int areaCount = 0;
-        int maxAreaCount = 0;
+        int numberOfArea = 0;
+        int maxSizeOfOneArea = 0;
+        boolean[][] visited = new boolean[picture.length][picture[0].length];
         
-        for(int i = 0; i < m; i++) {
-            for(int j = 0; j < n; j++) {
-                // 0이나 체크한 영역은 통과
-                if(check[i][j] || picture[i][j] == 0) {
-                    continue;
+        for(int i = 0; i < picture.length; i++) {
+            for(int j = 0; j < picture[0].length; j++) {
+                if(!visited[i][j] && picture[i][j] != 0) {
+                    maxSizeOfOneArea = Math.max(maxSizeOfOneArea, check(visited, picture, i, j));
+                    numberOfArea++;
                 }
-                check[i][j] = true;
-                areaCount++;
-                maxAreaCount = Math.max(maxAreaCount, searchArea(check, picture, picture[i][j], i , j));
             }
         }
-        answer[0] = areaCount;
-        answer[1] = ++maxAreaCount; // 맨 처음 탐색 지점도 1인데 그걸 DFS에서는 놓쳐서 1만 추가해줌
-        return answer;
+
+        return new int[] {numberOfArea, maxSizeOfOneArea};
     }
     
-    public int searchArea(boolean[][] check, int[][] picture, int color, int x, int y) {
-        int result = 0;
-        int[][] moving = new int[][] {{1, 0}, {-1,0}, {0, 1}, {0, -1}};
+    public int check(boolean[][] visited, int[][] picture, int x, int y) {
+        int result = 1;
+        visited[x][y] = true;
         
-        for(int[] arr : moving) {
-            int nextX = arr[0] + x;
-            int nextY = arr[1] + y;
+        int[][] moving = new int[][] {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        for(int[] next : moving) {
+            int nextX = x + next[0];
+            int nextY = y + next[1];
             
-            /*
-            조건에 부합한 지역이면 Result++ 하고 DFS.
-            */
-            if(checkRange(nextX, nextY, check.length, check[0].length)) {
-                if(picture[nextX][nextY] == color && !check[nextX][nextY]) {
-                    check[nextX][nextY] = true;
-                    result++;
-                    result += searchArea(check, picture, color, nextX, nextY);
-                }
+            if(rangeCheck(nextX, nextY, visited.length, visited[0].length) && 
+               !visited[nextX][nextY] &&
+               picture[nextX][nextY] == picture[x][y]) {
+                result += check(visited, picture, nextX, nextY);
             }
         }
-        
         return result;
     }
     
-    public boolean checkRange(int x, int y, int xLength, int yLength) {
-        if(x >= 0 && y >= 0 && x < xLength && y < yLength) {
+    public boolean rangeCheck(int x, int y, int endX, int endY) {
+        if(x >= 0 && y >= 0 && endX > x && endY > y) {
             return true;
         }
         return false;
-    }
-}
-
-=======================================================================================================================================================
-
-import java.util.Queue;
-import java.util.LinkedList;
-class Solution {
-   public int[] solution(int m, int n, int[][] picture) 
-   {
-       Queue<pic> Q = new LinkedList<>();
-       int[] answer = {0,0};
-       int[][] move = {{-1,0},{1,0},{0,-1},{0,1}};
-       int[][] Picture = new int[picture.length][picture[0].length];
-       for(int i = 0; i<picture.length; i++)
-           Picture[i] = picture[i].clone();
-       for(int i = 0; i< Picture.length; i++)
-       {
-           for(int j = 0; j<Picture[0].length; j++)
-           {
-               if(Picture[i][j]==0 || Picture[i][j] == -1)
-                   continue;
-               else
-               {
-                   Q.add(new pic(Picture[i][j],i,j));
-                   Picture[i][j] = -1;
-                   answer[0]+=1;
-                   int count = 1;
-                   while(Q.size()!=0)
-                   {
-                       pic temp = Q.poll();
-                       int x = temp.i, y = temp.j;
-                       for(int mov = 0; mov<move.length; mov++)
-                       {
-                           if(x+move[mov][0]>=0 && y+move[mov][1]>=0 && x+move[mov][0]<=picture.length-1 && y+move[mov][1]<=picture[0].length-1)
-                           {
-                               if(Picture[x+move[mov][0]][y+move[mov][1]]==-1 || Picture[x+move[mov][0]][y+move[mov][1]] == 0 )
-                                   continue;
-                               if(Picture[x+move[mov][0]][y+move[mov][1]]==temp.col)
-                               {
-                                   Q.add(new pic(temp.col , x+move[mov][0], y+move[mov][1]));
-                                   Picture[x+move[mov][0]][y+move[mov][1]] = -1;
-                                   count++;
-                               }
-                           }
-                       }
-                       if(Q.size()==0)
-                           answer[1] = count > answer[1] ? count : answer[1];
-                   }
-               }
-           }
-       }
-       return answer;
-   }
-    class pic
-    {
-        int col, i, j;
-        public pic(int col, int i, int j)
-        {
-            this.col = col;
-            this.i = i;
-            this.j = j;
-        }
     }
 }
