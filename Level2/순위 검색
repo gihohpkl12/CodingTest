@@ -4,48 +4,72 @@ import java.util.Collections;
 import java.util.Queue;
 import java.util.LinkedList;
 
+/*
+고려해야될 점이 2개인 문제.
+
+1. 쿼리에 맞는 인포를 찾으려고 하면 시간 초과.
+-> 사전에 인포로 생성 가능한 모든 경우의 수를 생성해놓고, 쿼리로 찾아야 함.
+즉, java backend junior pizza 150 의 경우라면
+java, backend, junior, pizza
+-, backend, junior, pizza
+java, -, junior, pizza
+-, -, junior, pizza
+...
+등 여러 경우의 수가 생김.
+
+2. 인포를 사전에 여러개 생성해놓기 때문에 같은 key에 여러 score가 존재할 수 있음.
+-> 예를 들어 -,-,-,- 같은 쿼리는 모든 info에서 생성이 가능함. 
+따라서 모든 쿼리의 점수가 -,-,-,-에 추가될 것.
+이런 경우에 이분탐색이 아니라 그냥 찾으려고 하면 시간 초과남.
+*/
+
 class Solution {
     public int[] solution(String[] info, String[] query) {
         int[] answer = new int[query.length];
         HashMap<String, ArrayList<Integer>> infoMap = new HashMap<>();
-        
+
+        // 인포맵 셋팅
         for(String information : info) {
             makingMap(information, infoMap);
         }
-        
+
+        // 이분 탐색을 위해 인포맵 정렬
         for(String key : infoMap.keySet()) {
             ArrayList<Integer> scoreList = infoMap.get(key);
             Collections.sort(scoreList);
             infoMap.replace(key, scoreList);
         }
-        
+
+        // 쿼리로 찾기 수행
         for(int i = 0; i < query.length; i++) {
             String[] queryArr = query[i].split(" ");
             String key = "";
             int score = queryArr[queryArr.length-1].equals("-") ? 0 : Integer.parseInt(queryArr[queryArr.length-1]);
-            
+
             for(int j = 0; j < queryArr.length-1; j++) {
                 if(!queryArr[j].equals("and")) {
                     key += queryArr[j];
                 }
             }
-            
+
+            // 점수 리스트에서 이분탐색으로 통과 가능한 점수를 찾음.
             if(infoMap.containsKey(key)) {
                 ArrayList<Integer> scoreList = infoMap.get(key);
-                
+
                 if(score > 0) {
                     int start = 0, end = scoreList.size()-1;
                     int avr = 0;
-                    
+
                     while(start <= end) {
                         avr = (start+end)/2;
-                        
+
                         if(scoreList.get(avr) >= score) {
                             end = avr -1;
                         } else {
                             start = avr +1;
                         }
-                    }          
+                    }
+
                     answer[i] = scoreList.size() - start;
                 } else {
                     answer[i] = scoreList.size();
@@ -54,28 +78,28 @@ class Solution {
         }
         return answer;
     }
-    
+
     public void makingMap(String info, HashMap<String, ArrayList<Integer>> infoMap) {
         Queue<String> Q = new LinkedList<>();
         String[] infoArr = info.split(" ");
         int score = Integer.parseInt(infoArr[infoArr.length-1]);
-        
+
         Q.add("-");
         Q.add(infoArr[0]);
-        
+
         for(int i = 1; i < infoArr.length-1; i++) {
             int end = Q.size();
-            
+
             for(int j = 0; j < end; j++) {
                 String infoTemp = Q.poll();
                 Q.add(infoTemp + "-");
                 Q.add(infoTemp+infoArr[i]);
             }
         }
-        
+
         while(Q.size() > 0) {
             String key = Q.poll();
-            
+
             if(infoMap.containsKey(key)) {
                 ArrayList<Integer> scoreList = infoMap.get(key);
                 scoreList.add(score);
