@@ -73,8 +73,9 @@ import java.util.HashMap;
 start = * 10 +1
 end = * 10 -1
 
-그리고 end 기준 pq에서 한 발 쏘고
+그리고 end를 기준으로 우선 하나를 체크함. (이건 정렬 했기 때문에 가장 먼저 도착하는 end)
 그 다음 in에서 해당 미사일이 끝나기 전까지 따져서 count++
+즉, 가장 먼저 목표에 도착하는 미사일 순서를 기준으로, 해당 미사일이 도착하기 전에 같이 처리할 수 있는 애들을 처리하는 것.
 */
 
 class Solution {
@@ -111,8 +112,10 @@ class Solution {
             if(outQ.size() > 0) {
                 Missile end = null;
                 while(outQ.size() > 0) {
+                    // 이건 이미 처리된 미사일이라서 패스
                     if(missileIdCheckMap.containsKey(outQ.peek().id)) {
                         outQ.poll();     
+                        // end 미사일 갱신신
                     } else {
                         end = outQ.poll();
                         missileIdCheckMap.put(end.id, 0);
@@ -125,11 +128,14 @@ class Solution {
                 }
                 
                 while(inQ.size() > 0) {
+                    // 이것도 이미 처리된 미사일임. 패스
                     if(missileIdCheckMap.containsKey(inQ.peek().id)) {
                         inQ.poll();
+                        // 이건 현재 end 마사일 기준으로 같이 처리할 수 있는 미사일임.
                     } else if(inQ.peek().in <= end.out && inQ.peek().out >= end.out) {
                         Missile get = inQ.poll();
                         missileIdCheckMap.put(get.id, 0);
+                        // 더이상 같이 처리할 수 없는 경우
                     } else {
                         break;
                     }
