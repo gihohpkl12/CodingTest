@@ -2,37 +2,35 @@ import java.util.Comparator;
 import java.util.Arrays;
 
 /*
-원래 내가 풀었던 방식보다 빠른 것 같아서 이렇게 함.
-개념은 비슷함
-그냥 시간 개념으로 start 기준으로 미사일 보고,
-end 타임 기준으로 챙김
+우선 미사일을 정렬해야 함.
+발사 시간 - 도착 시간 순서로.
 
-근데 else if 조건을 놓치기 쉬운데 저것도 챙겨야 함.
+다음은 서로 같이 터트릴 미사일로 그룹화 해야 함.
 
-만약에 1 - 10까지 날라가는 미사일이 있음.
-2 - 4까지 날라가는 미사일은 범위내에 들어감. ㅇㅋ임
-다음 미사일이 5 - 8까지라고 하면
-1~10 범위 내에서는 맞기 때문에 되는데 앞서 2-4와는 중복되지 않음
-그래서 범위내로 확정한 미사일을 확정하면,
-last범위를 작은 애로 바꿔야 함.
-위에서 보면 2-4의 4가 1-10의 10보다 작으니까 4로 변경해야 함.
-그러면 5-8은 자연스럽게 걸러짐.
+우선 현재 미사일이 없을 경우 미사일을 하나 킵함.
+다음 미사일을 받음.
+해당 미사일과 캡 해놓은 미사일을 같이 터트릴 수 있을지 확인함.
+
+같이 터트리는 게 불가능 하면 킵 해놓은 미사일들을 터트리고, 지금 들어온 미사일을 다시 킵함.
+
+같이 터트리는 게 가능하면 도착 시간을 체크해야 됨.
+서로 다른 여러 미사일을 하나의 그룹으로 묶으려면 도착 시간을 기준으로 삼아야 함.
+만약에 10분, 8분, 7분, 6분에 도착하는 애들이 있음.
+애들을 모두 한 번에 터트리려면 6분을 기준으로 삼아야 함.
+즉, 가장 빨리 터지는 애를 기준으로 그룹화를 해야 함.
+그렇기 때문에 새로 도착한 미사일과 킵 해놓은 미사일들의 도착 시간 중 가장 빠른 애로 갱신함.
 */
 class Solution {
-    public int solution(int[][] targets) {
+    public int solution(int[][] targets) {        
+        // 정렬
         Arrays.sort(targets, new Comparator<int[]>(){
             public int compare(int[] o1, int[] o2) {
                 if(o1[0] - o2[0] != 0) {
                     return o1[0] - o2[0];
-                }
-                
+                }  
                 return o1[1] - o2[1];
             }
         });
-        
-        for(int[] target : targets) {
-            System.out.println(target[0]+", "+target[1]);
-        }
         
         return interceptMissile(targets);
     }
@@ -46,13 +44,12 @@ class Solution {
             int startTime = targets[i][0] * 10 +1;
             int endTime = targets[i][1] * 10 -1;
             
+            // 미사일을 발사해야 하는 경우. 발사 시간이 킵 해놓은 미사일의 도착 시간보다 큼. 이 미사일을 기준으로 기준을 갱신
             if(lastOutTime < startTime) {
                 lastOutTime = endTime;
                 lastInTime = startTime;
                 result++;
-            // 통과한 미사일의 범위가 더 좁으면 그걸로 바꿔야 함.
-            // last: 1 - 10 , prePass : 2 - 4, cur : 5 - 8
-            // 위 케이스에서 에러가 안 나기 위해서 1-10, 2-4 에서 범위를 4로 갱신해야 함
+                // 이건 킵 해놓을 수 있는 미사일. 대신 도착 시간은 갱신해야 함.
             } else if(lastOutTime > endTime) {
                 lastOutTime = endTime;
             }
