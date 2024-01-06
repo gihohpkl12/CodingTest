@@ -1,3 +1,140 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+
+/*
+테스트 케이스가 추가된 이후로는 레벨2 문제가 아니라 최소 3은 될 거 같음.
+알파벳 변경은 어렵지 않음
+쉽게 바꿀 수 있음.
+
+근데 문제는 이동 거리임.
+이게 왜 그리디로 분류되는지 모르는 이유.
+그리디로 접근해서 현재 위치에서 가장 가까운 곳으로 접근하면 안 됨.
+그냥 현재 위치를 기준으로 좌우 모두 방문해서 가장 적게 걸리는 곳을 찾아야 함.
+*/
+class Solution {
+    public int solution(String name) {
+        HashMap<Character, Integer> alphabetIndex = new HashMap<>();
+        Character[] alphabet = new Character[] {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+        setMap(alphabetIndex, alphabet);
+        
+        return makingWord(alphabetIndex, alphabet, name);
+    }
+    
+    public int makingWord(HashMap<Character, Integer> alphabetIndex, Character[] alphabet, String name) {
+        int wordChangeCount = 0;
+        int moveCount = 0;
+        
+        // 가야할 곳을 저장
+        ArrayList<Integer> changeIndexs = new ArrayList<>();
+        for(int i = 1; i < name.length(); i++) {
+            if(name.charAt(i) != 'A') {
+                changeIndexs.add(i);
+            }
+        }
+        
+        wordChangeCount += calChangeWord(alphabetIndex, alphabet, name);
+        moveCount += calMove(changeIndexs, 0, name.length());
+        
+        return wordChangeCount + moveCount;
+    }
+    
+    // 이동 거리 계산. 재귀
+    public int calMove(ArrayList<Integer> changeIndexs, int curIndex, int totalLength) {
+        int result = 0;
+        int leftMin = -1;
+        int rightMin = -1;
+        
+        int[] indexsAndLength = findNextIndex(changeIndexs, curIndex, totalLength);
+        // 왼쪽으로 이동 가능하면
+        if(indexsAndLength[0] != -1) {
+            int leftIndex = indexsAndLength[0];
+            int leftValue = changeIndexs.get(leftIndex);
+            leftMin = indexsAndLength[2];
+            changeIndexs.remove(leftIndex);
+            result = calMove(changeIndexs, leftValue, totalLength) + leftMin;
+            changeIndexs.add(leftIndex, leftValue);
+        }
+        
+        // 오른쪽으로 이동 가능하면
+        if(indexsAndLength[1] != -1) {
+            int rightIndex = indexsAndLength[1];
+            int rightValue = changeIndexs.get(rightIndex);
+            rightMin = indexsAndLength[3];   
+            changeIndexs.remove(rightIndex);
+            // 왼쪽에서 이동한 경우와 비교해서 최소값을 찾아야 함
+            result = Math.min(result, calMove(changeIndexs, rightValue, totalLength) + rightMin);
+            changeIndexs.add(rightIndex, rightValue);
+        }
+        return result;
+    }
+    
+    // 현재 위치를 기준으로 다음으로 이동할 좌우 인덱스와 거리를 계산함.
+    // 위치 계산할 때, 현재 인덱스 보다 큰지 작은지 비교해야 함.
+    // 좌우 위치 계산 방법이 다름.
+    public int[] findNextIndex(ArrayList<Integer> changeIndexs, int curIndex, int totalLength) {
+        int left = -1;
+        int right = -1;
+        int leftMin = Integer.MAX_VALUE;
+        int rightMin = Integer.MAX_VALUE;
+        
+        for(int i = 0; i < changeIndexs.size(); i++) {
+            int getIndex = changeIndexs.get(i);
+            int rightLength = 0;
+            int leftLength = 0;
+            
+            // 가져온 인덱스가 현재 인덱스보다 작을 경우
+            if(getIndex < curIndex) {
+                leftLength = curIndex - getIndex;
+                rightLength = (totalLength-1 - curIndex) + getIndex+1;
+                // 가져온 인덱스가 현재 인덱스보다 클 경우
+            } else if(getIndex > curIndex) {
+                rightLength = getIndex - curIndex;
+                leftLength = (totalLength-1 - getIndex) + curIndex+1;
+            }
+            
+            if(leftMin > leftLength) {
+                leftMin = leftLength;
+                left = i;
+            }
+            
+            if(rightMin > rightLength) {
+                rightMin = rightLength;
+                right = i;
+            }
+        }
+        return new int[] {left, right, leftMin, rightMin};
+    }
+    
+    // A가 단어를 바꾸는 것.
+    public int calChangeWord(HashMap<Character, Integer> alphabetIndex, Character[] alphabet, String name) {
+        int result = 0;
+        for(int i = 0; i < name.length(); i++) {
+            if(name.charAt(i) != 'A') {
+                result += findQuickPosition(name.charAt(i), alphabetIndex);
+            }
+        }
+        
+        return result;
+    }
+    
+    // 맵 셋팅
+    public void setMap(HashMap<Character, Integer> alphabetIndex, Character[] alphabet) {
+        int index = 0;
+        for(char word : alphabet) {
+            alphabetIndex.put(word, index++);
+        }
+    }
+    
+    // 알파벳 변경할 때. 원래 순서, 역순 계산
+    public int findQuickPosition(Character word, HashMap<Character, Integer> alphabetIndex) {
+        int preIndex = alphabetIndex.get(word);
+        int forwardIndex = 25 - preIndex +1;
+        return Math.min(preIndex, forwardIndex);
+    }
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 import java.util.ArrayList;
 class Solution {
      public int solution(String name) 
