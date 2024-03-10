@@ -1,0 +1,153 @@
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+단순하게 접근한 문제.
+
+우선 추가된 노드는 구하기 쉬움.
+임의의 노드를 추가하고, 다른 그래프들에 간선을 이었기 때문에
+나가는 방향의 간선은 있는데, 들어오는 방향의 간선은 없음.
+단, 막대 그래프에서도 해당 케이스가 나올 수 있음. 
+근데 문제 조건에 각 그래프 모형의 합은 2이상이라고 명시했기 때문에
+
+위의 조건을 일치하면서 나가는 방향의 간선이 제일 많은 노드가 추가된 노드임.
+
+이후 그래프 종류를 구하는 것도 쉬움.
+그래프 모양에 따라 조건이 다름.
+
+도넛 그래프는 간선과 노드 개수가 같음.
+
+막대 그래프는 노드 개수가 간선 개수 보다 1큼
+
+8자 그래프는 노드 개수 보다 간선 개수가 1큼.
+
+이건 bfs로 돌면서 노드, 간선 개수를 세면 됨.
+
+bfs로 돌 때,
+이미 간 적이 있는 노드인지 확인해야 함.
+8자나 도넛 모양 때문에 무한 루프가 가능함.
+간선 개수만 추가해주면 됨.
+*/
+
+class Solution {
+    public int[] solution(int[][] edges) {
+        int[] answer = new int[4];
+        int addNodeNum = -1;
+        int nodeCount = 0;
+        int donutCount = 0;
+        int stickCount = 0;
+        int eightCount = 0;
+        
+        HashMap<Integer, ArrayList<Integer>> nodeMap = new HashMap<>();
+        HashMap<Integer, int[]> shootAndTakeCount = new HashMap<>();
+        
+        for(int[] edge : edges) {
+            int start = edge[0];
+            int end = edge[1];
+            nodeCount = Math.max(nodeCount, Math.max(start, end));
+                
+            // 노드 설정
+            if(nodeMap.containsKey(start)) {
+                nodeMap.get(start).add(end);
+            } else {
+                nodeMap.put(start, new ArrayList<>());
+                nodeMap.get(start).add(end);
+                
+            }
+            
+            
+            // 추가된 노드 찾기 위해서 쏘고, 받는 간선 카운트
+            if(shootAndTakeCount.containsKey(start)) {
+                int[] temp = shootAndTakeCount.get(start);
+                temp[0] += 1;
+            } else {
+                int[] temp = new int[] {1, 0};
+                shootAndTakeCount.put(start, temp);
+            }
+            
+            if(shootAndTakeCount.containsKey(end)) {
+                int[] temp = shootAndTakeCount.get(end);
+                temp[1] += 1;
+            } else {
+                int[] temp = new int[] {0, 1};
+                shootAndTakeCount.put(end, temp);
+            }
+        }
+        
+        int maxEdgeCount = 0;
+        int maxNodeNum = 0;
+        for(int key : shootAndTakeCount.keySet()) {
+            int[] temp = shootAndTakeCount.get(key);
+            
+            if(temp[0] > 0 && temp[1] == 0) {
+                if(maxEdgeCount < temp[0]) {
+                    maxEdgeCount = temp[0];
+                    maxNodeNum = key;
+                }
+            }
+        }
+        addNodeNum = maxNodeNum;
+        
+        boolean[] check = new boolean[nodeCount+1];
+        check[addNodeNum] =  true;
+        for(int nodeNum : nodeMap.get(addNodeNum)) {
+            // 노드에서 나가는 방향 간선이 있는지
+            if(nodeMap.containsKey(nodeNum)) {
+                check[nodeNum] = true;
+                int type = bfs(check, nodeNum, nodeMap);
+                if(type == 0) {
+                    donutCount++;
+                } else if(type == 1) {
+                    stickCount++;
+                } else {
+                    eightCount++;
+                }
+            // 노드가 있는데, 나가는 방향의 간선이 없으면 문제 조건상 무조건 막대 그래프.
+            } else {
+                stickCount++;
+            }
+        }
+        
+        return new int[] {addNodeNum, donutCount, stickCount, eightCount};
+    }
+    
+    public int bfs(boolean[] check, int nodeNum, HashMap<Integer, ArrayList<Integer>> nodeMap) {
+        int type = 0;
+        int nodeCount = 1;
+        int edgeCount = 0;
+        
+        Queue<Integer> q = new LinkedList<>();
+        q.add(nodeNum);
+        
+        while(q.size() > 0) {
+            int curNodeNum = q.poll();
+            
+            if(nodeMap.containsKey(curNodeNum)) {
+                for(int nextNodeNum : nodeMap.get(curNodeNum)) {
+                    if(!check[nextNodeNum]) {
+                        nodeCount++;
+                        check[nextNodeNum] = true;
+                        q.add(nextNodeNum);
+                    }
+                    edgeCount++;
+                }
+            }
+        }
+        
+        return checkType(edgeCount, nodeCount);
+    }
+    
+    public int checkType(int edgeCount, int nodeCount) {
+        if(nodeCount == edgeCount) {
+            return 0;
+        } else if(nodeCount -1 == edgeCount) {
+            return 1;
+        } else if(nodeCount +1 == edgeCount) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+}
