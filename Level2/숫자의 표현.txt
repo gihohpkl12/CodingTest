@@ -1,3 +1,37 @@
+import java.util.HashMap;
+
+/*
+기존에 어떻게 풀었는지 모르겠는데,
+1부터 n까지 계속 더하면서 합을 계산하고, map에 저장함.
+
+합이 n보다 큰 시점부터 합-n 값이 map에 저장되어 있는지 확인함.
+저장 되어 있으면 그 부분을 잘라내면 되니까 answer에 해당하는 경우임.
+*/
+class Solution {
+    public int solution(int n) {
+        int answer = 0;
+        HashMap<Integer, Integer> sumAndIndexMap = new HashMap<>();
+        int[] sum = new int[n+1];
+        
+        for(int i = 1; i <= n; i++) {
+            sum[i] = sum[i-1]+i;
+            sumAndIndexMap.put(sum[i], i);
+            
+            if(sum[i] == n) {
+                answer++;
+            }else if(sum[i] > n) {
+                if(sumAndIndexMap.containsKey(sum[i] - n)) {
+                    answer++;
+                }
+            }
+        }
+        
+        return answer;
+    }
+}
+
+============================================================================================================================
+
 import java.util.ArrayList;
 public class Solution {
 	static int answer =1;
