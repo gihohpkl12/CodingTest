@@ -1,0 +1,15 @@
+/*
+전형적인 DP 문제.
+방향을 위에서 아래, 아래에서 위 중에 어느 방향이 더 효율적인지 빨리 따져야 함.
+(아래에서 위가 더 효율적인 듯.)
+*/
+class Solution {
+    public int solution(int[][] triangle) {
+        for(int i = triangle.length-2; i >= 0; i--) {
+            for(int j = 0; j < triangle[i].length; j++) {
+                triangle[i][j] += Math.max(triangle[i+1][j], triangle[i+1][j+1]);
+            }
+        }        
+        return triangle[0][0];
+    }
+}
