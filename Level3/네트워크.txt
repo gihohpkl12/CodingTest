@@ -1,11 +1,45 @@
 import java.util.HashSet;
 
 /*
-DFS나 BFS로 풀 수 있는 문제지만, 동시에 유니온 파인드로도 풀 수 있음.
 케이스 9번 반례 맨 밑에
+
+
+DFS나 BFS로 풀어도 되고, 유니온 파인드로 풀어도 됨.
+
+성능적으로는 비슷한 거 같고, 굳이 쓰자면
+유니온 파인드를 쓸 일이 더 적은 것 같아서 유니온 파인드 추천.
+
+여기서는 작은 값을 기준으로 삼음.
+먼저 각 노드별로 자신의 인덱스를 기준으로 번호를 설정함.
+최초 기준으로는 특정 노드의 루트는 본인임.
+
+네트워크가 연결된 경우에
+ex. 1번과 2번이 연결 됨.
+
+1번과 2번에 각각 루트를 찾음.
+루트를 찾는다는 얘기는 노드 배열에 저장된 값이 인덱스와 같은 것을 찾는다는 의미임.
+다 본인이 루트임.
+1이 더 작기 때문에 2에다가 루트를 1로 설정함.
+
+이후에 만약에 3번과 2번이 연결되어 있다고 하자.
+2번에 루트를 찾는 과정을 보면
+-> 2번 인덱스에 저장된 값을 찾음. 
+-> 값은 1임.
+-> 저장된 값과 인덱스가 다르기 때문에 다시 루트를 찾기 위해 1이라는 값을 가지고 재귀함.
+-> 1번 인덱으세 저장된 값을 찾음.
+-> 값은 1임. 루트임. 리턴함
+
+이제 3번을 찾아보면
+-> 3번 인덱스에 저장된 값은 3임.
+-> 루트임.
+-> 리턴.
+
+3번과 1번 중에 1번이 더 작음.
+3번에다가 1을 저장함.
 */
+
 class Solution {
-    public int solution(int n, int[][] computers) {        
+    public int solution(int n, int[][] computers) {  
         int[] nodes = new int[n];
         for(int i = 0; i < nodes.length; i++) {
             nodes[i] = i;
@@ -34,7 +68,7 @@ class Solution {
     public void union(int i, int j, int[] nodes) {
         int groupA = findGroup(nodes, i);
         int groupB = findGroup(nodes, j);
-
+        
         if(groupA < groupB) {
             nodes[groupB] = groupA;
         } else {
@@ -46,9 +80,66 @@ class Solution {
         if(nodes[nodeNum] == nodeNum) {
             return nodeNum;   
         }
+        
         return nodes[nodeNum] = findGroup(nodes, nodes[nodeNum]);
     }
 }
+
+// 여기는 DFS 기준 풀이.
+// import java.util.HashMap;
+// import java.util.ArrayList;
+
+// class Solution {
+//     public int solution(int n, int[][] computers) {
+//         int answer = 0;
+//         HashMap<Integer, ArrayList<Integer>> networkList = new HashMap<>();
+        
+//         for(int i = 0; i < computers.length; i++) {
+//             for(int j = 0; j < computers[i].length; j++) {
+//                 if(i == j) {
+//                     continue;
+//                 }
+                
+//                 if(computers[i][j] == 1) {
+//                     int start = i+1;
+//                     int end = j+1;
+
+//                     if(networkList.containsKey(start)) {
+//                         networkList.get(start).add(end);
+//                     } else {
+//                         networkList.put(start, new ArrayList<>());
+//                         networkList.get(start).add(end);
+//                     }
+//                 }
+                
+//             }
+//         }
+        
+//         boolean[] check = new boolean[n+1];
+//         for(int i = 1; i <= n; i++) {
+//             if(!check[i]) {
+//                 answer++;
+//                 check[i] = true;
+//                 dfs(networkList, check, i);
+//             }
+//         }
+        
+//         return answer;
+//     }
+    
+//     public void dfs(HashMap<Integer, ArrayList<Integer>> networkList, boolean[] check, int nodeNum) {
+//         if(!networkList.containsKey(nodeNum)) {
+//             return;
+//         }
+        
+//         for(int nextNodeNum : networkList.get(nodeNum)) {
+//             if(!check[nextNodeNum]) {
+//                 check[nextNodeNum] = true;
+//                 dfs(networkList, check, nextNodeNum);
+//             }
+//         }
+//     }
+// }
 /*
 
 int[] test = {0,1,2,3,4,5,6,7,8,9};
@@ -111,75 +202,4 @@ int[] test = {0,1,2,3,4,5,6,7,8,9};
 
 */
 
------------------------------------------------------------------------------------------------------------------------------------------
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-class Solution {
-   public int solution(int n, int[][] computers) {
-	        int answer = n;
-	        boolean[] check = new boolean[n];
-	        LinkedHashMap<Integer,ArrayList<Integer>> map = new LinkedHashMap<>();
-	        for(int i=0; i<computers.length; i++)
-	        {
-	        	ArrayList<Integer> temp = new ArrayList<>();
-	        	for(int j =0; j<computers[0].length; j++)
-	        	{
-	        		if(i==j || check[j]) continue;
-	        		if(computers[i][j] == 1)
-	        			temp.add(j);
-	        	}
-	        	if(temp.size()!=0)
-	        	{
-	        		for(int j =0; j<temp.size(); j++)
-	        		{
-	        			if(check[temp.get(j)]) continue;
-	        			if(map.containsKey(i))
-	        			{
-	        				ArrayList<Integer> map_temp = map.get(i);
-	        				map_temp.add(temp.get(j));
-	        				map.replace(i, map_temp);
-	        			}
-	        			else
-	        			{
-	        				ArrayList<Integer> map_temp = new ArrayList<>();
-	        				map_temp.add(temp.get(j));
-	        				map.put(i,map_temp);
-	        			}
-	        			check[temp.get(j)] = true;
-	        			research(computers, map,i,check, temp.get(j));
-	        		}
-	        	}
-	        	check[i] = true;
-	        	
-	        }
-	        for(int i : map.keySet())
-	        	answer -= map.get(i).size();
-	        return answer;
-	    }
-	 public void research(int[][] computers, LinkedHashMap<Integer,ArrayList<Integer>> map, int key, boolean[] check,int j)
-	 {
-		 
-		 ArrayList<Integer> next = new ArrayList<>();
-		 for(int i =0; i<computers.length; i++)
-		 {
-			 if(i == key || check[i] || i==j) continue;
-			 if(computers[j][i]==1) 
-			 {
-				 next.add(i);
-				 check[i] = true;
-			 }
-		 }
-		 if(next.size()!=0)
-		 {
-			 for(int i =0; i<next.size(); i++ )
-			 {
-				 ArrayList<Integer> map_temp = map.get(key);
-				 map_temp.add(next.get(i));
-				 map.replace(key, map_temp);
-				 check[next.get(i)] = true;
-				 research(computers, map,key,check,next.get(i));
-			 }
-		 }
-		 return;
-	 }
-}
+
