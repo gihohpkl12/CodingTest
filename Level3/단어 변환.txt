@@ -2,54 +2,77 @@ import java.util.ArrayList;
 
 /*
 간단한 DFS 문제.
-물론 BFS로도 가능함.
+BFS로도 가능할 듯.
+
+한 번 변환한 문자는 체크해야 함.
+dog - dot - dog - dot 이런 무한 루프가 가능함.
 */
 class Solution {
-    static int answer = 0;
     public int solution(String begin, String target, String[] words) {
-        answer = Integer.MAX_VALUE;
+        int answer = 0;
         
-        // DFS를 위한 리스트 생성
+        if(!isPossible(target, words)) {
+            return 0;
+        }
+        
         ArrayList<String> wordList = new ArrayList<>();
         for(String word : words) {
             wordList.add(word);
         }
         
-        searchForWordChange(target, begin, wordList, 0);
+        answer = dfs(begin, target, wordList, 0);
         return answer == Integer.MAX_VALUE ? 0 : answer;
     }
     
-    // DFS
-    public void searchForWordChange(String target, String curWord, ArrayList<String> words, int count) {
-        // 목표거나 더이상 체크할 경우가 없으면 return
-        if(curWord.equals(target)) {
-            answer = count != 0 && answer > count ? count : answer;
-            return;
-        } else if(words.size() == 0) {
-            return;
-        }
-        
-        // 변환할 리스트 확인
-        for(int i = 0; i < words.size(); i++) {
-            String getWord = words.get(i);
-            
-            if(wordChangeCheck(curWord, getWord)) {
-                words.remove(i);
-                searchForWordChange(target, getWord, words, count+1);
-                words.add(i, getWord);    
+    // 정답으로 바꾸는 게 가능한지 사전에 체크함.
+    public boolean isPossible(String target, String[] words) {
+        for(String word : words) {
+            if(word.equals(target)) {
+                return true;
             }
         }
+        return false;
     }
     
-    // 단어 변환 가능 여부 체크
-    public boolean wordChangeCheck(String pre, String next) {
+    public int dfs(String curWord, String target, ArrayList<String> wordList, int count) {
+        int result = Integer.MAX_VALUE;
+        
+        // 정답인 경우
+        if(curWord.equals(target)) {
+            return count;
+        }
+        
+        for(int i = 0; i < wordList.size(); i++) {
+            // 변환 가능한지 체크
+            if(isChange(curWord, wordList.get(i))) {
+                String word = wordList.get(i);
+                wordList.remove(i);
+                
+                // 리턴 받은 숫자가 더 작으면 result 갱신
+                int takeResult = dfs(word, target, wordList, count +1);
+                result = Math.min(result, takeResult);
+                
+                wordList.add(i, word);
+            }     
+        }
+       
+        return result;
+    }
+    
+    // 변환이 가능한지 따짐. 1글자만 달라야 가능함.
+    public boolean isChange(String standardWord, String word) {
         int count = 0;
-        for(int i = 0; i < next.length(); i++) {
-            count += pre.charAt(i) != next.charAt(i) ? 1 : 0;
-            if(count > 1) {
-                return false;
+        
+        for(int i = 0; i < standardWord.length(); i++) {
+            if(standardWord.charAt(i) != word.charAt(i)) {
+                count++;
+                
+                if(count >= 2) {
+                    return false;
+                }
             }
         }
+        
         return true;
     }
 }
