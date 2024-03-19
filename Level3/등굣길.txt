@@ -1,31 +1,37 @@
+/*
+dp 문제임.
+이동하는 조건이 아래, 오른쪽으로만 이동하고, 가중치도 전부 같음.
+따라서 이건 움직이기만 하면 무조건 최단거리임.
+실제로 예시에서 모든 길로 가던 이동거리가 같음.
+
+dp로 하나씩 돌면서 현재 위치에 도착할 수 있는 경우의 수가 몇인가를 계산해야 함.
+생각해보면 현재 위치는 왼쪽이나, 위쪽에서만 도착할 수 있음.
+따라서 해당 위치를 기준으로 왼쪽, 위쪽에 도착할 수 있는 경우의 수를 더하면 됨.
+*/
 class Solution {
-   public int solution(int m, int n, int[][] puddles) 
-	{
-	     int[][] map = new int[n+1][m+1];
-	     for(int i =0; i<puddles.length; i++)
-	         map[puddles[i][1]][puddles[i][0]] = -1;
-	     map[1][1]=1;
-	     DP(map);
-	     return map[n][m];
-	}
-	public void DP(int[][] map)
-	{
-		for(int i =1; i<map.length; i++)
-		{
-			for(int j =1; j<map[0].length; j++)
-			{
-				if(i==1 && j==1 || map[i][j]==-1) continue;
-				else
-				{
-					map[i][j] = map[i][j-1]+map[i-1][j];
-					if(map[i][j-1]==-1)
-						map[i][j]+=1;
-					if(map[i-1][j]==-1)
-						map[i][j]+=1;
-					map[i][j]%=1000000007;
-				}
-			}
-		}
-	}
-	
+    public int solution(int m, int n, int[][] puddles) {
+        int answer = 0;
+        
+        int[][] map = new int[n+1][m+1];
+          for(int[] puddle : puddles) {
+            map[puddle[1]][puddle[0]] = -1;
+        }
+        
+        map[1][1] = 1;
+        
+        for(int i = 1; i <= n; i++) {
+            for(int j = 1; j <= m; j++) {
+                if(map[i][j] == -1) {
+                    continue;
+                }
+                
+                map[i][j] += map[i-1][j] != -1 ? map[i-1][j] : 0;
+                map[i][j] += map[i][j-1] != -1 ? map[i][j-1] : 0;
+                map[i][j] %= 1000000007;
+            }
+        }
+        
+        
+        return map[n][m];
+    }
 }
