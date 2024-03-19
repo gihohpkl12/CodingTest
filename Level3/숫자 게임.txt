@@ -1,31 +1,29 @@
 import java.util.Arrays;
+
 /*
-아래랑 같은 풀이임.
-근데 자료구조를 바꿈.
-이게 더 빠름
+정말 간단한 문제.
+이기는지만 따지면 됨. 즉, 순서는 상관이 없기 때문에 정렬하면 됨.
+A 숫자보다 높은 B의 숫자들 중에 최소값으로 이기면 됨.
 */
+
 class Solution {
     public int solution(int[] A, int[] B) {
-        int answer = 0;        
-        int index = 0;
-        sort(A, B);
-        
-        for(int i = 0; i < A.length; i++) {
-            for(int j = index; j < B.length; j++) {
-                if(B[j] > A[i]) {
-                    answer++;
-                    index = j+1;
-                    break;
-                }
-                index = j+1;
-            }
-        }
-        return answer;
-    }
-    
-    public void sort (int[] A, int[] B) {
+        int answer = 0;
         Arrays.sort(A);
         Arrays.sort(B);
+        
+        int index = 0;
+        for(int i = 0; i < B.length; i++) {
+            int scoreA = A[index];
+            int scoreB = B[i];
+            
+            if(scoreB > scoreA) {
+                index++;
+                answer++;
+            }
+        }
+        
+        return answer;
     }
 }
 --------------------------------------------------------------------------------------------------------------------------------------------------------
