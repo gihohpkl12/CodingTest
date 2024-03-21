@@ -1,36 +1,56 @@
 /*
-시간 초과 때문에 다시 풀게되는 문제.
-구현은 쉬움.
-O(n)으로 끝내야 함.
+시간 때문에 어려운 문제.
+stations 기준 O(n)으로 풀어야 하는 문제.
 
-stations를 돌면서 설치된 위치를 확인하고 빈 곳을 카운트해서
-width로 나누면 됨.(% != 0 이면 +1)
+아파트의 길이 n이 주어짐.
+그리고 중간 중간 설치하는 기지국의 위치가 주어짐.
+그리고 기지국 전파 범위가 주어짐. w*2 + 1
+그러면 전체 아파트 중에서 기지국이 설치된 부분과 설치되지 않은 부분을 나눌 수 있음.
+
+예제 2번의 경우
+1 ~ 16까지 있을 때, 9번에만 기지국이 설치되면
+1~6, 12~16 이 두 범위에 기지국을 설치해야 함.
+
+기지국 하나는 최대 w*2 + 1개 만큼 커버할 수 있음.
+따라서 범위 / 쵀대 커버 개수 해서 설치해야 하는 기지국 개수를 구할 수 있음.
+
 */
 class Solution {
     public int solution(int n, int[] stations, int w) {
         int answer = 0;
-        int lastChecked = 0, width = (w*2)+1;
+        int lastCheckPoint = 0;
         
         for(int i = 0; i < stations.length; i++) {
-            // 시작지점
-            int start = stations[i] - w >= 1 ? stations[i] - w : 1;
-            // 끝 지점
-            int end = stations[i] + w <= n ? stations[i] + w : n;
-            // 빈 역 공간
-            int countOfStataions = start - lastChecked -1 >= 0 ? start - lastChecked -1 : 0;
+            // 현재 기지국 위치
+            int station = stations[i];
+            // 기지국 범위 시작지점
+            int start = station - w >= 1 ? station - w : 1;
+            // 기지국 범위 끝나는 지점
+            int end = station + w <= n ? station + w : n;
+            // 마지막으로 체크한 지점과 현재 기지국 시작지점 사이에 거리 구함.
+            int gapBetweenLastPointAndCurPoint = start - lastCheckPoint -1 >= 0 ? start - lastCheckPoint -1 : 0;
             
-            // 숫자 카운팅 + 마지막 체크지점 갱신
-            answer += countOfStataions/width;
-            answer = countOfStataions%width != 0 ? answer+1 : answer;
-            lastChecked = end;
+            // 사이 거리가 1이상이면 기지국 설치.
+            if(gapBetweenLastPointAndCurPoint > 0) {
+                answer += gapBetweenLastPointAndCurPoint / (w*2+1);
+                answer += gapBetweenLastPointAndCurPoint % (w*2+1) == 0 ? 0 : 1;
+            }
             
-            // 마지막 역인데 n까지 체크가 되었는지 확인하고 값을 추가
+            // 마지막 체크 지점 갱신
+            lastCheckPoint = end;
+            
+            // 맨 마지막 기지국까지 체크한 상황에서 현재 기지국 ~ n까지 전파가 전달 되었는지 확인
             if(i == stations.length-1) {
-                answer += (n - lastChecked)/width;
-                answer = (n - lastChecked)%width != 0 ? answer+1 : answer;
+                if(lastCheckPoint < n) {
+                    gapBetweenLastPointAndCurPoint = n - lastCheckPoint;
+                    if(gapBetweenLastPointAndCurPoint > 0) {
+                        answer += gapBetweenLastPointAndCurPoint / (w*2+1);
+                        answer += gapBetweenLastPointAndCurPoint % (w*2+1) == 0 ? 0 : 1;    
+                    }
+                    
+                }
             }
         }
-        
         return answer;
     }
 }
