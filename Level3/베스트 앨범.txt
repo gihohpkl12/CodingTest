@@ -1,95 +1,100 @@
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.PriorityQueue;
 
 /*
-문제 자체는 어렵지 않음.
-근데 Map.entrySet()을 쓴 풀이임.
-속도는 테스트 안 해봤는데, key값을 기준으로 리스트에 저장한 다음에 정렬하는 것보다 훨씬 편함.
-entrySet.getValue, getKey를 쓰면 됨.
+순서를 정할 때 필요한 것.
+1. 장르별 총합.
+2. 같은 장르 내에 재생된 순서대로 정렬
+
+문제 자체는 그렇게 어렵지 않음.
+장르 별로 합을 구하고, 각 장르별 노래 정보를 기준에 따라 pq에 저장하면 됨.
+근데 map을 정렬하는 등의 작업에서 Map.Entry 등 잘 안 쓰는 메소드 등을 쓰게 됨.
 */
 class Solution {
     public int[] solution(String[] genres, int[] plays) {
-        ArrayList<Integer> answer = new ArrayList<>();
-        // 장르별 재생횟수를 저장
-        HashMap<String, Integer> genresCountMap = new HashMap<>();
-        // 노래의 인덱스 및 재생 횟수를 저장
-        HashMap<String, ArrayList<Song>> playListMap = new HashMap<>();
+        // 장르별 노래 재생 총합
+        HashMap<String, Integer> totalGenrePlayCount = new HashMap<>();
+        // 장르에 노래 목록
+        HashMap<String, PriorityQueue<GenreInfo>> genreInfoMap = new HashMap<>();
         
-        // 값들 저장.
-        for(int i = 0; i < plays.length; i++) {
+        // 정보 저장
+        for(int i = 0; i < genres.length; i++) {
             String genre = genres[i];
+            int index = i;
             int count = plays[i];
-            Song newSong = new Song(i, count);
             
-            if(genresCountMap.containsKey(genre)) {
-                genresCountMap.replace(genre, genresCountMap.get(genre)+count);
-            } else {
-                genresCountMap.put(genre, count);
-            }
+            GenreInfo curGenre = new GenreInfo();
+            curGenre.index = index;
+            curGenre.genre = genre;
+            curGenre.playCount = count;
             
-            if(playListMap.containsKey(genre)) {
-                playListMap.get(genre).add(newSong);
+            if(totalGenrePlayCount.containsKey(genre)) {
+                totalGenrePlayCount.replace(genre, totalGenrePlayCount.get(genre)+count);
+                genreInfoMap.get(genre).add(curGenre);
+                
             } else {
-                playListMap.put(genre, new ArrayList<>());
-                playListMap.get(genre).add(newSong);
+                totalGenrePlayCount.put(genre, count);
+                genreInfoMap.put(genre, creatQ());
+                genreInfoMap.get(genre).add(curGenre);
             }
         }
         
-        // 장르별 재생횟수를 기준으로 정렬함.
-        ArrayList<HashMap.Entry<String, Integer>> orderByGenreCount = new ArrayList<>(genresCountMap.entrySet());
-        orderByGenreCount.sort(new Comparator<HashMap.Entry<String, Integer>>() {
-            public int compare(HashMap.Entry<String, Integer> o1, HashMap.Entry<String, Integer> o2) {
+        // 재생 총합 기준으로 정렬 시키고, 해당 장르 내에서도 재생 횟수를 기준으로 2곡을 찾음.
+        ArrayList<Map.Entry<String, Integer>> sortedList = sortMap(totalGenrePlayCount);
+        ArrayList<Integer> answer = new ArrayList<>();
+        // key는 가장 많이 재생된 장르 순서.
+        for(Map.Entry<String, Integer> key : sortedList) {
+            // pq는 해당 장르 내에서 재생 횟수를 기준으로 정렬된 노래들.
+            PriorityQueue<GenreInfo> pq = genreInfoMap.get(key.getKey());
+            int count = 2;
+            while(pq.size() > 0) {
+                answer.add(pq.poll().index);
+                count--;
+                if(count == 0) {
+                    break;
+                }
+            }
+        }
+        
+        return answer.stream().mapToInt(Integer::intValue).toArray();
+    }
+    
+    // 장르의 재생 총합을 기준으로 정렬함.
+    // Map.Entry 이용.
+    public ArrayList<Map.Entry<String, Integer>> sortMap(HashMap<String, Integer> totalGenrePlayCount) {
+        ArrayList<Map.Entry<String, Integer>> sortedList = new ArrayList<>(totalGenrePlayCount.entrySet());
+        sortedList.sort(new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
                 return o2.getValue() - o1.getValue();
             }
         });
         
-        // 정렬된 장르의 재생횟수를 기준으로 저장한 노래를 가져옴.
-        for(int i = 0; i < orderByGenreCount.size(); i++) {
-            // 선택된 장르 (재생횟수 기준 정렬된 값)
-            String genre = orderByGenreCount.get(i).getKey();
-            
-            ArrayList<Song> playListOfCurGenre = playListMap.get(genre);
-            // 선택된 장르의 노래들을 해당 노래의 재생횟수를 기준으로 정렬함.
-            playListOfCurGenre.sort(new Comparator<Song>() {
-                public int compare(Song o1, Song o2) {
-                    if(o2.playCount == o1.playCount) {
-                        return o1.songNum - o2.songNum;
-                    }
+        return sortedList;
+    }
+    
+    // 장르 내에 속한 노래를 저장하는 q 생성.
+    // 기준 1. 재생된 횟수
+    // 기준 2. 인덱스
+    public PriorityQueue creatQ() {
+        PriorityQueue<GenreInfo> pq = new PriorityQueue<>(new Comparator<>(){
+            public int compare(GenreInfo o1, GenreInfo o2) {
+                if(o1.playCount != o2.playCount ) {
                     return o2.playCount - o1.playCount;
                 }
-            });
-            
-            // 2곡 이상이면 2곡, 1곡이면 1곡
-            int end = playListOfCurGenre.size() >= 2 ? 2 : playListOfCurGenre.size();
-            for(int j = 0; j < end; j++) {
-                answer.add(playListOfCurGenre.get(j).songNum);
+                
+                return o1.index - o2.index;
             }
-        }
-        
-        return convertListToArray(answer);
+        });
+        return pq;
     }
     
-    // Array로 바꿈.
-    public int[] convertListToArray(ArrayList<Integer> list) {
-        int[] answer = new int[list.size()];
-        int index = 0;
-        
-        for(int i : list) {
-            answer[index++] = i;
-        }
-        return answer;
-    }
-    
-    class Song {
-        int songNum;
+    class GenreInfo {
+        String genre;
         int playCount;
-        
-        public Song(int songNum, int playCount) {
-            this.songNum = songNum;
-            this.playCount = playCount;
-        }
+        int index;
     }
 }
 
