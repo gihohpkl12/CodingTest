@@ -1,4 +1,122 @@
 import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
+
+/*
+효율성 때문에 어려운 문제.
+
+효율성이 아니면 단순하게 2중 반복문 돌면 됨.
+
+문제에 핵심은 하나씩 순서대로 보석을 추가하는데,
+현재 추가하려는 보석이 이미 구매한 보석이고, 구매 리스트 기준 맨 처음 보석과 같은 보석이어야 함.
+그러면 맨 처음 보석을 빼고 다음 보석을 맨 처음으로 갱신하면 됨.
+
+풀이
+0번 인덱스부터 보석을 하나씩 큐에 저장함.
+근데 지금 저장하려는 보석이 큐에 peek과 동일하면,
+poll을 하고, 큐에 저장함.
+
+이때 중요한 건 맨 처음 보석이 변동되었다는 것임.
+예제 1번처럼 0번 인덱스 dia가 3번 인덱스 dia 때문에 제거되면,
+1번인덱스 ruby가 맨 처음 보석이 되고, 이건 2번 인덱스 ruby 때문에 제거가 가능한 보석임.
+
+따라서 peek과 현재 보석이 일치하는 경우에는
+제거 가능한 보석이 있는지 확인하는 과정이 필요함.
+
+*/
+
+class Solution {
+    public int[] solution(String[] gems) {
+        // 단순하게 보석 종류 구하기 위함
+        HashMap<String, String> gemType = new HashMap<>();
+        for(String gem : gems) {
+            gemType.put(gem, gem);
+        }
+        int totalGemCount = gemType.size();
+        
+        // 현재 기준 시작 인덱스
+        int startIndex = 0;
+        // 현재 기준 마지막 인덱스
+        int endIndex = gems.length-1;
+        // 조건을 충족하는 경우 중에서 제일 길이가 짧은 케이스
+        int minLength = Integer.MAX_VALUE;
+        // 조건 충족하는 시작 인덱스
+        int minStart = 0;
+        // 조건 충족하는 마지막 인덱스
+        int minEnd = 0;
+        // 보석 큐
+        Queue<String> gemQ = new LinkedList<>();
+        // 보석 맵
+        HashMap<String, Integer> savedGem = new HashMap<>();
+        for(int i = 0; i < gems.length; i++) {
+            String curGem = gems[i];
+            
+            // 현재 보석이 저장된 적이 있는 경우
+            if(savedGem.containsKey(curGem)) {
+                // 현재 보석이 peek과 동일함
+                if(gemQ.peek().equals(curGem)) {
+                    // 보석 제거 로직. poll하고, 추가하고, 시작 인덱스 갱신
+                    gemQ.poll();
+                    gemQ.add(curGem);
+                    startIndex++;
+                    
+                    // 제거 가능한지 체크
+                    int removeCount = checkGemPollInQ(gemQ, savedGem);
+                    // 제거한 개수만큼 시작 인덱스 갱신
+                    startIndex += removeCount;
+                // peek이랑 다르기 때문에 단순하게 보석 추가하고, 개수 증가
+                } else {
+                    gemQ.add(curGem);
+                    savedGem.replace(curGem, savedGem.get(curGem) +1);
+                }
+            // 저장된 적이 없음. 고로 큐랑 맵에 추가함.
+            } else {
+                gemQ.add(curGem);
+                savedGem.put(curGem, 1);
+            }
+            
+            // 마지막 인덱스 갱신
+            endIndex = i;
+            
+            // 저장된 보석 종류가 조건에 충족하는 경우.
+            if(savedGem.size() == totalGemCount) {
+                if(endIndex - startIndex < minLength) {
+                    minLength = endIndex - startIndex;
+                    minStart = startIndex;
+                    minEnd = endIndex;
+                }
+            }
+        }
+        
+        return new int[] {minStart+1, minEnd+1};
+    }
+    
+    // 보석이 제거 가능한지 확인
+    public int checkGemPollInQ(Queue<String> gemQ, HashMap<String, Integer> savedGem) {
+        int count = 0;
+        while(gemQ.size() > 0) {
+            String curGem = gemQ.peek();
+            
+            // 현재 peek으로 확인한 보석의 개수가 2이상이면 제거가 가능함.
+            if(savedGem.containsKey(curGem) && savedGem.get(curGem) > 1) {
+                gemQ.poll();
+                savedGem.replace(curGem, savedGem.get(curGem)-1);
+                count++;
+            // 안 되면 break.
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+}
+
+
+
+
+
+=======================================================================================================================================================
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
